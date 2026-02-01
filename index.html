@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>NΞØ PROTOCOL // MISSION CONTROL</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta http-equiv="refresh" content="300"> <!-- Auto refresh fallback -->
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- HEADER -->
+        <header class="header">
+            <div class="logo">
+                <h1>NΞØ_PROTOCOL <span class="text-dim">v1.2 // CORE</span></h1>
+            </div>
+            <div class="header-info">
+                <div class="status-badge">
+                    <span class="status-dot"></span>
+                    <span id="system-status">ONLINE</span>
+                </div>
+                <span id="clock" class="text-dim">--:--:--</span>
+            </div>
+        </header>
+
+        <!-- DASHBOARD GRID -->
+        <div class="dashboard-grid">
+
+            <!-- COL 1: MAIN OPERATIONS (LOGS & COMMANDS) -->
+            <div class="col-main">
+
+                <!-- SYSTEM LOGS (The Heartbeat) -->
+                <div class="bento-card" style="flex: 1; display: flex; flex-direction: column;">
+                    <div class="card-header">
+                        <h2>>> SYSTEM_LOG_STREAM</h2>
+                        <div style="display:flex; gap:10px">
+                            <span class="text-dim" style="font-size:10px">BUFFER: 100 LINES</span>
+                            <button class="icon-btn" onclick="fetchLogs()" style="border:none; padding:0">↻</button>
+                        </div>
+                    </div>
+                    <div id="log-terminal" class="ai-messages"
+                        style="background:#000; border:none; padding:10px; font-size:12px; color:#aaa;">
+                        <div class="ai-message assistant">Initializing connection to NΞØ Core...</div>
+                    </div>
+                </div>
+
+                <!-- TERMINAL INPUT -->
+                <div class="ai-input-form">
+                    <input type="text" id="ai-input" placeholder="ENTER_COMMAND_OR_QUERY..."
+                        onkeypress="handleInput(event)">
+                    <button class="action-btn" onclick="sendCommand()">EXECUTE</button>
+                </div>
+
+                <script>
+                    async function sendCommand() {
+                        const input = document.getElementById('ai-input');
+                        const text = input.value.trim();
+                        if (!text) return;
+
+                        // Add User Message
+                        addLog('user', text);
+                        input.value = '';
+
+                        try {
+                            const res = await fetch('/api/ai/chat', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ message: text })
+                            });
+
+                            const data = await res.json();
+
+                            if (data.error) throw new Error(data.error);
+
+                            // Add AI Response
+                            addLog('assistant', data.message);
+
+                        } catch (e) {
+                            addLog('error', `EXECUTION FAILED: ${e.message}`);
+                        }
+                    }
+
+                    function handleInput(e) {
+                        if (e.key === 'Enter') sendCommand();
+                    }
+
+                    function addLog(type, msg) {
+                        const container = document.getElementById('log-terminal');
+                        let color = '#eee'; // Default color for system/general logs
+                        let prefix = '>>> ';
+
+                        if (type === 'user') { color = '#fff'; prefix = 'YOU > '; }
+                        else if (type === 'assistant') { color = 'var(--accent)'; prefix = 'NΞØ > '; }
+                        else if (type === 'error') { color = 'var(--accent-err)'; prefix = 'ERR > '; }
+                        else if (type === 'warn') { color = 'var(--accent-warn)'; prefix = 'WARN > '; }
+                        else if (type === 'system') { color = '#888'; prefix = 'SYS > '; } // For logs from fetchLogs
+
+                        const formatted = msg.replace(/\n/g, '<br>');
+
+                        const div = document.createElement('div');
+                        div.style.marginBottom = '8px';
+                        div.style.borderBottom = '1px solid #111';
+                        div.innerHTML = `<span style="color:#666; font-size:10px">[${new Date().toLocaleTimeString()}]</span> <span style="color:${color}; font-weight:bold">${prefix}</span><span style="color:${color}">${formatted}</span>`;
+
+                        container.appendChild(div);
+                        container.scrollTop = container.scrollHeight;
+                    }
+                </script>
+
+
+                <!-- COMMAND CENTER -->
+                <div class="bento-card">
+                    <div class="card-header">
+                        <h2>>> COMMAND_EXECUTION</h2>
+                    </div>
+                    <div class="quick-actions">
+                        <button class="action-btn" onclick="triggerAutomation('morning-briefing')">
+                            ⚡ RUN_MORNING_BRIEF
+                        </button>
+                        <button class="action-btn" onclick="triggerAutomation('intelligent-report')">
+                            📊 GEN_DAILY_REPORT
+                        </button>
+                        <button class="action-btn" onclick="window.location.href='/api/health'" target="_blank">
+                            🚑 CHECK_HEALTH
+                        </button>
+                        <button class="action-btn text-error" onclick="alert('Funcionalidade em desenvolvimento')">
+                            🛑 STOP_SERVICES
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- COL 2: NEO REGISTRY & STATUS -->
+            <div class="col-sidebar">
+
+                <!-- REGISTRY STATUS -->
+                <div class="bento-card">
+                    <div class="card-header">
+                        <h2>NΞØ REGISTRY</h2>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">INDEX_CID</span>
+                        <span class="metric-value text-success" id="registry-cid"
+                            style="font-family: monospace">Wait...</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">TOTAL_SKILLS</span>
+                        <span class="metric-value" id="registry-total">0</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">LAST_SYNC</span>
+                        <span class="metric-value text-dim" id="registry-date">--</span>
+                    </div>
+                </div>
+
+                <!-- INSTALLED SKILLS -->
+                <div class="bento-card" style="flex: 1;">
+                    <div class="card-header">
+                        <h2>INSTALLED_MODULES</h2>
+                        <button class="icon-btn" onclick="fetchRegistry()">SYNC</button>
+                    </div>
+                    <div id="skills-list" style="display: flex; flex-direction: column; gap: 10px; padding: 15px;">
+                        <div class="text-dim" style="text-align:center">Scanning local modules...</div>
+                    </div>
+                </div>
+
+                <!-- AI STATUS (Minimal) -->
+                <div class="bento-card">
+                    <div class="card-header">
+                        <h2>AI_COPROCESSOR</h2>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">STATUS</span>
+                        <span class="metric-value text-error" id="ai-status-text">OFFLINE</span>
+                        <!-- Will update to ONLINE if API key present -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CORE FUNCTIONS ---
+
+        // 1. Clock
+        setInterval(() => {
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+        }, 1000);
+
+        // 2. Fetch Logs (Real-time Stream)
+        async function fetchLogs() {
+            try {
+                const res = await fetch('/api/logs');
+                const logs = await res.json();
+                const container = document.getElementById('log-terminal');
+
+                // Diff check essential to avoid flickering? Nah, just replace for now.
+                container.innerHTML = logs.map(log => {
+                    const color = log.type === 'error' ? 'var(--accent-err)' : (log.type === 'warn' ? 'var(--accent-warn)' : '#888');
+                    return `<div style="margin-bottom:4px; border-bottom:1px solid #111; padding-bottom:2px;">
+                    <span style="color:#444; font-size:10px">[${new Date(log.timestamp).toLocaleTimeString()}]</span>
+                    <span style="color:${color}; font-weight:bold">[${log.type.toUpperCase()}]</span>
+                    <span style="color:#eee">${log.message}</span>
+                </div>`;
+                }).join('');
+            } catch (e) {
+                console.error("Log fetch failed", e);
+            }
+        }
+
+        // 3. Fetch NEO Registry
+        async function fetchRegistry() {
+            try {
+                const res = await fetch('/api/neo/registry');
+                const data = await res.json();
+
+                if (data.success) {
+                    // Update Metrics
+                    document.getElementById('registry-cid').innerText = data.indexCID || "UNPUBLISHED";
+                    document.getElementById('registry-total').innerText = data.totalSkills;
+                    document.getElementById('registry-date').innerText = new Date(data.updatedAt).toLocaleTimeString();
+
+                    // Update List
+                    const list = document.getElementById('skills-list');
+                    if (data.skills && data.skills.length > 0) {
+                        list.innerHTML = data.skills.map(skill => `
+                        <div style="border:1px solid #333; padding:10px; background:#080808;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                                <span style="color:#fff; font-weight:bold">${skill.id}</span>
+                                <span style="color:var(--accent); font-size:11px">v${skill.latest}</span>
+                            </div>
+                            <div style="font-size:11px; color:#666; font-family:monospace; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                CID: ${skill.versionList[0] || 'LOCAL'}
+                            </div>
+                        </div>
+                    `).join('');
+                    } else {
+                        list.innerHTML = `<div class="text-dim" style="text-align:center">No modules found.</div>`;
+                    }
+                }
+            } catch (e) {
+                console.error("Registry fetch failed", e);
+            }
+        }
+
+        // 4. Trigger Automation
+        async function triggerAutomation(id) {
+            // Placeholder for now, can implement route later
+            alert(`Requesting execution of: ${id}... Check logs.`);
+            // Note: Needs a backend route to manual trigger event
+        }
+
+        // Init Loops
+        fetchLogs();
+        fetchRegistry();
+        setInterval(fetchLogs, 2000); // 2s refresh for logs
+        setInterval(fetchRegistry, 10000); // 10s refresh for registry
+
+    </script>
+
+</body>
+
+</html>

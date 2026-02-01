@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeoBot Dashboard - Demo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .demo-section {
+            margin: 40px 0;
+            padding: 30px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--backdrop-blur));
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-color);
+        }
+        
+        .demo-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        
+        .color-item {
+            padding: 20px;
+            border-radius: var(--radius-md);
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .color-primary { background: var(--accent-primary); }
+        .color-secondary { background: var(--accent-secondary); }
+        .color-success { background: var(--accent-success); }
+        .color-warning { background: var(--accent-warning); }
+        .color-danger { background: var(--accent-danger); }
+        .color-pink { background: var(--accent-pink); }
+        .color-purple { background: var(--accent-purple); }
+        .color-teal { background: var(--accent-teal); }
+        
+        .component-showcase {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .animation-demo {
+            display: inline-block;
+            padding: 20px 30px;
+            background: var(--accent-primary);
+            border-radius: var(--radius-md);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .animation-demo:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 12px 24px rgba(0, 122, 255, 0.4);
+        }
+        
+        .glassmorphism-example {
+            padding: 30px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--glass-border);
+        }
+        
+        .gradient-text {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, 
+                var(--accent-primary),
+                var(--accent-secondary),
+                var(--accent-purple),
+                var(--accent-pink)
+            );
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            animation: gradientShift 5s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(30deg); }
+        }
+        
+        .card-grid-demo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        
+        .demo-card {
+            padding: 24px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+        
+        .demo-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-primary);
+            box-shadow: 0 12px 32px rgba(0, 122, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">🎨</span>
+                <h1>Dashboard Demo</h1>
+            </div>
+            <div class="status-badge">
+                <span class="status-dot"></span>
+                <span>iOS Style</span>
+            </div>
+        </header>
+
+        <!-- Gradient Text -->
+        <div class="demo-section">
+            <div class="gradient-text">NeoBot Dashboard</div>
+            <p style="text-align: center; color: var(--text-secondary); margin-top: 20px;">
+                iOS-inspired design with glassmorphism and smooth animations
+            </p>
+        </div>
+
+        <!-- Color Palette -->
+        <div class="demo-section">
+            <h2 class="demo-title">🎨 Paleta de Cores iOS</h2>
+            <div class="color-palette">
+                <div class="color-item color-primary">
+                    Primary<br>#007AFF
+                </div>
+                <div class="color-item color-secondary">
+                    Secondary<br>#5856D6
+                </div>
+                <div class="color-item color-success">
+                    Success<br>#34C759
+                </div>
+                <div class="color-item color-warning">
+                    Warning<br>#FF9500
+                </div>
+                <div class="color-item color-danger">
+                    Danger<br>#FF3B30
+                </div>
+                <div class="color-item color-pink">
+                    Pink<br>#FF2D55
+                </div>
+                <div class="color-item color-purple">
+                    Purple<br>#AF52DE
+                </div>
+                <div class="color-item color-teal">
+                    Teal<br>#5AC8FA
+                </div>
+            </div>
+        </div>
+
+        <!-- Components Showcase -->
+        <div class="demo-section">
+            <h2 class="demo-title">🧩 Componentes</h2>
+            <div class="component-showcase">
+                <!-- Buttons -->
+                <div>
+                    <h3 style="margin-bottom: 12px; color: var(--text-secondary);">Buttons</h3>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <button class="action-btn">
+                            <span class="btn-icon">⚡</span>
+                            <span>Primary Action</span>
+                        </button>
+                        <button class="automation-btn">Execute</button>
+                        <button class="automation-btn toggle enabled">Enabled</button>
+                        <button class="icon-btn">↻</button>
+                    </div>
+                </div>
+
+                <!-- Cards -->
+                <div>
+                    <h3 style="margin-bottom: 12px; color: var(--text-secondary);">Cards</h3>
+                    <div class="card-grid-demo">
+                        <div class="demo-card card-primary">
+                            <h4>Primary Card</h4>
+                            <p style="color: var(--text-secondary); font-size: 14px; margin-top: 8px;">
+                                Com gradiente azul
+                            </p>
+                        </div>
+                        <div class="demo-card card-accent">
+                            <h4>Accent Card</h4>
+                            <p style="color: var(--text-secondary); font-size: 14px; margin-top: 8px;">
+                                Com gradiente verde
+                            </p>
+                        </div>
+                        <div class="demo-card card-stats">
+                            <h4>Stats Card</h4>
+                            <p style="color: var(--text-secondary); font-size: 14px; margin-top: 8px;">
+                                Com gradiente laranja
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Animations -->
+                <div>
+                    <h3 style="margin-bottom: 12px; color: var(--text-secondary);">Animations</h3>
+                    <div class="animation-demo">
+                        Hover me! 🚀
+                    </div>
+                </div>
+
+                <!-- Glassmorphism -->
+                <div>
+                    <h3 style="margin-bottom: 12px; color: var(--text-secondary);">Glassmorphism Effect</h3>
+                    <div class="glassmorphism-example">
+                        <h4>Glass Card</h4>
+                        <p style="color: var(--text-secondary); margin-top: 8px;">
+                            Efeito de vidro com blur backdrop e transparência.
+                            Perfeito para o design iOS moderno!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bento Grid Example -->
+        <div class="demo-section">
+            <h2 class="demo-title">📐 Bento Grid Layout</h2>
+            <div class="bento-grid">
+                <div class="bento-card card-primary">
+                    <h3>Normal Card</h3>
+                    <p style="color: var(--text-secondary); margin-top: 8px;">1x1 size</p>
+                </div>
+                
+                <div class="bento-card card-tall card-accent">
+                    <h3>Tall Card</h3>
+                    <p style="color: var(--text-secondary); margin-top: 8px;">1x2 size (tall)</p>
+                </div>
+                
+                <div class="bento-card">
+                    <h3>Normal Card</h3>
+                    <p style="color: var(--text-secondary); margin-top: 8px;">1x1 size</p>
+                </div>
+                
+                <div class="bento-card card-wide card-stats">
+                    <h3>Wide Card</h3>
+                    <p style="color: var(--text-secondary); margin-top: 8px;">2x1 size (wide)</p>
+                </div>
+                
+                <div class="bento-card card-primary">
+                    <h3>Normal Card</h3>
+                    <p style="color: var(--text-secondary); margin-top: 8px;">1x1 size</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features List -->
+        <div class="demo-section">
+            <h2 class="demo-title">✨ Features do Dashboard</h2>
+            <div class="bento-grid">
+                <div class="bento-card card-primary">
+                    <h3>🤖 Claude AI Chat</h3>
+                    <div style="color: var(--text-secondary); margin-top: 12px; font-size: 14px;">
+                        • Interface de chat em tempo real<br>
+                        • Histórico persistente<br>
+                        • Estatísticas de uso<br>
+                        • Análise de bugs automática
+                    </div>
+                </div>
+
+                <div class="bento-card card-accent">
+                    <h3>🔄 Automações</h3>
+                    <div style="color: var(--text-secondary); margin-top: 12px; font-size: 14px;">
+                        • Relatório diário às 18h<br>
+                        • Briefing matinal às 8h<br>
+                        • Resumo semanal<br>
+                        • Health check contínuo
+                    </div>
+                </div>
+
+                <div class="bento-card card-stats">
+                    <h3>📊 Analytics</h3>
+                    <div style="color: var(--text-secondary); margin-top: 12px; font-size: 14px;">
+                        • Métricas em tempo real<br>
+                        • Uso de tokens<br>
+                        • Custos de API<br>
+                        • Performance do sistema
+                    </div>
+                </div>
+
+                <div class="bento-card">
+                    <h3>⚡ Ações Rápidas</h3>
+                    <div style="color: var(--text-secondary); margin-top: 12px; font-size: 14px;">
+                        • Criar lembretes<br>
+                        • Enviar mensagens<br>
+                        • Executar automações<br>
+                        • Gerar relatórios
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tech Stack -->
+        <div class="demo-section">
+            <h2 class="demo-title">🛠️ Tech Stack</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                <div class="metric" style="padding: 20px;">
+                    <div style="font-size: 32px; margin-bottom: 8px;">🎨</div>
+                    <div class="metric-label">CSS Glassmorphism</div>
+                </div>
+                <div class="metric" style="padding: 20px;">
+                    <div style="font-size: 32px; margin-bottom: 8px;">⚡</div>
+                    <div class="metric-label">Node.js + Express</div>
+                </div>
+                <div class="metric" style="padding: 20px;">
+                    <div style="font-size: 32px; margin-bottom: 8px;">🤖</div>
+                    <div class="metric-label">Claude AI</div>
+                </div>
+                <div class="metric" style="padding: 20px;">
+                    <div style="font-size: 32px; margin-bottom: 8px;">📱</div>
+                    <div class="metric-label">iOS Design</div>
+                </div>
+                <div class="metric" style="padding: 20px;">
+                    <div style="font-size: 32px; margin-bottom: 8px;">🔄</div>
+                    <div class="metric-label">Cron Automation</div>
+                </div>
+                <div class="metric" style="padding: 20px;">
+                    <div style="font-size: 32px; margin-bottom: 8px;">📊</div>
+                    <div class="metric-label">Real-time Updates</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="demo-section" style="text-align: center;">
+            <h2 class="demo-title">🚀 Pronto para Começar?</h2>
+            <p style="color: var(--text-secondary); margin: 20px 0;">
+                Volte para o dashboard principal e explore todas as funcionalidades!
+            </p>
+            <a href="/" style="text-decoration: none;">
+                <button class="action-btn" style="display: inline-flex; margin-top: 20px;">
+                    <span class="btn-icon">🏠</span>
+                    <span>Ir para Dashboard</span>
+                </button>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
