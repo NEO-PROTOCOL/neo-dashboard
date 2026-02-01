@@ -1,5 +1,7 @@
-
+import dotenv from 'dotenv';
 import express from 'express';
+
+dotenv.config();
 import cors from 'cors';
 import { exec, spawn } from 'child_process';
 import { promisify } from 'util';
