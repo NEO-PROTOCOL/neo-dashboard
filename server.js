@@ -214,6 +214,7 @@ app.get('/', (req, res) => {
 // Server Start
 // ------------------------------------------------------------------
 app.listen(PORT, () => {
+    const publicUrl = process.env.PUBLIC_URL || `http://localhost:${PORT}`;
     console.log(`
 ╔═══════════════════════════════════════════════════════╗
 ║                                                       ║
@@ -221,10 +222,10 @@ app.listen(PORT, () => {
 ║                                                       ║
 ║   Status: ✅ ONLINE                                   ║
 ║   Port: ${PORT}                                       ║
-║   URL: http://localhost:${PORT}                       ║
+║   URL: ${publicUrl}                       ║
 ║                                                       ║
-║   Dashboard: http://localhost:${PORT}                 ║
-║   NEO API: http://localhost:${PORT}/api/neo           ║
+║   Dashboard: ${publicUrl}                 ║
+║   NEO API: ${publicUrl}/api/neo           ║
 ║                                                       ║
 ╚═══════════════════════════════════════════════════════╝
     `);
