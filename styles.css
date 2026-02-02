@@ -410,25 +410,29 @@ textarea:focus {
 }
 
 /* --- MOBILE RESPONSIVENESS --- */
+/* --- MOBILE RESPONSIVENESS --- */
 @media (max-width: 1024px) {
     .dashboard-grid {
-        grid-template-columns: 1fr;
-        /* Stack layout */
-        height: auto;
-        display: flex;
-        flex-direction: column;
+        grid-template-columns: 1fr !important;
+        display: flex !important;
+        flex-direction: column !important;
+        height: auto !important;
+        background: none;
     }
 
     .col-main,
     .col-sidebar {
-        height: auto;
-        overflow: visible;
-        border-right: none;
-        border-left: none;
+        width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
+        border: none !important;
+        grid-column: auto !important;
+        padding: 15px !important;
     }
 
     .col-sidebar {
         border-top: 1px solid var(--border);
+        background: var(--bg-panel);
     }
 
     .container {
@@ -438,6 +442,17 @@ textarea:focus {
 
     .ai-chat-container {
         height: 60vh;
-        /* Fixed height for chat on mobile */
+    }
+
+    .header-info {
+        gap: 10px;
+    }
+
+    #clock {
+        display: none;
+    }
+
+    .quick-actions {
+        grid-template-columns: 1fr;
     }
 }
