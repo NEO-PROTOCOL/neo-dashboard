@@ -116,6 +116,46 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
+
+// ------------------------------------------------------------------
+// Security Middleware (NΞØ Auth)
+// ------------------------------------------------------------------
+const GATEWAY_PASSWORD = process.env.CLAWDBOT_GATEWAY_PASSWORD;
+
+const authMiddleware = (req, res, next) => {
+    // Skip auth if no password is set in env (for local dev dev convenience, but recommended to always set it)
+    if (!GATEWAY_PASSWORD) {
+        return next();
+    }
+
+    const providedPassword = req.headers['x-gateway-password'] || req.query.password;
+
+    if (providedPassword === GATEWAY_PASSWORD) {
+        return next();
+    }
+
+    // If it's a browser request without the query param, we can't show the dashboard
+    if (req.accepts('html')) {
+        return res.status(401).send(`
+            <html>
+                <body style="background:#000; color:#ff003c; font-family:monospace; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh;">
+                    <h1>NΞØ_PROTOCOL // ACCESS_DENIED</h1>
+                    <p>Authentication Required. Please provide password via query (?password=...)</p>
+                    <script>
+                        const pass = prompt('ENTER GATEWAY PASSWORD:');
+                        if (pass) window.location.search = '?password=' + pass;
+                    </script>
+                </body>
+            </html>
+        `);
+    }
+
+    res.status(401).json({ error: 'UNAUTHORIZED_ACCESS', message: 'Valid x-gateway-password header required' });
+};
+
+// Apply auth to all routes below
+app.use(authMiddleware);
+
 app.use(express.static(__dirname)); // In standalone, we serve from the root 
 
 
