@@ -7,6 +7,9 @@
     <title>NΞØ PROTOCOL // MISSION CONTROL</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <meta http-equiv="refresh" content="300"> <!-- Auto refresh fallback -->
 </head>
 
@@ -103,9 +106,10 @@
                         const formatted = msg.replace(/\n/g, '<br>');
 
                         const div = document.createElement('div');
-                        div.style.marginBottom = '8px';
-                        div.style.borderBottom = '1px solid #111';
-                        div.innerHTML = `<span style="color:#666; font-size:10px">[${new Date().toLocaleTimeString()}]</span> <span style="color:${color}; font-weight:bold">${prefix}</span><span style="color:${color}">${formatted}</span>`;
+                        div.className = 'log-entry';
+
+                        const time = new Date().toLocaleTimeString();
+                        div.innerHTML = `<span class="log-ts">[${time}]</span> <span class="log-type" style="color:${color}">${type.toUpperCase()}</span> <span class="log-msg" style="color:${color}">${formatted}</span>`;
 
                         container.appendChild(div);
                         container.scrollTop = container.scrollHeight;
@@ -203,12 +207,16 @@
 
                 // Diff check essential to avoid flickering? Nah, just replace for now.
                 container.innerHTML = logs.map(log => {
-                    const color = log.type === 'error' ? 'var(--accent-err)' : (log.type === 'warn' ? 'var(--accent-warn)' : '#888');
-                    return `<div style="margin-bottom:4px; border-bottom:1px solid #111; padding-bottom:2px;">
-                    <span style="color:#444; font-size:10px">[${new Date(log.timestamp).toLocaleTimeString()}]</span>
-                    <span style="color:${color}; font-weight:bold">[${log.type.toUpperCase()}]</span>
-                    <span style="color:#eee">${log.message}</span>
-                </div>`;
+                    let color = '#eee';
+                    if (log.type === 'error') color = 'var(--accent-err)';
+                    else if (log.type === 'warn') color = 'var(--accent-warn)';
+                    else if (log.type === 'info') color = '#aaa';
+
+                    return `<div class="log-entry">
+                        <span class="log-ts">[${new Date(log.timestamp).toLocaleTimeString()}]</span>
+                        <span class="log-type" style="color:${color}">${log.type.toUpperCase()}</span>
+                        <span class="log-msg">${log.message}</span>
+                    </div>`;
                 }).join('');
             } catch (e) {
                 console.error("Log fetch failed", e);
