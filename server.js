@@ -111,16 +111,22 @@ try {
 // ------------------------------------------------------------------
 // Express Setup
 // ------------------------------------------------------------------
+// ------------------------------------------------------------------
+// Express Setup
+// ------------------------------------------------------------------
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
+// Serve Static Files (Public - Authentication handled client-side)
+app.use(express.static(__dirname));
+
 // ------------------------------------------------------------------
 // Security Middleware (NΞØ Auth)
 // ------------------------------------------------------------------
-const GATEWAY_PASSWORD = process.env.CLAWDBOT_GATEWAY_PASSWORD;
+const GATEWAY_PASSWORD = process.env.GATEWAY_PASSWORD || process.env.CLAWDBOT_GATEWAY_PASSWORD;
 
 const authMiddleware = (req, res, next) => {
     // Skip auth if no password is set in env (for local dev dev convenience, but recommended to always set it)
@@ -134,29 +140,22 @@ const authMiddleware = (req, res, next) => {
         return next();
     }
 
-    // If it's a browser request without the query param, we can't show the dashboard
-    if (req.accepts('html')) {
-        return res.status(401).send(`
-            <html>
-                <body style="background:#000; color:#ff003c; font-family:monospace; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh;">
-                    <h1>NΞØ_PROTOCOL // ACCESS_DENIED</h1>
-                    <p>Authentication Required. Please provide password via query (?password=...)</p>
-                    <script>
-                        const pass = prompt('ENTER GATEWAY PASSWORD:');
-                        if (pass) window.location.search = '?password=' + pass;
-                    </script>
-                </body>
-            </html>
-        `);
-    }
-
     res.status(401).json({ error: 'UNAUTHORIZED_ACCESS', message: 'Valid x-gateway-password header required' });
 };
 
-// Apply auth to all routes below
-app.use(authMiddleware);
+// Apply auth to API routes
+app.use('/api', authMiddleware);
 
-app.use(express.static(__dirname)); // In standalone, we serve from the root 
+
+// Mount Routes (These are under /api anyway usually, but we ensure middleware hits them if they are standalone)
+// Note: setupAIRoutes mounts on app directly, usually at /api/ai/chat
+// We need to ensure they are protected.
+// If setupAIRoutes uses /api prefix, the above app.use('/api', ...) covers it IF the routes are mounted on a router that is used under /api.
+// BUT setupAIRoutes likely does app.post('/api/ai/chat', ...).
+// Middleware order matters!
+// app.use('/api', authMiddleware) ONLY matches requests STARTING with /api and runs middleware.
+// Then subsequent route handlers match.
+
 
 
 // Mount Routes
@@ -193,6 +192,20 @@ app.get('/api/stats', (req, res) => res.json(stats));
 
 // Logs API (Real-time Console Stream)
 app.get('/api/logs', (req, res) => res.json(serverLogs));
+
+// POST Logs (From Core)
+app.post('/api/logs', (req, res) => {
+    const { type, message, timestamp } = req.body;
+    if (message) {
+        serverLogs.unshift({
+            timestamp: timestamp || new Date().toISOString(),
+            type: type || 'info',
+            message: `[CORE] ${message}`
+        });
+        if (serverLogs.length > MAX_LOGS) serverLogs.pop();
+    }
+    res.json({ success: true });
+});
 
 // Reminders API (Simplified)
 app.get('/api/reminders', async (req, res) => {

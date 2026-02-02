@@ -72,9 +72,17 @@
                         try {
                             const res = await fetch('/api/ai/chat', {
                                 method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    ...getAuthHeaders()
+                                },
                                 body: JSON.stringify({ message: text })
                             });
+
+                            if (res.status === 401) {
+                                addLog('error', 'UNAUTHORIZED: Please check credentials.');
+                                return;
+                            }
 
                             const data = await res.json();
 
@@ -190,8 +198,74 @@
         </div>
     </div>
 
+    <!-- LOGIN MODAL -->
+    <div class="modal" id="login-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>>> AUTHENTICATION__REQUIRED</h2>
+            </div>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>GATEWAY_PASSWORD</label>
+                    <input type="password" id="login-pass" placeholder="Enter credentials..." required
+                        style="background:#111; color:var(--accent);">
+                </div>
+                <button class="action-btn" type="submit" style="width:100%">UNLOCK_CONSOLE</button>
+            </form>
+        </div>
+    </div>
+
     <script>
-        // --- CORE FUNCTIONS ---
+        // --- AUTH & CORE FUNCTIONS ---
+
+        const API_PASS_KEY = 'neo_gateway_password';
+
+        // Initialize Auth
+        (function initAuth() {
+            // 1. Check URL (Magic Link / Legacy)
+            const params = new URLSearchParams(window.location.search);
+            const urlPass = params.get('password');
+
+            if (urlPass) {
+                localStorage.setItem(API_PASS_KEY, urlPass);
+                // Clean URL instantly to hide secret
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            // 2. Check Storage
+            const storedPass = localStorage.getItem(API_PASS_KEY);
+
+            if (!storedPass) {
+                showLoginModal();
+            }
+        })();
+
+        function showLoginModal() {
+            document.getElementById('login-modal').classList.add('active');
+            // Timeout to allow DOM render if needed
+            setTimeout(() => {
+                const input = document.getElementById('login-pass');
+                if (input) input.focus();
+            }, 100);
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const pass = document.getElementById('login-pass').value;
+            if (pass) {
+                localStorage.setItem(API_PASS_KEY, pass);
+                document.getElementById('login-modal').classList.remove('active');
+                // Refresh data
+                fetchLogs();
+                fetchRegistry();
+            }
+        }
+
+        // Helper to get auth headers
+        function getAuthHeaders() {
+            const password = localStorage.getItem(API_PASS_KEY);
+            return password ? { 'x-gateway-password': password } : {};
+        }
 
         // 1. Clock
         setInterval(() => {
@@ -201,7 +275,17 @@
         // 2. Fetch Logs (Real-time Stream)
         async function fetchLogs() {
             try {
-                const res = await fetch('/api/logs');
+                // Use header authentication
+                const res = await fetch('/api/logs', {
+                    headers: getAuthHeaders()
+                });
+
+                if (res.status === 401) {
+                    console.warn("Unauthorized access to logs - invalid credentials?");
+                    // If we have a password but got 401, it might be wrong.
+                    return;
+                }
+
                 const logs = await res.json();
                 const container = document.getElementById('log-terminal');
 
@@ -226,7 +310,17 @@
         // 3. Fetch NEO Registry
         async function fetchRegistry() {
             try {
-                const res = await fetch('/api/neo/registry');
+                // Use header authentication
+                const res = await fetch('/api/neo/registry', {
+                    headers: getAuthHeaders()
+                });
+
+                if (res.status === 401) {
+                    console.warn("Unauthorized access to registry");
+                    document.getElementById('registry-cid').innerText = "AUTH_ERR";
+                    return;
+                }
+
                 const data = await res.json();
 
                 if (data.success) {
