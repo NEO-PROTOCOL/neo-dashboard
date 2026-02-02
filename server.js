@@ -173,7 +173,12 @@ let stats = { totalReminders: 0, totalMessages: 0 };
 // Standard API Routes
 // ------------------------------------------------------------------
 
-// Health Check
+// Health Check (Railway/Root)
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', service: 'neo-dashboard', timestamp: new Date().toISOString() });
+});
+
+// Health Check (API)
 app.get('/api/health', (req, res) => {
     res.json({
         status: 'ok',
