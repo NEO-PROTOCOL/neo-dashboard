@@ -41,13 +41,13 @@ TELEGRAM_ADMIN_CHAT=seu_chat_id
 ANTHROPIC_API_KEY=sua_chave_claude
 ```
 
-2. Inicie o servidor:
+1. Inicie o servidor:
 
 ```bash
 node server.js
 ```
 
-3. Acesse o dashboard:
+1. Acesse o dashboard:
 
 ```
 http://localhost:3000
@@ -91,6 +91,7 @@ Layout em grade responsivo que se adapta ao conteúdo:
 ```
 
 **Variantes:**
+
 - `.card-primary` - Azul (ações principais)
 - `.card-accent` - Verde (saúde/status)
 - `.card-stats` - Laranja (estatísticas)
@@ -252,7 +253,7 @@ Contadores rápidos:
 </div>
 ```
 
-2. Adicione estilos no `styles.css`:
+1. Adicione estilos no `styles.css`:
 
 ```css
 .my-container {
@@ -260,7 +261,7 @@ Contadores rápidos:
 }
 ```
 
-3. Adicione lógica no `app.js`:
+1. Adicione lógica no `app.js`:
 
 ```javascript
 async function loadMyData() {
@@ -450,5 +451,5 @@ MIT
 
 ---
 
-**Made with ❤️ for NeoBot** | v1.1.0 | Design inspired by iOS 17  
+**Made with ❤️ for NeoBot** | v1.1.0 | Design inspired by iOS 17
 *Optimized for performance and cost efficiency* ⚡💰

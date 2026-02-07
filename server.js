@@ -1,15 +1,15 @@
+import { exec, spawn } from 'child_process';
+import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
-
-dotenv.config();
-import cors from 'cors';
-import { exec, spawn } from 'child_process';
-import { promisify } from 'util';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { promisify } from 'util';
 import { setupAIRoutes } from './ai-routes.js';
 import automationRoutes from './automation-routes.js';
 import neoRoutes from './neo-routes.js';
+
+dotenv.config();
 // import { initializeAutomations } from '../dist/automations/index.js';
 
 const execAsync = promisify(exec);
@@ -128,9 +128,16 @@ app.use(express.static(__dirname));
 // ------------------------------------------------------------------
 const GATEWAY_PASSWORD = process.env.GATEWAY_PASSWORD || process.env.CLAWDBOT_GATEWAY_PASSWORD;
 
+// Production safety: require a gateway password when running in production.
+if (process.env.NODE_ENV === 'production' && !GATEWAY_PASSWORD) {
+    console.error('FATAL: GATEWAY_PASSWORD must be set when running in production. Aborting startup.');
+    process.exit(1);
+}
+
 const authMiddleware = (req, res, next) => {
-    // Skip auth if no password is set in env (for local dev dev convenience, but recommended to always set it)
+    // If no password configured, allow local/dev convenience but log a clear warning.
     if (!GATEWAY_PASSWORD) {
+        console.warn('⚠️ Warning: GATEWAY_PASSWORD not set. API auth disabled (development only).');
         return next();
     }
 

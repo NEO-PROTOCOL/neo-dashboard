@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEØ Ecosytem 3D Graph</title>
+    <style>
+      body {
+        margin: 0;
+        background: #0a0a0a;
+        color: #fff;
+        font-family: 'Inter', sans-serif;
+        overflow: hidden;
+      }
+      #graph-container {
+        width: 100vw;
+        height: 100vh;
+      }
+      .overlay {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        pointer-events: none;
+        z-index: 10;
+      }
+      h1 {
+        margin: 0;
+        font-size: 24px;
+        color: #00ffcc;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+      }
+      .legend {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #333;
+        font-size: 12px;
+        -webkit-backdrop-filter: blur(5px);
+        backdrop-filter: blur(5px);
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+      }
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="overlay">
+      <h1>NEØ Protocol Ecosystem</h1>
+      <p style="color: #888">Interactive 3D Graph Visualization</p>
+    </div>
+
+    <div id="graph-container"></div>
+
+    <div class="legend">
+      <div class="legend-item">
+        <div class="dot" style="background: #ff4444"></div>
+        NEO Protocol (Core)
+      </div>
+      <div class="legend-item">
+        <div class="dot" style="background: #00ccff"></div>
+        Neo Smart Factory
+      </div>
+      <div class="legend-item">
+        <div class="dot" style="background: #00ffcc"></div>
+        FlowPay
+      </div>
+      <div class="legend-item">
+        <div class="dot" style="background: #4488ff"></div>
+        Fluxx Dao
+      </div>
+      <div class="legend-item">
+        <div class="dot" style="background: #ffcc00"></div>
+        DApps & Tools
+      </div>
+    </div>
+
+    <script src="//unpkg.com/3d-force-graph"></script>
+    <script>
+      const colorMap = {
+        'NEO Protocol': '#ff4444',
+        'Neo Smart Factory': '#00ccff',
+        FlowPay: '#00ffcc',
+        'Fluxx Dao': '#4488ff',
+        'FlowOFF Agency': '#ff00ff', // Magenta FlowOFF
+        'WOD Game': '#ffcc00',
+        'Neo Tooling': '#aaaaaa',
+      };
+
+      fetch('ecosystem-graph.json')
+        .then((res) => res.json())
+        .then((data) => {
+          const Graph = ForceGraph3D()(
+            document.getElementById('graph-container')
+          )
+            .graphData(data)
+            .backgroundColor('#0a0a0a')
+            .nodeLabel(
+              (node) =>
+                `<span style="color:${colorMap[node.group] || '#fff'}"><b>${node.name}</b></span><br/>${node.group}`
+            )
+            .nodeColor((node) => colorMap[node.group] || '#fff')
+            .nodeVal((node) => node.val)
+            .nodeResolution(24) // Smoother spheres
+            .linkDirectionalParticles(2)
+            .linkDirectionalParticleSpeed((d) => 0.005)
+            .linkDirectionalParticleWidth(2)
+            .linkWidth(1)
+            .linkColor(() => '#333')
+            .onNodeClick((node) => {
+              // Aim at node from outside
+              const distance = 40;
+              const distRatio =
+                1 + distance / Math.hypot(node.x, node.y, node.z);
+
+              Graph.cameraPosition(
+                {
+                  x: node.x * distRatio,
+                  y: node.y * distRatio,
+                  z: node.z * distRatio,
+                }, // new pos
+                node, // lookAt node
+                3000 // ms transition duration
+              );
+            });
+
+          // Add bloom effect for that premium neon look (guarded — may not be available in this build)
+          try {
+            if (typeof Graph.postProcessingComposer === 'function') {
+              const composer = Graph.postProcessingComposer();
+              const UnrealBloom =
+                (window.THREE && THREE.UnrealBloomPass) ||
+                window.UnrealBloomPass;
+              if (composer && UnrealBloom && window.THREE && THREE.Vector2) {
+                composer.addPass(
+                  new UnrealBloom(
+                    new THREE.Vector2(window.innerWidth, window.innerHeight),
+                    1.5,
+                    0.4,
+                    0.85
+                  )
+                );
+              }
+            }
+          } catch (e) {
+            console.warn('Bloom pass not applied:', e);
+          }
+        });
+    </script>
+  </body>
+</html>
