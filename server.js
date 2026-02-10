@@ -8,6 +8,7 @@ import { promisify } from 'util';
 import { setupAIRoutes } from './ai-routes.js';
 import automationRoutes from './automation-routes.js';
 import neoRoutes from './neo-routes.js';
+import nexusRoutes from './nexus-routes.js';
 
 dotenv.config();
 // import { initializeAutomations } from '../dist/automations/index.js';
@@ -169,6 +170,7 @@ app.use('/api', authMiddleware);
 setupAIRoutes(app);
 app.use('/api/automations', automationRoutes);
 app.use('/api/neo', neoRoutes);
+app.use('/api/nexus', nexusRoutes);
 
 // Storage (Legacy In-Memory)
 let reminders = [];

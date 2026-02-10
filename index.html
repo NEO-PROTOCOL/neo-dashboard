@@ -111,6 +111,29 @@
                         <span class="metric-value" id="ai-status-text">OFFLINE</span>
                     </div>
                 </div>
+
+                <div class="bento-card">
+                    <div class="card-header">
+                        <h2>NΞØ_NEXUS_ENGINE</h2>
+                        <div class="status-dot" id="nexus-health-dot" style="background: var(--accent-err); box-shadow: 0 0 10px var(--accent-err);"></div>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">RETRY_QUEUE</span>
+                        <span class="metric-value" id="nexus-retry-count">0</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">DEAD_LETTER</span>
+                        <span class="metric-value text-error" id="nexus-dlq-count">0</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">EVENTS_PROCESSED</span>
+                        <span class="metric-value" id="nexus-events-count">0</span>
+                    </div>
+                    <div style="padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                        <button class="action-btn" style="padding: 5px 8px; font-size: 9px;" onclick="window.open('/api/nexus/health')">HEALTH</button>
+                        <button class="action-btn" style="padding: 5px 8px; font-size: 9px;" onclick="fetchNexusData()">REFRESH</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -213,6 +236,29 @@
             }, 1000);
             setInterval(fetchLogs, 3000);
             setInterval(fetchRegistry, 15000);
+            setInterval(fetchNexusData, 10000);
+            fetchNexusData();
+        }
+
+        async function fetchNexusData() {
+            try {
+                const res = await fetch('/api/nexus/metrics/summary', { headers: getAuthHeaders() });
+                if (res.status === 401) return;
+                const data = await res.json();
+                
+                document.getElementById('nexus-retry-count').innerText = data.retryQueueSize || 0;
+                document.getElementById('nexus-dlq-count').innerText = data.deadLetterSize || 0;
+                document.getElementById('nexus-events-count').innerText = data.eventsTotal || 0;
+                
+                const dot = document.getElementById('nexus-health-dot');
+                dot.style.background = 'var(--accent)';
+                dot.style.boxShadow = '0 0 10px var(--accent)';
+            } catch (e) { 
+                console.error('Nexus fetch error:', e);
+                const dot = document.getElementById('nexus-health-dot');
+                dot.style.background = 'var(--accent-err)';
+                dot.style.boxShadow = '0 0 10px var(--accent-err)';
+            }
         }
 
         async function fetchLogs() {
