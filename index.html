@@ -17,14 +17,14 @@
         <!-- Header -->
         <header class="header">
             <div class="logo-container">
-                <h1>NΞØ_PROTOCOL <span style="color: var(--text-dark); opacity: 0.5;">// MISSION_CONTROL</span></h1>
+                <h1>NΞØ_PROTOCOL <span style="color: var(--text-mute); opacity: 0.5;">// MISSION_CONTROL</span></h1>
                 <p style="font-size: 8px; color: var(--text-dim); letter-spacing: 2px;">SOVEREIGN EDITION v3.1 // OBSERVABILITY MODE</p>
             </div>
             <div class="header-info" style="display: flex; gap: 2rem; align-items: center;">
-                <div id="clock" style="color: var(--accent-cyan); font-weight: 800; font-size: 14px; letter-spacing: 1px;">00:00:00</div>
+                <div id="clock" style="color: var(--cyan); font-weight: 800; font-size: 14px; letter-spacing: 1px;">00:00:00</div>
                 <div class="status-badge">
                     <div class="pulse-dot"></div>
-                    <span id="system-status" style="font-size: 10px; font-weight: 900; color: var(--accent-cyan);">CORE_ONLINE</span>
+                    <span id="system-status" style="font-size: 10px; font-weight: 900; color: var(--cyan);">CORE_ONLINE</span>
                 </div>
             </div>
         </header>
@@ -36,7 +36,7 @@
                 <div class="bento-card">
                     <div class="card-header">
                         <span class="card-title">NΞØ_NEXUS_TELEMETRY</span>
-                        <div id="nexus-health-dot" class="pulse-dot" style="background: var(--accent-err); box-shadow: 0 0 10px var(--accent-err);"></div>
+                        <div id="nexus-health-dot" class="pulse-dot" style="background: var(--red); box-shadow: 0 0 10px var(--red);"></div>
                     </div>
                     <div class="metric-box">
                         <span class="metric-label">RETRY_QUEUE / REPROCESSAMENTO</span>
@@ -44,7 +44,7 @@
                     </div>
                     <div class="metric-box">
                         <span class="metric-label">DEAD_LETTER / FALHOS</span>
-                        <div class="metric-val" id="nexus-dlq-count" style="color: var(--accent-err);">—</div>
+                        <div class="metric-val" id="nexus-dlq-count" style="color: var(--red);">—</div>
                     </div>
                     <div class="metric-box">
                         <span class="metric-label">EVENTS_TOTAL / PROCESSADOS</span>
@@ -67,7 +67,7 @@
                         <span id="nodes-count" style="font-size: 9px; color: var(--text-dim);">—</span>
                     </div>
                     <div id="nodes-list" style="padding: 0.8rem; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;">
-                        <div style="color: var(--text-dark); font-size: 10px; padding: 1rem; text-align: center;">Carregando nós...</div>
+                        <div style="color: var(--text-mute); font-size: 10px; padding: 1rem; text-align: center;">Carregando nós...</div>
                     </div>
                 </div>
             </div>
@@ -92,11 +92,11 @@
                         <span class="card-title">QUICK_STATS</span>
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; padding: 0;">
-                        <div class="metric-box" style="border-bottom: none; border-right: 1px solid var(--border-glass);">
+                        <div class="metric-box" style="border-bottom: none; border-right: 1px solid var(--border);">
                             <span class="metric-label">SKILLS</span>
                             <div class="metric-val" id="stat-skills" style="font-size: 20px;">—</div>
                         </div>
-                        <div class="metric-box" style="border-bottom: none; border-right: 1px solid var(--border-glass);">
+                        <div class="metric-box" style="border-bottom: none; border-right: 1px solid var(--border);">
                             <span class="metric-label">NODES</span>
                             <div class="metric-val" id="stat-nodes" style="font-size: 20px;">—</div>
                         </div>
@@ -156,7 +156,7 @@
                 <div class="bento-card" style="flex: 1;">
                     <div class="card-header">
                         <span class="card-title">REGISTRY_SKILLS</span>
-                        <span id="registry-status" style="font-size: 9px; color: var(--accent-err); font-weight: 800;">OFFLINE</span>
+                        <span id="registry-status" style="font-size: 9px; color: var(--red); font-weight: 800;">OFFLINE</span>
                     </div>
                     <div id="skills-list" style="padding: 0.8rem; overflow-y: auto; display: flex; flex-direction: column; gap: 4px;">
                         <!-- Skills injected here -->
@@ -170,7 +170,7 @@
     <div class="login-overlay active" id="login-modal">
         <div class="login-card">
             <div style="margin-bottom: 2.5rem; text-align: center;">
-                <h2 style="font-size: 24px; color: var(--accent-cyan); letter-spacing: -1.5px; margin-bottom: 0.5rem;">NΞØ SOVEREIGN</h2>
+                <h2 style="font-size: 24px; color: var(--cyan); letter-spacing: -1.5px; margin-bottom: 0.5rem;">NΞØ SOVEREIGN</h2>
                 <p style="font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 3px;">Mission Control // Observability</p>
             </div>
             <form onsubmit="handleLogin(event)">
@@ -182,11 +182,11 @@
                     <label style="font-size: 9px; font-weight: 800; color: var(--text-dim); display: block; margin-bottom: 8px;">GATEWAY_CREDENTIAL</label>
                     <input type="password" id="login-pass" class="input-field" placeholder="••••••••••••" autofocus required>
                 </div>
-                <button type="submit" class="btn" style="width: 100%; height: 55px; justify-content: center; background: var(--accent-cyan); color: #000; font-size: 13px; letter-spacing: 1px;">
+                <button type="submit" class="btn" style="width: 100%; height: 55px; justify-content: center; background: var(--cyan); color: #000; font-size: 13px; letter-spacing: 1px;">
                     ESTABLISH_CONNECTION
                 </button>
             </form>
-            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-glass); font-size: 8px; color: var(--text-dark); letter-spacing: 1px;">
+            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); font-size: 8px; color: var(--text-mute); letter-spacing: 1px;">
                 PROTOCOL: AES-256-GCM // SOVEREIGN EDITION
             </div>
         </div>
@@ -280,13 +280,13 @@
                 document.getElementById('nexus-reactor-count').innerText = d.reactorExecutions ?? 0;
 
                 const dot = document.getElementById('nexus-health-dot');
-                dot.style.background = 'var(--accent-cyan)';
-                dot.style.boxShadow = '0 0 10px var(--accent-cyan)';
+                dot.style.background = 'var(--cyan)';
+                dot.style.boxShadow = '0 0 10px var(--cyan)';
                 document.getElementById('system-status').innerText = 'NEXUS_ONLINE';
             } catch (e) {
                 const dot = document.getElementById('nexus-health-dot');
-                dot.style.background = 'var(--accent-err)';
-                dot.style.boxShadow = '0 0 10px var(--accent-err)';
+                dot.style.background = 'var(--red)';
+                dot.style.boxShadow = '0 0 10px var(--red)';
                 document.getElementById('system-status').innerText = 'NEXUS_OFFLINE';
             }
         }
@@ -303,20 +303,20 @@
 
                 const list = document.getElementById('nodes-list');
                 if (nodes.length === 0) {
-                    list.innerHTML = '<div style="color: var(--text-dark); font-size: 10px; padding: 1rem; text-align: center;">Nenhum nó encontrado</div>';
+                    list.innerHTML = '<div style="color: var(--text-mute); font-size: 10px; padding: 1rem; text-align: center;">Nenhum nó encontrado</div>';
                     return;
                 }
                 list.innerHTML = nodes.map(n => `
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding: 6px 8px; background: rgba(0,242,254,0.03); border-left: 2px solid var(--accent-cyan); border-radius: 2px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding: 6px 8px; background: rgba(0,242,254,0.03); border-left: 2px solid var(--cyan); border-radius: 2px;">
                         <div>
-                            <div style="font-size:10px; font-weight:800; color: var(--text-main);">${(n.id || n.name || '?').toUpperCase()}</div>
+                            <div style="font-size:10px; font-weight:800; color: var(--text);">${(n.id || n.name || '?').toUpperCase()}</div>
                             <div style="font-size:8px; color:var(--text-dim);">${n.role || n.name || ''}</div>
                         </div>
-                        <div style="font-size:8px; font-weight:900; color: ${n.status === 'online' ? 'var(--accent-cyan)' : 'var(--text-dark)'};">${(n.status || 'unknown').toUpperCase()}</div>
+                        <div style="font-size:8px; font-weight:900; color: ${n.status === 'online' ? 'var(--cyan)' : 'var(--text-mute)'};">${(n.status || 'unknown').toUpperCase()}</div>
                     </div>
                 `).join('');
             } catch (e) {
-                document.getElementById('nodes-list').innerHTML = '<div style="color:var(--accent-err);font-size:10px;padding:1rem;">Erro ao carregar nós</div>';
+                document.getElementById('nodes-list').innerHTML = '<div style="color:var(--red);font-size:10px;padding:1rem;">Erro ao carregar nós</div>';
             }
         }
 
@@ -370,13 +370,13 @@
                 const skills = d.skills || [];
                 document.getElementById('stat-skills').innerText = skills.length;
                 document.getElementById('registry-status').innerText = 'ACTIVE';
-                document.getElementById('registry-status').style.color = 'var(--accent-cyan)';
+                document.getElementById('registry-status').style.color = 'var(--cyan)';
 
                 const list = document.getElementById('skills-list');
                 list.innerHTML = skills.map(s => `
                     <div style="display:flex; justify-content:space-between; align-items:center; padding: 4px 6px; background: rgba(0,242,254,0.02); border-left: 2px solid rgba(0,242,254,0.3); border-radius: 2px;">
                         <span style="font-weight:800; font-size:10px;">${(s.id || '').toUpperCase()}</span>
-                        <span style="color:var(--accent-cyan); font-size:9px;">${s.version || '?'}</span>
+                        <span style="color:var(--cyan); font-size:9px;">${s.version || '?'}</span>
                     </div>
                 `).join('');
             } catch (e) { console.error(e); }
@@ -415,7 +415,7 @@
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            toast.style.cssText = `background:var(--glass);backdrop-filter:blur(10px);border-left:4px solid ${type === 'error' ? 'var(--accent-err)' : type === 'success' ? 'var(--accent-green)' : 'var(--accent-cyan)'};padding:12px 20px;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,0.5);color:#fff;font-size:12px;font-family:JetBrains Mono,monospace;max-width:340px;word-break:break-word;`;
+            toast.style.cssText = `background:var(--bg-card);backdrop-filter:blur(10px);border-left:4px solid ${type === 'error' ? 'var(--red)' : type === 'success' ? 'var(--green)' : 'var(--cyan)'};padding:12px 20px;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,0.5);color:#fff;font-size:12px;font-family:JetBrains Mono,monospace;max-width:340px;word-break:break-word;`;
             toast.innerHTML = `<strong>${type.toUpperCase()}</strong>: ${message}`;
             container.appendChild(toast);
             setTimeout(() => toast.remove(), 6000);
