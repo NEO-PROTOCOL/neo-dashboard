@@ -7,7 +7,7 @@ let failCount = 0;
 let silentUntil = 0;
 const FAIL_THRESHOLD = 3;
 const SILENT_MS = 5 * 60 * 1000; // 5 min
-const FETCH_TIMEOUT_MS = 5000;    // 5s timeout per request
+const FETCH_TIMEOUT_MS = 10000;    // 10s timeout per request
 
 function fetchWithTimeout(url, options = {}) {
     const controller = new AbortController();
@@ -16,57 +16,61 @@ function fetchWithTimeout(url, options = {}) {
         .finally(() => clearTimeout(timer));
 }
 
-function handleNexusError(label, error, res) {
+const getNexusUrl = () => process.env.NEXUS_API_URL || 'https://neo-nexus-production.up.railway.app';
+
+function handleNexusError(label, error, res, url) {
     const now = Date.now();
     if (now > silentUntil) {
         failCount++;
         if (failCount >= FAIL_THRESHOLD) {
-            console.warn(`[NEXUS] ${label} unreachable — silencing logs for 5min (circuit open)`);
+            console.warn(`[NEXUS] ${label} unreachable (Attempted: ${url}) — silencing logs for 5min`);
             silentUntil = now + SILENT_MS;
             failCount = 0;
         } else {
-            console.warn(`[NEXUS] ${label} fetch failed (${failCount}/${FAIL_THRESHOLD}):`, error.message);
+            console.warn(`[NEXUS] ${label} fetch failed for ${url} (${failCount}/${FAIL_THRESHOLD}):`, error.message);
         }
     }
-    res.status(503).json({ success: false, error: 'Nexus service unreachable', offline: true });
+    res.status(503).json({ success: false, error: 'Nexus service unreachable', offline: true, attemptedUrl: url });
 }
 
 // Proxy for Nexus Retry Stats
 router.get('/retry/stats', async (req, res) => {
+    const nexusUrl = getNexusUrl();
+    const url = `${nexusUrl}/api/retry/stats`;
     try {
-        const nexusUrl = process.env.NEXUS_API_URL || 'https://nexus.neoprotocol.space';
-        const response = await fetchWithTimeout(`${nexusUrl}/api/retry/stats`);
+        const response = await fetchWithTimeout(url);
         const data = await response.json();
-        failCount = 0; // reset on success
+        failCount = 0;
         res.json(data);
     } catch (error) {
-        handleNexusError('retry/stats', error, res);
+        handleNexusError('retry/stats', error, res, url);
     }
 });
 
 // Proxy for Nexus Health Detailed
 router.get('/health', async (req, res) => {
+    const nexusUrl = getNexusUrl();
+    const url = `${nexusUrl}/health/detailed`;
     try {
-        const nexusUrl = process.env.NEXUS_API_URL || 'https://nexus.neoprotocol.space';
-        const response = await fetchWithTimeout(`${nexusUrl}/health/detailed`);
+        const response = await fetchWithTimeout(url);
         const data = await response.json();
         failCount = 0;
         res.json(data);
     } catch (error) {
-        handleNexusError('health', error, res);
+        handleNexusError('health', error, res, url);
     }
 });
 
 // Proxy for Nexus Simple Metrics (parsing Prometheus text)
 router.get('/metrics/summary', async (req, res) => {
+    const nexusUrl = getNexusUrl();
+    const url = new URL('/metrics', nexusUrl).toString();
     try {
-        const nexusUrl = process.env.NEXUS_API_URL || 'https://nexus.neoprotocol.space';
-        const response = await fetchWithTimeout(new URL('/metrics', nexusUrl).toString());
+        const response = await fetchWithTimeout(url);
         const text = await response.text();
 
-        failCount = 0; // reset on success
+        failCount = 0;
 
-        // Improved extraction for dashboard (handles labels and exact matches)
         const extract = (metricName) => {
             const regex = new RegExp(`^${metricName}(?:\\{[^\\}]*\\})?\\s+(\\d+(\\.\\d+)?)$`, 'm');
             const match = text.match(regex);
@@ -81,7 +85,7 @@ router.get('/metrics/summary', async (req, res) => {
             wsConnections: extract('nexus_websocket_connections')
         });
     } catch (error) {
-        handleNexusError('metrics/summary', error, res);
+        handleNexusError('metrics/summary', error, res, url);
     }
 });
 
