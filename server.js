@@ -294,7 +294,7 @@ app.listen(PORT, () => {
     console.log(`
 ╔═══════════════════════════════════════════════════════
 ║                                                       
-║   🛰️  NΞØ BOT Dashboard API                           
+║   🛰️  NΞØBOT Dashboard//API                           
 ║                                                       
 ║   Status: ✅ ONLINE                                   
 ║   Port: ${PORT}                                       
