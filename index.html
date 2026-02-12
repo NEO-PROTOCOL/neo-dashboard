@@ -284,6 +284,27 @@
             setInterval(fetchRegistry, 30000);
         }
 
+        async function fetchWithRetry(url, options, retries = 3, backoff = 1000) {
+            try {
+                const res = await fetch(url, options);
+                if (res.status === 401) return res;
+                if (res.status === 503 && retries > 0) {
+                    console.warn(`Service Unavailable (503). Retrying in ${backoff / 1000}s...`);
+                    await new Promise(resolve => setTimeout(resolve, backoff));
+                    return fetchWithRetry(url, options, retries - 1, backoff * 2);
+                }
+                if (!res.ok) throw new Error(`HTTP_${res.status}`);
+                return res;
+            } catch (error) {
+                if (retries > 0) {
+                    console.warn(`Fetch failed: ${error.message}. Retrying in ${backoff / 1000}s...`);
+                    await new Promise(resolve => setTimeout(resolve, backoff));
+                    return fetchWithRetry(url, options, retries - 1, backoff * 2);
+                }
+                throw error;
+            }
+        }
+
         function refreshAll() {
             fetchNexusData();
             fetchLogs();
@@ -295,9 +316,8 @@
         // --- Nexus Metrics ---
         async function fetchNexusData() {
             try {
-                const res = await fetch('/api/nexus/metrics/summary', { headers: getAuthHeaders() });
+                const res = await fetchWithRetry('/api/nexus/metrics/summary', { headers: getAuthHeaders() });
                 if (res.status === 401) return;
-                if (!res.ok) throw new Error(`HTTP_${res.status}`);
                 const d = await res.json();
 
                 document.getElementById('nexus-retry-count').innerText = d.retryQueueSize ?? 0;

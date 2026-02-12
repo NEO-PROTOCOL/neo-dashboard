@@ -163,6 +163,27 @@
     <script>
         const API_PASS_KEY = 'neo_gateway_password';
 
+        async function fetchWithRetry(url, options, retries = 3, backoff = 1000) {
+            try {
+                const res = await fetch(url, options);
+                if (res.status === 401) return res;
+                if (res.status === 503 && retries > 0) {
+                    console.warn(`Service Unavailable (503). Retrying in ${backoff / 1000}s...`);
+                    await new Promise(resolve => setTimeout(resolve, backoff));
+                    return fetchWithRetry(url, options, retries - 1, backoff * 2);
+                }
+                if (!res.ok) throw new Error(`HTTP_${res.status}`);
+                return res;
+            } catch (error) {
+                if (retries > 0) {
+                    console.warn(`Fetch failed: ${error.message}. Retrying in ${backoff / 1000}s...`);
+                    await new Promise(resolve => setTimeout(resolve, backoff));
+                    return fetchWithRetry(url, options, retries - 1, backoff * 2);
+                }
+                throw error;
+            }
+        }
+
         async function handleMLogin(e) {
             e.preventDefault();
             const pass = document.getElementById('m-login-pass').value;
@@ -195,8 +216,8 @@
 
             try {
                 const [nexusRes, logsRes] = await Promise.all([
-                    fetch('/api/nexus/metrics/summary', { headers }),
-                    fetch('/api/logs', { headers })
+                    fetchWithRetry('/api/nexus/metrics/summary', { headers }),
+                    fetchWithRetry('/api/logs', { headers })
                 ]);
 
                 if (nexusRes.ok) {
