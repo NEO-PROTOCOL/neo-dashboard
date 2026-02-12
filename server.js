@@ -9,6 +9,7 @@ import { promisify } from 'util';
 import automationRoutes from './automation-routes.js';
 import neoRoutes from './neo-routes.js';
 import nexusRoutes from './nexus-routes.js';
+import aiRoutes from './ai-routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -114,7 +115,7 @@ class SimpleTelegramBot {
 
     async sendMessage(chatId, message, options = {}) {
         if (!this.token) {
-            console.warn('⚠️ Telegram Token missing. Message skipped:', message);
+            console.warn('⧖ Telegram Token missing. Message skipped:', message);
             return;
         }
         try {
@@ -135,7 +136,7 @@ class SimpleTelegramBot {
             }
             return data.result;
         } catch (error) {
-            console.error('❌ Error sending Telegram message:', error);
+            console.error('✗ Error sending Telegram message:', error);
         }
     }
 }
@@ -186,6 +187,7 @@ app.use('/api', authMiddleware);
 app.use('/api/automations', automationRoutes);
 app.use('/api/neo', neoRoutes);
 app.use('/api/nexus', nexusRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Storage (Legacy In-Memory)
 let reminders = [];
@@ -266,7 +268,7 @@ app.post('/api/messages', async (req, res) => {
             cwd: path.join(__dirname, '..'),
             stdio: ['ignore', 'pipe', 'pipe']
         });
-        console.log(`📨 Message sent process spawned for ${to}`);
+        console.log(`⟠ Message sent process spawned for ${to}`);
     } catch (e) {
         console.error(e);
     }
@@ -299,9 +301,9 @@ app.listen(PORT, () => {
     console.log(`
 ╔═══════════════════════════════════════════════════════
 ║                                                       
-║   🛰️  NΞØBOT Dashboard//API                           
+║   Ξ  NΞØBOT Dashboard//API                           
 ║                                                       
-║   Status: ✅ ONLINE                                   
+║   Status: ✓ ONLINE                                   
 ║   Port: ${PORT}                                       
 ║   URL: ${publicUrl}                                   
 ║                                                       

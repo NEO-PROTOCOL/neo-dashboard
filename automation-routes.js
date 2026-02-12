@@ -8,11 +8,11 @@ const FETCH_TIMEOUT = 5000;
 
 // Static fallback: ecosystem nodes from ecosystem.json (used when neobot is offline)
 const ECOSYSTEM_FALLBACK = [
-    { id: 'neobot-architect',  name: 'Neobot — Node Warrior / NEO Nexus', role: 'Sovereign Node / Orchestrator', url: 'https://nexus.neoprotocol.space' },
-    { id: 'neo-nexus',         name: 'NEO Nexus (Event Hub)',              role: 'Event Bus / Standalone Hub',    url: 'https://neo-nexus-production.up.railway.app' },
-    { id: 'flowpay',           name: 'FlowPay (PIX Gateway)',              role: 'Payment Gateway / PIX',         url: 'https://flowpay-production-10d8.up.railway.app' },
-    { id: 'neo-agent-full',    name: 'Neo Agent Full (LangGraph ReAct)',   role: 'AI Sales Agent / Closer',       url: 'https://neo-agent-full-production.up.railway.app' },
-    { id: 'neo-dashboard',     name: 'NEO Dashboard (Mission Control)',    role: 'Observability / Dashboard',     url: 'https://neo-dashboard-production-2e56.up.railway.app' },
+    { id: 'neobot-architect', name: 'Neobot — Node Warrior / NEO Nexus', role: 'Sovereign Node / Orchestrator', url: 'https://nexus.neoprotocol.space' },
+    { id: 'neo-nexus', name: 'NEO Nexus (Event Hub)', role: 'Event Bus / Standalone Hub', url: 'https://neo-nexus-production.up.railway.app' },
+    { id: 'flowpay', name: 'FlowPay (PIX Gateway)', role: 'Payment Gateway / PIX', url: 'https://flowpay-production-10d8.up.railway.app' },
+    { id: 'neo-agent-full', name: 'Neo Agent Full (LangGraph ReAct)', role: 'AI Sales Agent / Closer', url: 'https://neo-agent-full-production.up.railway.app' },
+    { id: 'neo-dashboard', name: 'NEO Dashboard (Mission Control)', role: 'Observability / Dashboard', url: 'https://neo-dashboard-production-2e56.up.railway.app' },
 ];
 
 function fetchWithTimeout(url, options = {}) {
@@ -28,7 +28,7 @@ async function neobotFetch(path, options = {}) {
         'Content-Type': 'application/json',
         ...(NEOBOT_KEY ? { 'Authorization': `Bearer ${NEOBOT_KEY}` } : {})
     };
-    return fetchWithTimeout(url, { ...options, headers: { ...headers, ...(options.headers || {}) } });
+    return fetchWithTimeout(url, { ...options, headers: { ...headers, ...options.headers } });
 }
 
 // Probe a node URL to check if it's online

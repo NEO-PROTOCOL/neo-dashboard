@@ -73,7 +73,7 @@ async function createReminder(event) {
         });
 
         if (response.ok) {
-            showNotification('✅ Lembrete criado com sucesso!', 'success');
+            showNotification('✓ Lembrete criado com sucesso!', 'success');
             closeModal('reminder-modal');
             document.getElementById('reminder-form').reset();
             loadReminders();
@@ -83,7 +83,7 @@ async function createReminder(event) {
             throw new Error('Falha ao criar lembrete');
         }
     } catch (error) {
-        showNotification('❌ Erro ao criar lembrete', 'error');
+        showNotification('✗ Erro ao criar lembrete', 'error');
         console.error(error);
     }
 }
@@ -103,7 +103,7 @@ async function sendMessage(event) {
         });
 
         if (response.ok) {
-            showNotification('✅ Mensagem enviada!', 'success');
+            showNotification('✓ Mensagem enviada!', 'success');
             closeModal('message-modal');
             document.getElementById('message-form').reset();
             loadMessages();
@@ -113,7 +113,7 @@ async function sendMessage(event) {
             throw new Error('Falha ao enviar mensagem');
         }
     } catch (error) {
-        showNotification('❌ Erro ao enviar mensagem', 'error');
+        showNotification('✗ Erro ao enviar mensagem', 'error');
         console.error(error);
     }
 }
@@ -148,7 +148,7 @@ function renderReminders() {
 
     container.innerHTML = reminders.map(reminder => `
         <div class="reminder-item">
-            <div class="reminder-text">🔔 ${reminder.text}</div>
+            <div class="reminder-text">⟠ ${reminder.text}</div>
             <div class="reminder-time">${formatTime(reminder.scheduledFor)}</div>
         </div>
     `).join('');
@@ -157,18 +157,18 @@ function renderReminders() {
 function renderMockReminders() {
     const container = document.getElementById('reminders-list');
     if (!container) return;
-    
+
     container.innerHTML = `
         <div class="reminder-item">
-            <div class="reminder-text">🔔 Beber água</div>
+            <div class="reminder-text">⟠ Backup de Logs</div>
             <div class="reminder-time">Daqui a 30 minutos</div>
         </div>
         <div class="reminder-item">
-            <div class="reminder-text">🔔 Academia</div>
+            <div class="reminder-text">⟠ Auditoria de Rede</div>
             <div class="reminder-time">Daqui a 2 horas</div>
         </div>
     `;
-    
+
     const countEl = document.getElementById('reminders-count');
     if (countEl) {
         countEl.textContent = '2 agendados';
@@ -213,21 +213,21 @@ function renderMessages() {
 function renderMockMessages() {
     const container = document.getElementById('messages-list');
     if (!container) return;
-    
+
     container.innerHTML = `
         <div class="message-item">
             <div class="message-header">
-                <span class="message-from">Você → Ana Carolina</span>
+                <span class="message-from">Você → Operador</span>
                 <span class="message-time">há 5 minutos</span>
             </div>
-            <div class="message-text">vc me ama?</div>
+            <div class="message-text">Status do link estabelecido.</div>
         </div>
         <div class="message-item">
             <div class="message-header">
                 <span class="message-from">Sistema</span>
                 <span class="message-time">há 10 minutos</span>
             </div>
-            <div class="message-text">🔔 LEMBRETE: Teste funcionando!</div>
+            <div class="message-text">⟠ COMANDO: Protocolo de segurança ativo.</div>
         </div>
     `;
 }
@@ -236,7 +236,7 @@ function renderMockMessages() {
 function updateStats() {
     const totalRemindersEl = document.getElementById('total-reminders');
     const totalMessagesEl = document.getElementById('total-messages');
-    
+
     if (totalRemindersEl) {
         totalRemindersEl.textContent = stats.totalReminders;
     }
@@ -247,12 +247,12 @@ function updateStats() {
 
 // Refresh Status
 async function refreshStatus() {
-    showNotification('🔄 Atualizando...', 'info');
+    showNotification('⨷ Atualizando...', 'info');
     await Promise.all([
         loadReminders(),
         loadMessages()
     ]);
-    showNotification('✅ Atualizado!', 'success');
+    showNotification('✓ Atualizado!', 'success');
 }
 
 // Utility Functions
@@ -389,7 +389,7 @@ async function sendAIMessage(event) {
         }
     } catch (error) {
         removeAIMessage(loadingId);
-        addAIMessage('assistant', '❌ Erro ao processar mensagem. Verifique se a API do Claude está configurada.');
+        addAIMessage('assistant', '✗ Erro ao processar mensagem. Verifique se a API do Claude está configurada.');
         console.error(error);
     } finally {
         sendBtn.disabled = false;
@@ -459,13 +459,13 @@ async function clearAIContext() {
         const messagesContainer = document.getElementById('ai-messages');
         messagesContainer.innerHTML = `
             <div class="ai-welcome">
-                👋 Olá! Sou o Claude AI. Como posso ajudar você hoje?
+                Ξ Olá! Sou o Claude AI. Como posso ajudar você hoje?
             </div>
         `;
 
-        showNotification('✅ Contexto limpo!', 'success');
+        showNotification('✓ Contexto limpo!', 'success');
     } catch (error) {
-        showNotification('❌ Erro ao limpar contexto', 'error');
+        showNotification('✗ Erro ao limpar contexto', 'error');
     }
 }
 
@@ -511,7 +511,7 @@ async function analyzeBug(event) {
     const code = document.getElementById('bug-code').value.trim();
 
     if (!error) {
-        showNotification('❌ Forneça uma mensagem de erro', 'error');
+        showNotification('✗ Forneça uma mensagem de erro', 'error');
         return;
     }
 
@@ -520,12 +520,12 @@ async function analyzeBug(event) {
     const analysisDiv = document.getElementById('bug-analysis');
 
     resultDiv.style.display = 'block';
-    analysisDiv.innerHTML = '<div class="loading">🔍 Analisando bug...</div>';
+    analysisDiv.innerHTML = '<div class="loading">◬ Analisando bug...</div>';
 
     // Disable submit button
     const submitBtn = document.querySelector('#bug-form button[type="submit"]');
     submitBtn.disabled = true;
-    submitBtn.textContent = '🔍 Analisando...';
+    submitBtn.textContent = '◬ Analisando...';
 
     try {
         const response = await fetch(`${API_BASE}/ai/analyze-bug`, {
@@ -543,21 +543,21 @@ async function analyzeBug(event) {
             // Update AI stats
             loadAIStats();
 
-            showNotification('✅ Análise concluída!', 'success');
+            showNotification('✓ Análise concluída!', 'success');
         } else {
             throw new Error('Falha ao analisar bug');
         }
     } catch (error) {
         analysisDiv.innerHTML = `
             <div class="empty-state">
-                ❌ Erro ao analisar bug. Verifique se a API do Claude está configurada.
+                ✗ Erro ao analisar bug. Verifique se a API do Claude está configurada.
             </div>
         `;
-        showNotification('❌ Erro ao analisar bug', 'error');
+        showNotification('✗ Erro ao analisar bug', 'error');
         console.error(error);
     } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = '🔍 Analisar Bug';
+        submitBtn.textContent = '◬ Analisar Bug';
     }
 }
 
@@ -581,13 +581,13 @@ function formatBugAnalysis(text) {
 async function loadAutomations() {
     try {
         const response = await fetch(`${API_BASE}/automations/tasks`);
-        
+
         if (!response.ok) {
             throw new Error('Failed to load automations');
         }
 
         const data = await response.json();
-        
+
         if (data.success) {
             displayAutomations(data.tasks);
             updateAutomationStats(data.stats);
@@ -596,7 +596,7 @@ async function loadAutomations() {
         console.error('Error loading automations:', error);
         const container = document.getElementById('automations-list');
         if (container) {
-            container.innerHTML = '<div class="empty-state">❌ Erro ao carregar automações</div>';
+            container.innerHTML = '<div class="empty-state">✗ Erro ao carregar automações</div>';
         }
     }
 }
@@ -604,7 +604,7 @@ async function loadAutomations() {
 function displayAutomations(tasks) {
     const container = document.getElementById('automations-list');
     if (!container) return;
-    
+
     if (!tasks || tasks.length === 0) {
         container.innerHTML = '<div class="empty-state">Nenhuma automação configurada</div>';
         return;
@@ -620,17 +620,17 @@ function displayAutomations(tasks) {
                 <div class="automation-schedule">${task.schedule}</div>
                 <div class="automation-meta">
                     <span>✓ ${task.runCount} execuções</span>
-                    ${task.errorCount > 0 ? `<span>⚠️ ${task.errorCount} erros</span>` : ''}
-                    ${task.lastRun ? `<span>📅 ${formatDate(task.lastRun)}</span>` : ''}
+                    ${task.errorCount > 0 ? `<span>⧖ ${task.errorCount} erros</span>` : ''}
+                    ${task.lastRun ? `<span>◭ ${formatDate(task.lastRun)}</span>` : ''}
                 </div>
             </div>
             <div class="automation-actions">
                 <button class="automation-btn" onclick="executeAutomation('${task.id}')">
-                    ▶️ Executar
+                    ⨷ Executar
                 </button>
                 <button class="automation-btn toggle ${task.enabled ? 'enabled' : 'disabled'}" 
                         onclick="toggleAutomation('${task.id}', ${!task.enabled})">
-                    ${task.enabled ? '⏸️ Pausar' : '▶️ Ativar'}
+                    ${task.enabled ? '⧗ Pausar' : '⨷ Ativar'}
                 </button>
             </div>
         </div>
@@ -640,15 +640,15 @@ function displayAutomations(tasks) {
 function updateAutomationStats(stats) {
     const totalEl = document.getElementById('automation-total');
     const runsEl = document.getElementById('automation-runs');
-    
+
     if (totalEl) totalEl.textContent = stats.enabled;
     if (runsEl) runsEl.textContent = stats.totalRuns;
 }
 
 async function executeAutomation(taskId) {
     try {
-        showNotification('🚀 Executando automação...', 'info');
-        
+        showNotification('⟠ Executando automação...', 'info');
+
         const response = await fetch(`${API_BASE}/automations/tasks/${taskId}/execute`, {
             method: 'POST'
         });
@@ -656,14 +656,14 @@ async function executeAutomation(taskId) {
         const data = await response.json();
 
         if (data.success) {
-            showNotification('✅ Automação executada com sucesso!', 'success');
+            showNotification('✓ Automação executada com sucesso!', 'success');
             loadAutomations();
         } else {
             throw new Error(data.error || 'Failed to execute automation');
         }
     } catch (error) {
         console.error('Error executing automation:', error);
-        showNotification('❌ Erro ao executar automação', 'error');
+        showNotification('✗ Erro ao executar automação', 'error');
     }
 }
 
@@ -678,21 +678,21 @@ async function toggleAutomation(taskId, enabled) {
         const data = await response.json();
 
         if (data.success) {
-            showNotification(`✅ Automação ${enabled ? 'ativada' : 'pausada'}!`, 'success');
+            showNotification(`✓ Automação ${enabled ? 'ativada' : 'pausada'}!`, 'success');
             loadAutomations();
         } else {
             throw new Error(data.error || 'Failed to toggle automation');
         }
     } catch (error) {
         console.error('Error toggling automation:', error);
-        showNotification('❌ Erro ao alterar automação', 'error');
+        showNotification('✗ Erro ao alterar automação', 'error');
     }
 }
 
 async function generateReport() {
     try {
-        showNotification('📊 Gerando relatório inteligente...', 'info');
-        
+        showNotification('◭ Gerando relatório inteligente...', 'info');
+
         const button = event.target.closest('button');
         button.disabled = true;
         button.innerHTML = '<span class="spinner"></span> Gerando...';
@@ -706,25 +706,25 @@ async function generateReport() {
         if (data.success) {
             const previewDiv = document.getElementById('report-preview');
             const contentDiv = document.getElementById('report-content');
-            
+
             if (contentDiv) {
                 contentDiv.textContent = data.report;
             }
             if (previewDiv) {
                 previewDiv.style.display = 'block';
             }
-            
-            showNotification('✅ Relatório gerado com sucesso!', 'success');
+
+            showNotification('✓ Relatório gerado com sucesso!', 'success');
         } else {
             throw new Error(data.error || 'Failed to generate report');
         }
     } catch (error) {
         console.error('Error generating report:', error);
-        showNotification('❌ Erro ao gerar relatório', 'error');
+        showNotification('✗ Erro ao gerar relatório', 'error');
     } finally {
         const button = event.target.closest('button');
         button.disabled = false;
-        button.innerHTML = '<span class="btn-icon">📄</span><span>Gerar Relatório Inteligente</span>';
+        button.innerHTML = '<span class="btn-icon">◭</span><span>Gerar Relatório Inteligente</span>';
     }
 }
 
@@ -732,24 +732,24 @@ function formatDate(dateString) {
     const date = new Date(dateString);
     const now = new Date();
     const diff = now - date;
-    
+
     // Less than 1 minute
     if (diff < 60000) {
         return 'agora mesmo';
     }
-    
+
     // Less than 1 hour
     if (diff < 3600000) {
         const minutes = Math.floor(diff / 60000);
         return `há ${minutes} min`;
     }
-    
+
     // Less than 24 hours
     if (diff < 86400000) {
         const hours = Math.floor(diff / 3600000);
         return `há ${hours}h`;
     }
-    
+
     // More than 24 hours
     return date.toLocaleDateString('pt-BR', {
         day: '2-digit',
@@ -762,7 +762,7 @@ function formatDate(dateString) {
 // Initialize automations on page load
 document.addEventListener('DOMContentLoaded', () => {
     loadAutomations();
-    
+
     // Auto-refresh automations every 30 seconds
     setInterval(loadAutomations, 30000);
 });

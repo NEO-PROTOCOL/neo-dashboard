@@ -14,15 +14,15 @@ Dashboard moderno com design inspirado no iOS, usando glassmorphism, animações
 
 ### Funcionalidades
 
-- 📊 **Visualização em Tempo Real**: Status do sistema atualizado automaticamente
+- ⟁ **Visualização em Tempo Real**: Status do sistema atualizado automaticamente
 - 🤖 **Chat com Claude AI**: Interface de chat integrada
 - 📅 **Gerenciamento de Lembretes**: Criar e visualizar lembretes
 - 💬 **Envio de Mensagens**: Telegram integrado
 - 🐛 **Analisador de Bugs**: Análise automática de erros com IA
-- 🔄 **Automações**: Controle completo de automações avançadas
+- ⨷ **Automações**: Controle completo de automações avançadas
 - 📄 **Relatórios**: Geração de relatórios inteligentes
 
-## 🚀 Início Rápido
+## ⟠ Início Rápido
 
 ### Instalação
 
@@ -104,7 +104,7 @@ Botões iOS-style com animação de shine:
 
 ```html
 <button class="action-btn">
-    <span class="btn-icon">🔔</span>
+    <span class="btn-icon">⟠</span>
     <span>Novo Lembrete</span>
 </button>
 ```
@@ -167,7 +167,7 @@ Status badge animado e logo com float effect.
 ```html
 <header class="header">
     <div class="logo">
-        <span class="logo-icon">🛰️</span>
+        <span class="logo-icon">Ξ</span>
         <h1>NΞØ BOT</h1>
     </div>
     <div class="status-badge">
@@ -378,7 +378,7 @@ curl http://localhost:3000/api/ai/stats
 - Touch-friendly buttons
 - Optimized spacing
 
-## 🔄 Auto-refresh
+## ⨷ Auto-refresh
 
 O dashboard atualiza automaticamente:
 
@@ -395,7 +395,7 @@ O dashboard atualiza automaticamente:
 3. **Modais**: Clique fora para fechar (adicione se quiser)
 4. **Mobile**: Adicione à tela inicial para app-like experience
 
-## 🚀 Deploy
+## ⨂ Deploy
 
 ### Opção 1: Servidor Local
 
@@ -433,10 +433,10 @@ CMD ["node", "server.js"]
 
 ### 🐛 Correções de Bugs
 
-- ✅ Corrigido 11 null pointer errors
-- ✅ Validação de DOM elements antes de acessar
-- ✅ Fail gracefully quando elementos não existem
-- ✅ Error handling robusto em todas as funções
+- ✓ Corrigido 11 null pointer errors
+- ✓ Validação de DOM elements antes de acessar
+- ✓ Fail gracefully quando elementos não existem
+- ✓ Error handling robusto em todas as funções
 
 ### 💰 Economia de IA (30-50%)
 

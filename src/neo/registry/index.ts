@@ -43,7 +43,7 @@ export class NeoSkillsRegistry {
    * Publish a skill directory to IPFS
    */
   async publish(skillDir: string, signer?: any): Promise<{ cid: string; manifest: SkillManifest }> {
-    console.log(`\n📦 Publishing skill from: ${skillDir}...`);
+    console.log(`\n⦿ Publishing skill from: ${skillDir}...`);
 
     // 1. Validate Manifest
     const manifestPath = path.join(skillDir, 'skill.json');
@@ -81,7 +81,7 @@ export class NeoSkillsRegistry {
 
     if (!rootCid) throw new Error("Failed to get root CID from IPFS addAll");
 
-    console.log(`✅ Published! CID: ${rootCid}`);
+    console.log(`✓ Published! CID: ${rootCid}`);
     console.log(`   Skill: ${manifest.name} v${manifest.version}`);
 
     // Update manifest with CID (optional, but good for tracking)
@@ -95,7 +95,7 @@ export class NeoSkillsRegistry {
    */
   async install(cid: string, alias?: string): Promise<string> {
     const targetDir = this.config.localSkillsDir || './skills';
-    console.log(`\n📥 Installing skill ${cid}...`);
+    console.log(`\n⟠ Installing skill ${cid}...`);
 
     // Create temp or final directory
     // If alias is provided, use it as folder name. Otherwise use CID.
@@ -133,7 +133,7 @@ export class NeoSkillsRegistry {
       }
     }
 
-    console.log(`✅ Installed to ${installPath}`);
+    console.log(`✓ Installed to ${installPath}`);
     return installPath;
   }
 

@@ -7,6 +7,7 @@
     <title>NΞØ PROTOCOL // MOBILE CORE</title>
     <link rel="stylesheet" href="mobile-styles.css">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body>
@@ -16,7 +17,7 @@
             <div style="text-align: center; margin-bottom: 30px;">
                 <div
                     style="width: 60px; height: 60px; background: var(--ios-accent); border-radius: 15px; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 10px 20px rgba(0, 242, 254, 0.3);">
-                    🛰️</div>
+                    Ξ</div>
                 <h2 style="font-size: 24px; font-weight: 700; color: #fff; letter-spacing: -0.5px;">NΞØ PROTOCOL</h2>
                 <p
                     style="font-size: 11px; color: var(--ios-text-dim); text-transform: uppercase; letter-spacing: 2px; margin-top: 4px;">
@@ -36,7 +37,7 @@
             </form>
 
             <div style="margin-top: 30px; text-align: center; font-size: 10px; color: var(--ios-text-dim);">
-                🔒 AES-256-GCM Secure Channel
+                ⧗ AES-256-GCM Secure Channel
             </div>
         </div>
     </div>
@@ -58,7 +59,7 @@
         <!-- Main Stats -->
         <div class="ios-grid">
             <div class="ios-card">
-                <span class="card-icon">🛰️</span>
+                <span class="card-icon">Ξ</span>
                 <span class="card-label">Events</span>
                 <span class="card-value" id="m-events">0</span>
                 <svg class="sparkline" viewBox="0 0 100 40">
@@ -66,7 +67,7 @@
                 </svg>
             </div>
             <div class="ios-card">
-                <span class="card-icon">🧠</span>
+                <span class="card-icon">⧉</span>
                 <span class="card-label">Memory</span>
                 <span class="card-value" id="m-memory">85%</span>
                 <div style="height: 4px; background: var(--ios-glass); border-radius: 2px; margin-top: 10px;">
@@ -109,7 +110,7 @@
                 <span class="card-label">Recent Activity</span>
                 <div class="activity-list" id="m-activity-list">
                     <div class="activity-item">
-                        <div class="activity-icon">🔗</div>
+                        <div class="activity-icon">⟠</div>
                         <div class="activity-content">
                             <div class="activity-title">Connection Established</div>
                             <div class="activity-time">Nexus Node // San Francisco</div>
@@ -117,7 +118,7 @@
                         <div class="activity-time">2m ago</div>
                     </div>
                     <div class="activity-item">
-                        <div class="activity-icon">📦</div>
+                        <div class="activity-icon">⦿</div>
                         <div class="activity-content">
                             <div class="activity-title">Event Processed</div>
                             <div class="activity-time">ID: 8x2...f91a</div>
@@ -125,7 +126,7 @@
                         <div class="activity-time">5m ago</div>
                     </div>
                     <div class="activity-item">
-                        <div class="activity-icon">⚠️</div>
+                        <div class="activity-icon">⧖</div>
                         <div class="activity-content">
                             <div class="activity-title">Retry Queue Updated</div>
                             <div class="activity-time">3 items pending</div>
@@ -140,22 +141,22 @@
     <!-- Tab Bar -->
     <nav class="tab-bar">
         <a href="#" class="tab-item active">
-            <span class="tab-icon">🏠</span>
+            <i data-lucide="home" style="width: 20px; margin-bottom: 2px;"></i>
             <span class="tab-label">Home</span>
         </a>
         <a href="#" class="tab-item">
-            <span class="tab-icon">📡</span>
+            <i data-lucide="network" style="width: 20px; margin-bottom: 2px;"></i>
             <span class="tab-label">Nexus</span>
         </a>
         <div class="action-btn-container">
             <button class="action-btn" onclick="triggerMainAction()">Σ</button>
         </div>
         <a href="#" class="tab-item">
-            <span class="tab-icon">📉</span>
+            <i data-lucide="activity" style="width: 20px; margin-bottom: 2px;"></i>
             <span class="tab-label">Stats</span>
         </a>
         <a href="#" class="tab-item">
-            <span class="tab-icon">👤</span>
+            <i data-lucide="shield" style="width: 20px; margin-bottom: 2px;"></i>
             <span class="tab-label">Admin</span>
         </a>
     </nav>
@@ -249,7 +250,7 @@
 
             list.innerHTML = logs.map(log => `
                 <div class="activity-item">
-                    <div class="activity-icon">${log.type === 'error' ? '❌' : log.type === 'warn' ? '⚠️' : 'ℹ️'}</div>
+                    <div class="activity-icon">${log.type === 'error' ? '✗' : log.type === 'warn' ? '⧖' : '◬'}</div>
                     <div class="activity-content">
                         <div class="activity-title">${log.message.substring(0, 30)}...</div>
                         <div class="activity-time">${new Date(log.timestamp).toLocaleTimeString()}</div>
@@ -259,7 +260,7 @@
         }
 
         function triggerMainAction() {
-            alert("NΞØ PROTOCOL // Command Center Initiated");
+            alert("Ξ NΞØ PROTOCOL // Command Center Initiated");
         }
 
         // Auth handling
@@ -271,6 +272,7 @@
             if (localStorage.getItem(API_PASS_KEY)) {
                 unlockMDashboard();
             }
+            lucide.createIcons();
         })();
     </script>
 </body>
