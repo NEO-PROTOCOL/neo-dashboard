@@ -9,7 +9,6 @@
         "dev": "nodemon --import tsx server.js"
     },
     "dependencies": {
-        "@anthropic-ai/sdk": "^0.71.2",
         "cors": "^2.8.5",
         "dotenv": "^17.2.3",
         "esbuild": "0.27.3",

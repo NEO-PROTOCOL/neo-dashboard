@@ -6,22 +6,55 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { promisify } from 'util';
-import { setupAIRoutes } from './ai-routes.js';
 import automationRoutes from './automation-routes.js';
 import neoRoutes from './neo-routes.js';
 import nexusRoutes from './nexus-routes.js';
 
-// Load environment variables with priority for neo-config.env (fixes system permissions issues)
-dotenv.config();
-if (fs.existsSync('neo-config.env')) {
-    dotenv.config({ path: 'neo-config.env', override: true });
-} else if (fs.existsSync('.env.local')) {
-    dotenv.config({ path: '.env.local', override: true });
-}
-
-const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+function manualLoadEnv(path) {
+    try {
+        if (!fs.existsSync(path)) return;
+        const content = fs.readFileSync(path, 'utf8');
+        content.split('\n').forEach(line => {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed.startsWith('#')) return;
+            const index = trimmed.indexOf('=');
+            if (index !== -1) {
+                const key = trimmed.substring(0, index).trim();
+                const val = trimmed.substring(index + 1).trim();
+                process.env[key] = val;
+            }
+        });
+        console.log(`[SYS] Manually loaded env from ${path}`);
+    } catch (e) {
+        console.error(`[SYS] Failed to manually load env from ${path}:`, e.message);
+    }
+}
+
+// Load environment variables
+dotenv.config();
+manualLoadEnv(path.join(__dirname, 'neo-config.env'));
+manualLoadEnv(path.join(__dirname, '.env.local'));
+
+// JSON Settings Fallback (Workaround for EPERM on .env files)
+try {
+    const jsonSettingsPath = path.join(__dirname, 'app-settings.json');
+    if (fs.existsSync(jsonSettingsPath)) {
+        const settings = JSON.parse(fs.readFileSync(jsonSettingsPath, 'utf8'));
+        Object.entries(settings).forEach(([key, val]) => {
+            process.env[key] = String(val);
+        });
+        console.log(`[SYS] Loaded settings from ${jsonSettingsPath}`);
+    }
+} catch (e) {
+    console.error(`[SYS] Failed to load app-settings.json:`, e.message);
+}
+
+console.log('[SYS] Bootstrap sequence complete.');
+
+const execAsync = promisify(exec);
 
 // ------------------------------------------------------------------
 // Log Capture System (In-Memory Ring Buffer)
@@ -94,14 +127,11 @@ class SimpleTelegramBot {
 
             const data = await response.json();
             if (!data.ok) {
-                // Ignore chat not found if just testing
-                // throw new Error(`Telegram API error: ${data.description}`);
                 console.warn(`Telegram API warning: ${data.description}`);
             }
             return data.result;
         } catch (error) {
             console.error('❌ Error sending Telegram message:', error);
-            // Don't crash server for telegram errors
         }
     }
 }
@@ -111,30 +141,6 @@ const telegramBot = new SimpleTelegramBot(
     process.env.TELEGRAM_CHAT_ID
 );
 
-// ------------------------------------------------------------------
-// Automation Initialization (Moved to Agent repo)
-// ------------------------------------------------------------------
-/*
-let automationManager = null;
-try {
-    if (typeof initializeAutomations !== 'undefined') {
-        automationManager = initializeAutomations({
-            enabledAutomations: ['intelligent-report', 'morning-briefing'],
-            telegram: telegramBot
-        });
-
-        automationManager.initialize().then(() => {
-            console.log('✅ Automation system initialized');
-        }).catch(err => console.error('⚠️ Automations init warning:', err.message));
-    }
-} catch (error) {
-    console.warn('⚠️ Automations module failed to load. Skipping.');
-}
-*/
-
-// ------------------------------------------------------------------
-// Express Setup
-// ------------------------------------------------------------------
 // ------------------------------------------------------------------
 // Express Setup
 // ------------------------------------------------------------------
@@ -159,38 +165,20 @@ if (process.env.NODE_ENV === 'production' && !GATEWAY_PASSWORD) {
 }
 
 const authMiddleware = (req, res, next) => {
-    // If no password configured, allow local/dev convenience but log a clear warning.
-    if (!GATEWAY_PASSWORD) {
-        console.warn('⚠️ Warning: GATEWAY_PASSWORD not set. API auth disabled (development only).');
-        return next();
-    }
-
     const providedPassword = req.headers['x-gateway-password'] || req.query.password;
 
-    if (providedPassword === GATEWAY_PASSWORD) {
+    if (GATEWAY_PASSWORD && providedPassword === GATEWAY_PASSWORD) {
         return next();
     }
 
+    console.warn(`[SECURITY] Unauthorized access attempt from ${req.ip}`);
     res.status(401).json({ error: 'UNAUTHORIZED_ACCESS', message: 'Valid x-gateway-password header required' });
 };
 
 // Apply auth to API routes
 app.use('/api', authMiddleware);
 
-
-// Mount Routes (These are under /api anyway usually, but we ensure middleware hits them if they are standalone)
-// Note: setupAIRoutes mounts on app directly, usually at /api/ai/chat
-// We need to ensure they are protected.
-// If setupAIRoutes uses /api prefix, the above app.use('/api', ...) covers it IF the routes are mounted on a router that is used under /api.
-// BUT setupAIRoutes likely does app.post('/api/ai/chat', ...).
-// Middleware order matters!
-// app.use('/api', authMiddleware) ONLY matches requests STARTING with /api and runs middleware.
-// Then subsequent route handlers match.
-
-
-
 // Mount Routes
-setupAIRoutes(app);
 app.use('/api/automations', automationRoutes);
 app.use('/api/neo', neoRoutes);
 app.use('/api/nexus', nexusRoutes);
@@ -252,7 +240,6 @@ app.get('/api/reminders', async (req, res) => {
 });
 
 app.post('/api/reminders', async (req, res) => {
-    // Implementação simplificada para não crashar
     const { text, when } = req.body;
     if (!text || !when) return res.status(400).json({ error: 'Missing args' });
 
@@ -268,17 +255,12 @@ app.post('/api/messages', async (req, res) => {
     const { to, message } = req.body;
     if (!to || !message) return res.status(400).json({ error: 'Missing args' });
 
-    // Try to send via telegram script if possible
     try {
         const scriptPath = path.join(__dirname, '../skills/telegram/scripts/telegram.ts');
         const child = spawn('pnpm', ['tsx', scriptPath, '--to', to, '--message', message], {
             cwd: path.join(__dirname, '..'),
             stdio: ['ignore', 'pipe', 'pipe']
         });
-
-        let out = '';
-        child.stdout.on('data', d => out += d);
-        // Não vamos esperar o exit pra responder rápido
         console.log(`📨 Message sent process spawned for ${to}`);
     } catch (e) {
         console.error(e);
@@ -291,6 +273,10 @@ app.post('/api/messages', async (req, res) => {
     messages.push(msg);
     stats.totalMessages++;
     res.json({ success: true, message: msg });
+});
+
+app.get('/mobile', (req, res) => {
+    res.sendFile(path.join(__dirname, 'mobile.html'));
 });
 
 // ------------------------------------------------------------------
@@ -306,18 +292,18 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
     const publicUrl = process.env.PUBLIC_URL || `http://localhost:${PORT}`;
     console.log(`
-╔═══════════════════════════════════════════════════════╗
-║                                                       ║
-║   🛰️  NΞØ BOT Dashboard API                           ║
-║                                                       ║
-║   Status: ✅ ONLINE                                   ║
-║   Port: ${PORT}                                       ║
-║   URL: ${publicUrl}                       ║
-║                                                       ║
-║   Dashboard: ${publicUrl}                 ║
-║   NEO API: ${publicUrl}/api/neo           ║
-║                                                       ║
-╚═══════════════════════════════════════════════════════╝
+╔═══════════════════════════════════════════════════════
+║                                                       
+║   🛰️  NΞØ BOT Dashboard API                           
+║                                                       
+║   Status: ✅ ONLINE                                   
+║   Port: ${PORT}                                       
+║   URL: ${publicUrl}                                   
+║                                                       
+║   Dashboard: ${publicUrl}                             
+║   NEO API: ${publicUrl}/api/neo                       
+║                                                       
+╚═══════════════════════════════════════════════════════
     `);
 });
 

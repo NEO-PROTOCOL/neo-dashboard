@@ -35,3 +35,4 @@ Thumbs.db
 /reports/
 neo-config.env
 config-test.js
+app-settings.json
