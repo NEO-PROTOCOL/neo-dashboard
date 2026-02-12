@@ -54,6 +54,10 @@ try {
 
 console.log('[SYS] Bootstrap sequence complete.');
 
+if (!process.env.NEXUS_API_URL || process.env.NEXUS_API_URL.includes('neoprotocol.space')) {
+    process.env.NEXUS_API_URL = 'https://neo-nexus-production.up.railway.app';
+}
+
 const execAsync = promisify(exec);
 
 // ------------------------------------------------------------------
@@ -202,6 +206,7 @@ app.get('/api/health', (req, res) => {
     res.json({
         status: 'ok',
         telegram: process.env.TELEGRAM_BOT_TOKEN ? 'configured' : 'missing',
+        nexus_url: (process.env.NEXUS_API_URL || 'FALLBACK').replace(/(:\/\/).+?(\/|$)/, '$1***$2'),
         scheduler: 'active',
         timestamp: new Date().toISOString()
     });

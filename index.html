@@ -274,14 +274,21 @@
             return p ? { 'x-gateway-password': p } : {};
         }
 
+        let nexusFetchInProgress = false;
+        let loopsStarted = false;
+        let nexusInterval, logsInterval, nodesInterval, registryInterval, clockInterval;
+
         function startLoops() {
-            setInterval(() => {
+            if (loopsStarted) return;
+            loopsStarted = true;
+
+            clockInterval = setInterval(() => {
                 document.getElementById('clock').innerText = new Date().toLocaleTimeString();
             }, 1000);
-            setInterval(fetchNexusData, 10000);
-            setInterval(fetchLogs, 5000);
-            setInterval(fetchNodes, 30000);
-            setInterval(fetchRegistry, 30000);
+            nexusInterval = setInterval(fetchNexusData, 10000);
+            logsInterval = setInterval(fetchLogs, 5000);
+            nodesInterval = setInterval(fetchNodes, 30000);
+            registryInterval = setInterval(fetchRegistry, 30000);
         }
 
         async function fetchWithRetry(url, options, retries = 3, backoff = 1000) {
@@ -315,6 +322,8 @@
 
         // --- Nexus Metrics ---
         async function fetchNexusData() {
+            if (nexusFetchInProgress) return;
+            nexusFetchInProgress = true;
             try {
                 const res = await fetchWithRetry('/api/nexus/metrics/summary', { headers: getAuthHeaders() });
                 if (res.status === 401) return;
@@ -335,6 +344,8 @@
                 dot.style.background = 'var(--red)';
                 dot.style.boxShadow = '0 0 10px var(--red)';
                 document.getElementById('system-status').innerText = 'NEXUS_OFFLINE';
+            } finally {
+                nexusFetchInProgress = false;
             }
         }
 

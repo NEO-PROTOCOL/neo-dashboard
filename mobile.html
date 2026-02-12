@@ -203,14 +203,21 @@
             }
         }
 
+        let nexusFetchInProgress = false;
+        let loopsStarted = false;
+
         function unlockMDashboard() {
             document.getElementById('m-login-overlay').classList.remove('active');
             document.getElementById('m-main-content').style.display = 'flex';
             fetchMobileData();
+            if (loopsStarted) return;
+            loopsStarted = true;
             setInterval(fetchMobileData, 10000);
         }
 
         async function fetchMobileData() {
+            if (nexusFetchInProgress) return;
+            nexusFetchInProgress = true;
             const pass = localStorage.getItem(API_PASS_KEY);
             const headers = pass ? { 'x-gateway-password': pass } : {};
 
@@ -231,6 +238,8 @@
                 }
             } catch (e) {
                 console.error('Fetch error:', e);
+            } finally {
+                nexusFetchInProgress = false;
             }
         }
 

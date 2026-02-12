@@ -2,12 +2,9 @@ import express from 'express';
 
 const router = express.Router();
 
-// Circuit breaker: after 3 failures, stop logging for 5 minutes
-let failCount = 0;
-let silentUntil = 0;
-const FAIL_THRESHOLD = 3;
-const SILENT_MS = 5 * 60 * 1000; // 5 min
+// Configuration
 const FETCH_TIMEOUT_MS = 10000;    // 10s timeout per request
+const getNexusUrl = () => process.env.NEXUS_API_URL || 'https://neo-nexus-production.up.railway.app';
 
 function fetchWithTimeout(url, options = {}) {
     const controller = new AbortController();
@@ -16,25 +13,47 @@ function fetchWithTimeout(url, options = {}) {
         .finally(() => clearTimeout(timer));
 }
 
-const getNexusUrl = () => process.env.NEXUS_API_URL || 'https://neo-nexus-production.up.railway.app';
+// Circuit breaker state
+let failCount = 0;
+let circuitOpenUntil = 0;
+const FAIL_THRESHOLD = 5;
+const COOLDOWN_MS = 60 * 1000; // 1 min circuit break
 
 function handleNexusError(label, error, res, url) {
     const now = Date.now();
-    if (now > silentUntil) {
-        failCount++;
-        if (failCount >= FAIL_THRESHOLD) {
-            console.warn(`[NEXUS] ${label} unreachable (Attempted: ${url}) — silencing logs for 5min`);
-            silentUntil = now + SILENT_MS;
-            failCount = 0;
-        } else {
-            console.warn(`[NEXUS] ${label} fetch failed for ${url} (${failCount}/${FAIL_THRESHOLD}):`, error.message);
-        }
+    failCount++;
+
+    if (failCount >= FAIL_THRESHOLD) {
+        console.warn(`[NEXUS] ${label} critical failure. Opening circuit for 60s. Error: ${error.message}`);
+        circuitOpenUntil = now + COOLDOWN_MS;
+        failCount = 0;
     }
-    res.status(503).json({ success: false, error: 'Nexus service unreachable', offline: true, attemptedUrl: url });
+
+    res.status(503).json({
+        success: false,
+        error: 'Nexus service unreachable',
+        offline: true,
+        attemptedUrl: url,
+        message: error.message
+    });
 }
+
+const checkCircuit = (res) => {
+    if (Date.now() < circuitOpenUntil) {
+        res.status(503).json({
+            success: false,
+            error: 'Nexus Circuit Open',
+            message: 'Service is temporarily disabled due to persistent failures',
+            offline: true
+        });
+        return false;
+    }
+    return true;
+};
 
 // Proxy for Nexus Retry Stats
 router.get('/retry/stats', async (req, res) => {
+    if (!checkCircuit(res)) return;
     const nexusUrl = getNexusUrl();
     const url = `${nexusUrl}/api/retry/stats`;
     try {
@@ -49,6 +68,7 @@ router.get('/retry/stats', async (req, res) => {
 
 // Proxy for Nexus Health Detailed
 router.get('/health', async (req, res) => {
+    if (!checkCircuit(res)) return;
     const nexusUrl = getNexusUrl();
     const url = `${nexusUrl}/health/detailed`;
     try {
@@ -63,6 +83,7 @@ router.get('/health', async (req, res) => {
 
 // Proxy for Nexus Simple Metrics (parsing Prometheus text)
 router.get('/metrics/summary', async (req, res) => {
+    if (!checkCircuit(res)) return;
     const nexusUrl = getNexusUrl();
     const url = new URL('/metrics', nexusUrl).toString();
     try {
