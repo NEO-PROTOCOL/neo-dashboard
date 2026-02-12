@@ -79,7 +79,8 @@ function captureLog(type, args) {
 
     // Filter repetitive or noisy logs from the dashboard stream
     if (rawMessage.includes('Attempting Nexus fetch')) return;
-    if (rawMessage.includes('Nexus fetch error')) type = 'warn'; // Downgrade expected minor errors
+    if (rawMessage.includes('Nexus fetch error')) type = 'warn';
+    if (rawMessage.includes('╔') || rawMessage.includes('║') || rawMessage.includes('╚') || rawMessage.includes('═')) return;
 
     // Auto-tagging for cleaner UI
     let message = rawMessage;
