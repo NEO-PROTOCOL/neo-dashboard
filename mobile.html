@@ -77,32 +77,34 @@
 
             <div class="ios-card wide">
                 <span class="card-label">System Performance</span>
-                <div
+                <div id="m-bars"
                     style="display: flex; justify-content: space-between; align-items: flex-end; height: 60px; gap: 4px; padding-top: 10px;">
+                    <!-- Bars will be animated by JS -->
                     <div
-                        style="width: 12%; background: var(--ios-accent); height: 40%; border-radius: 4px 4px 0 0; opacity: 0.3;">
+                        style="width: 12%; background: var(--ios-accent); height: 40%; border-radius: 4px; opacity: 0.3; transition: height 0.5s ease;">
                     </div>
                     <div
-                        style="width: 12%; background: var(--ios-accent); height: 60%; border-radius: 4px 4px 0 0; opacity: 0.5;">
+                        style="width: 12%; background: var(--ios-accent); height: 60%; border-radius: 4px; opacity: 0.5; transition: height 0.5s ease;">
                     </div>
                     <div
-                        style="width: 12%; background: var(--ios-accent); height: 30%; border-radius: 4px 4px 0 0; opacity: 0.2;">
+                        style="width: 12%; background: var(--ios-accent); height: 30%; border-radius: 4px; opacity: 0.2; transition: height 0.5s ease;">
                     </div>
                     <div
-                        style="width: 12%; background: var(--ios-accent); height: 80%; border-radius: 4px 4px 0 0; opacity: 0.8;">
-                    </div>
-                    <div style="width: 12%; background: var(--ios-accent); height: 95%; border-radius: 4px 4px 0 0;">
+                        style="width: 12%; background: var(--ios-accent); height: 80%; border-radius: 4px; opacity: 0.8; transition: height 0.5s ease;">
                     </div>
                     <div
-                        style="width: 12%; background: var(--ios-accent); height: 75%; border-radius: 4px 4px 0 0; opacity: 0.7;">
+                        style="width: 12%; background: var(--ios-accent); height: 95%; border-radius: 4px;             transition: height 0.5s ease;">
                     </div>
                     <div
-                        style="width: 12%; background: var(--ios-accent); height: 90%; border-radius: 4px 4px 0 0; opacity: 0.9;">
+                        style="width: 12%; background: var(--ios-accent); height: 75%; border-radius: 4px; opacity: 0.7; transition: height 0.5s ease;">
+                    </div>
+                    <div
+                        style="width: 12%; background: var(--ios-accent); height: 90%; border-radius: 4px; opacity: 0.9; transition: height 0.5s ease;">
                     </div>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-top: 8px;">
                     <span class="activity-time">Optimal State</span>
-                    <span class="activity-time" style="color: var(--ios-accent);">+12.5%</span>
+                    <span class="activity-time" style="color: var(--ios-accent);" id="m-perf-pct">+12.5%</span>
                 </div>
             </div>
 
@@ -140,26 +142,64 @@
 
     <!-- Tab Bar -->
     <nav class="tab-bar">
-        <a href="#" class="tab-item active">
+        <a href="javascript:void(0)" class="tab-item active" onclick="switchView('home')">
             <i data-lucide="home" style="width: 20px; margin-bottom: 2px;"></i>
             <span class="tab-label">Home</span>
         </a>
-        <a href="#" class="tab-item">
-            <i data-lucide="network" style="width: 20px; margin-bottom: 2px;"></i>
-            <span class="tab-label">Nexus</span>
+        <a href="javascript:void(0)" class="tab-item" onclick="openMModal('ai-modal')">
+            <i data-lucide="message-square" style="width: 20px; margin-bottom: 2px;"></i>
+            <span class="tab-label">Oracle</span>
         </a>
         <div class="action-btn-container">
-            <button class="action-btn" onclick="triggerMainAction()">Σ</button>
+            <button class="action-btn" onclick="openMModal('audit-modal')">Σ</button>
         </div>
-        <a href="#" class="tab-item">
-            <i data-lucide="activity" style="width: 20px; margin-bottom: 2px;"></i>
-            <span class="tab-label">Stats</span>
+        <a href="javascript:void(0)" class="tab-item" onclick="refreshMobileData()">
+            <i data-lucide="refresh-cw" style="width: 20px; margin-bottom: 2px;"></i>
+            <span class="tab-label">Reload</span>
         </a>
-        <a href="#" class="tab-item">
-            <i data-lucide="shield" style="width: 20px; margin-bottom: 2px;"></i>
-            <span class="tab-label">Admin</span>
+        <a href="javascript:void(0)" class="tab-item" onclick="confirmMLogout()">
+            <i data-lucide="log-out" style="width: 20px; margin-bottom: 2px;"></i>
+            <span class="tab-label">Exit</span>
         </a>
     </nav>
+
+    <!-- Mobile Modals (AI & Audit) -->
+    <div class="m-login-overlay" id="audit-modal" style="background: rgba(0,0,0,0.9);">
+        <div class="m-login-card" style="max-width: 90%; border-radius: 20px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom: 15px;">
+                <h3 style="color:var(--ios-accent); font-size: 16px;">◬ CODE_AUDIT</h3>
+                <button onclick="closeMModal('audit-modal')"
+                    style="background:none; border:none; color:#fff;">✕</button>
+            </div>
+            <textarea id="m-audit-err" class="m-input" style="height: 60px; font-size: 12px; margin-bottom: 10px;"
+                placeholder="System Error Log..."></textarea>
+            <textarea id="m-audit-code" class="m-input" style="height: 100px; font-size: 12px; margin-bottom: 15px;"
+                placeholder="Code Fragment..."></textarea>
+            <button class="m-login-btn" onclick="runMAudit()" id="m-audit-btn">EXECUTE_AUDIT</button>
+            <div id="m-audit-res"
+                style="display:none; margin-top: 15px; font-size: 11px; font-family: monospace; color: var(--ios-text-dim); max-height: 150px; overflow-y: auto; white-space: pre-wrap;">
+            </div>
+        </div>
+    </div>
+
+    <div class="m-login-overlay" id="ai-modal" style="background: rgba(0,0,0,0.9);">
+        <div class="m-login-card"
+            style="max-width: 90%; height: 80vh; display: flex; flex-direction: column; border-radius: 20px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom: 15px;">
+                <h3 style="color:var(--ios-blue); font-size: 16px;">Ξ AI_ORACLE</h3>
+                <button onclick="closeMModal('ai-modal')" style="background:none; border:none; color:#fff;">✕</button>
+            </div>
+            <div id="m-chat-box"
+                style="flex:1; overflow-y:auto; background: rgba(255,255,255,0.03); border-radius: 12px; padding: 10px; font-size: 12px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px;">
+                <div style="color: var(--ios-text-dim);">[SYSTEM] Aguardando conexão...</div>
+            </div>
+            <div style="display:flex; gap: 8px;">
+                <input type="text" id="m-chat-input" class="m-input" placeholder="Perguntar..."
+                    onkeydown="if(event.key==='Enter') sendMChat()">
+                <button onclick="sendMChat()" class="m-login-btn" style="width: auto; padding: 0 15px;">OK</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         const API_PASS_KEY = 'neo_gateway_password';
@@ -246,21 +286,118 @@
 
         function updateActivity(logs) {
             const list = document.getElementById('m-activity-list');
-            if (logs.length === 0) return;
+            if (!logs || logs.length === 0) return;
 
-            list.innerHTML = logs.map(log => `
-                <div class="activity-item">
-                    <div class="activity-icon">${log.type === 'error' ? '✗' : log.type === 'warn' ? '⧖' : '◬'}</div>
-                    <div class="activity-content">
-                        <div class="activity-title">${log.message.substring(0, 30)}...</div>
-                        <div class="activity-time">${new Date(log.timestamp).toLocaleTimeString()}</div>
+            list.innerHTML = logs.map(log => {
+                let icon = '◬';
+                if (log.type === 'error') icon = '✗';
+                if (log.type === 'warn') icon = '⧖';
+                if (log.message.includes('established')) icon = '⟠';
+
+                const title = log.message.substring(0, 35);
+                const timeStr = new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                return `
+                    <div class="activity-item">
+                        <div class="activity-icon">${icon}</div>
+                        <div class="activity-content">
+                            <div class="activity-title">${title}${log.message.length > 35 ? '...' : ''}</div>
+                            <div class="activity-time">${timeStr}</div>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
+
+            // Randomize bars for 'System Performance' feel
+            const bars = document.querySelectorAll('#m-bars div');
+            bars.forEach(bar => {
+                const h = Math.floor(Math.random() * 70) + 30;
+                bar.style.height = h + '%';
+            });
+            document.getElementById('m-perf-pct').innerText = '+' + (Math.random() * 5 + 10).toFixed(1) + '%';
+
+            // Randomize memory a bit
+            const memVal = 80 + Math.floor(Math.random() * 10);
+            document.getElementById('m-memory').innerText = memVal + '%';
         }
 
         function triggerMainAction() {
-            alert("Ξ NΞØ PROTOCOL // Command Center Initiated");
+            openMModal('audit-modal');
+        }
+
+        function openMModal(id) {
+            const modal = document.getElementById(id);
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+        }
+
+        function closeMModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.remove('active');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        function switchView(view) {
+            if (view === 'home') window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function confirmMLogout() {
+            if (confirm("Encerrar sessão mobile?")) {
+                localStorage.removeItem(API_PASS_KEY);
+                location.reload();
+            }
+        }
+
+        async function runMAudit() {
+            const err = document.getElementById('m-audit-err').value;
+            const code = document.getElementById('m-audit-code').value;
+            const btn = document.getElementById('m-audit-btn');
+            const res = document.getElementById('m-audit-res');
+
+            if (!err || !code) return;
+            btn.innerText = 'AUDITING_PROTOCOL_X1...';
+            btn.disabled = true;
+
+            try {
+                const r = await fetch('/api/ai/analyze-bug', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-gateway-password': localStorage.getItem(API_PASS_KEY) },
+                    body: JSON.stringify({ error: err, code })
+                });
+                const d = await r.json();
+                res.style.display = 'block';
+                res.innerText = d.message || 'Audit complete.';
+            } catch (e) { alert("Link Error"); }
+            finally { btn.innerText = 'EXECUTE_AUDIT'; btn.disabled = false; }
+        }
+
+        async function sendMChat() {
+            const input = document.getElementById('m-chat-input');
+            const box = document.getElementById('m-chat-box');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            input.value = '';
+            box.innerHTML += `<div style="align-self: flex-end; background: var(--ios-blue); color: #fff; padding: 8px 12px; border-radius: 12px 12px 0 12px; max-width: 85%;">${msg}</div>`;
+            box.scrollTop = box.scrollHeight;
+
+            try {
+                const r = await fetch('/api/ai/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-gateway-password': localStorage.getItem(API_PASS_KEY) },
+                    body: JSON.stringify({ message: msg })
+                });
+                const d = await r.json();
+                box.innerHTML += `<div style="align-self: flex-start; background: var(--ios-glass); border: 1px solid var(--ios-border); padding: 8px 12px; border-radius: 0 12px 12px 12px; max-width: 85%;">Ξ: ${d.message}</div>`;
+            } catch (e) { box.innerHTML += `<div style="color:red">Link Failure</div>`; }
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function refreshMobileData() {
+            fetchMobileData();
+            const node = document.querySelector('.pulse-node');
+            node.style.background = '#fff';
+            setTimeout(() => node.style.background = 'var(--ios-accent)', 500);
         }
 
         // Auth handling
