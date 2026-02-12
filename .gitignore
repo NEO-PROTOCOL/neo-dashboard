@@ -33,3 +33,5 @@ Thumbs.db
 
 # App specific
 /reports/
+neo-config.env
+config-test.js
