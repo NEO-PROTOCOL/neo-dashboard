@@ -1,10 +1,15 @@
+import fs from 'fs';
 import dotenv from 'dotenv';
 import express from 'express';
-// Use TS source directly via tsx
 import { getClaudeService } from './src/ai/claude-service.ts';
 
-// Load environment variables
+// Environment variable loading with multi-env fallback support
 dotenv.config();
+if (fs.existsSync('neo-config.env')) {
+    dotenv.config({ path: 'neo-config.env', override: true });
+} else if (fs.existsSync('.env.local')) {
+    dotenv.config({ path: '.env.local', override: true });
+}
 
 // Helper to get system context from server logs (needs to access global captured logs)
 // We'll pass a function that fetches logs from the global scope if possible,

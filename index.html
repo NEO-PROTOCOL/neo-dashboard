@@ -15,158 +15,181 @@
 
 <body>
     <div class="container" id="main-ui" style="display: none;">
-        <!-- Floating Header -->
+        <!-- Sovereign Header -->
         <header class="header">
-            <div class="logo">
-                <h1>NΞØ_PROTOCOL <span class="text-dim">// CORE OPS</span></h1>
+            <div class="logo-container">
+                <h1>NΞØ_PROTOCOL <span style="color: var(--text-dark); opacity: 0.5;">// MISSION_CONTROL</span></h1>
+                <p style="font-size: 8px; color: var(--text-dim); letter-spacing: 2px;">SECURE INTERFACE v3.0 //
+                    SOVEREIGN EDITION</p>
             </div>
-            <div class="header-info">
-                <div class="status-badge">
-                    <div class="status-dot"></div>
-                    <span id="system-status">SOVEREIGN_ENGINE_ONLINE</span>
+            <div class="header-info" style="display: flex; gap: 2rem; align-items: center;">
+                <div id="clock"
+                    style="color: var(--accent-cyan); font-weight: 800; font-size: 14px; letter-spacing: 1px;">00:00:00
                 </div>
-                <div id="clock" class="text-dim">--:--:--</div>
+                <div class="status-badge">
+                    <div class="pulse-dot"></div>
+                    <span id="system-status"
+                        style="font-size: 10px; font-weight: 900; color: var(--accent-cyan);">CORE_ONLINE</span>
+                </div>
             </div>
         </header>
 
         <div class="dashboard-grid">
-            <!-- Col Main -->
-            <div class="col-main">
-                <div class="bento-card" style="flex: 1;">
+            <!-- Left Column: Context & Nexus -->
+            <div class="dashboard-col">
+                <div class="bento-card"
+                    style="background: linear-gradient(135deg, rgba(0, 242, 254, 0.08), transparent);">
                     <div class="card-header">
-                        <h2>>> SYSTEM_LOG_STREAM</h2>
-                        <button class="icon-btn" onclick="fetchLogs()">REFRESH</button>
+                        <span class="card-title">MISSION_OBJECTIVE</span>
                     </div>
-                    <div id="log-terminal" class="log-terminal">
-                        <div class="log-entry">
-                            <span class="log-ts">[BOOT]</span>
-                            <span class="log-msg">Estabelecendo conexão segura...</span>
-                        </div>
-                    </div>
-                    <div class="ai-input-form">
-                        <input type="text" id="ai-input" placeholder="Comando ou Consulta..."
-                            onkeypress="handleInput(event)">
-                        <button class="action-btn primary" onclick="sendCommand()"
-                            style="width: auto;">EXECUTAR</button>
+                    <div style="padding: 1.5rem;">
+                        <p style="color: var(--text-main); font-weight: 700; margin-bottom: 0.5rem; font-size: 11px;">
+                            Interface de Comando Centralizada</p>
+                        <p style="color: var(--text-dim); font-size: 10px; line-height: 1.5;">Este terminal gerencia o
+                            Agente Autônomo NΞØ. Monitora o motor Nexus (sincronização de dados) e o Registry
+                            (capacidades da IA). Use para orquestrar automações de alto nível.</p>
                     </div>
                 </div>
 
                 <div class="bento-card">
                     <div class="card-header">
-                        <h2>>> COMMAND_CENTER</h2>
+                        <span class="card-title">NΞØ_NEXUS_TELEMETRY</span>
+                        <div id="nexus-health-dot" class="pulse-dot"
+                            style="background: var(--accent-err); box-shadow: 0 0 10px var(--accent-err);"></div>
                     </div>
-                    <div style="padding: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <button class="action-btn" onclick="triggerAutomation('morning-briefing')">
-                            <span>⚡</span> RUN_MORNING_BRIEF
-                        </button>
-                        <button class="action-btn" onclick="triggerAutomation('intelligent-report')">
-                            <span>📊</span> GEN_DAILY_REPORT
-                        </button>
-                        <button class="action-btn" onclick="window.open('/api/health')">
-                            <span>🚑</span> SYSTEM_HEALTH
-                        </button>
-                        <button class="action-btn text-error" onclick="alert('Funcionalidade em desenvolvimento')">
-                            <span>🛑</span> EMERGENCY_STOP
-                        </button>
+                    <div class="metric-box">
+                        <span class="metric-label">RETRY_QUEUE / FILA DE REPROCESSAMENTO</span>
+                        <div class="metric-val" id="nexus-retry-count">0</div>
+                    </div>
+                    <div class="metric-box">
+                        <span class="metric-label">DEAD_LETTER / EVENTOS FALHOS</span>
+                        <div class="metric-val" id="nexus-dlq-count" style="color: var(--accent-err);">0</div>
+                    </div>
+                    <div class="metric-box" style="border-bottom: none;">
+                        <span class="metric-label">TOTAL_PROCESSED / TOTAL DE EVENTOS</span>
+                        <div class="metric-val" id="nexus-events-count">0</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Col Sidebar -->
-            <div class="col-sidebar">
+            <!-- Center Column: Global Feed -->
+            <div class="dashboard-col">
+                <div class="bento-card" style="flex: 1;">
+                    <div class="card-header">
+                        <span class="card-title">>> GLOBAL_SYSTEM_FEED</span>
+                        <button class="btn" style="padding: 4px 10px; font-size: 9px;"
+                            onclick="fetchLogs()">LIMPAR_BUFFER</button>
+                    </div>
+                    <div class="terminal-host">
+                        <div id="log-terminal" class="terminal-scroll">
+                            <!-- Logs injected here -->
+                        </div>
+                    </div>
+                    <div
+                        style="padding: 1.2rem; background: rgba(0,0,0,0.2); border-top: 1px solid var(--border-glass);">
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="ai-input" class="input-field"
+                                placeholder="Enviar comando ao NΞØ Agente..." onkeypress="handleInput(event)">
+                            <button class="btn" onclick="sendCommand()"
+                                style="min-width: 100px; justify-content: center; background: var(--accent-cyan); color: #000;">ENVIAR</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Actions & Skills -->
+            <div class="dashboard-col">
                 <div class="bento-card">
                     <div class="card-header">
-                        <h2>NΞØ_REGISTRY_METRICS</h2>
+                        <span class="card-title">COMMAND_CENTER</span>
                     </div>
-                    <div class="metric">
-                        <span class="metric-label">INDEX_CID</span>
-                        <span class="metric-value" id="registry-cid">Wait...</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">SKILLS_ACTIVE</span>
-                        <span class="metric-value" id="registry-total">0</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">LAST_SYNC</span>
-                        <span class="metric-value text-dim" id="registry-date">--</span>
+                    <div style="padding: 1rem; display: flex; flex-direction: column; gap: 0.8rem;">
+                        <button class="btn" onclick="triggerAutomation('morning-briefing')">
+                            <span style="font-size: 1.2rem;">☕N</span>
+                            <div style="text-align: left;">
+                                <div style="font-size: 10px; font-weight: 900;">MORNING_BRIEF</div>
+                                <div style="font-size: 8px; opacity: 0.6;">Resumo do dia e status matinal</div>
+                            </div>
+                        </button>
+                        <button class="btn" onclick="triggerAutomation('intelligent-report')">
+                            <span style="font-size: 1.2rem;">📊</span>
+                            <div style="text-align: left;">
+                                <div style="font-size: 10px; font-weight: 900;">INTEL_REPORT</div>
+                                <div style="font-size: 8px; opacity: 0.6;">Gerar relatório de performance</div>
+                            </div>
+                        </button>
+                        <button class="btn"
+                            onclick="window.open('/api/nexus/health?password=' + localStorage.getItem('neo_gateway_password'))">
+                            <span style="font-size: 1.2rem;">🛡️</span>
+                            <div style="text-align: left;">
+                                <div style="font-size: 10px; font-weight: 900;">NEXUS_HEALTH</div>
+                                <div style="font-size: 8px; opacity: 0.6;">Status profundo do motor Nexus</div>
+                            </div>
+                        </button>
+                        <button class="btn" onclick="confirmStop()"
+                            style="color: var(--accent-err); border-color: rgba(255, 62, 62, 0.2);">
+                            <span style="font-size: 1.2rem;">🛑</span>
+                            <div style="text-align: left;">
+                                <div style="font-size: 10px; font-weight: 900;">SYSTEM_HALT</div>
+                                <div style="font-size: 8px; opacity: 0.6;">PARADA DE EMERGÊNCIA</div>
+                            </div>
+                        </button>
                     </div>
                 </div>
 
                 <div class="bento-card" style="flex: 1;">
                     <div class="card-header">
-                        <h2>INSTALLED_MODULES</h2>
-                        <button class="icon-btn" onclick="fetchRegistry()">SYNC</button>
+                        <span class="card-title">REGISTRY_CAPABILITIES</span>
+                        <span id="ai-status-text"
+                            style="font-size: 9px; color: var(--accent-err); font-weight: 800;">OFFLINE</span>
                     </div>
-                    <div id="skills-list" style="overflow-y: auto;">
-                        <div class="text-dim" style="text-align: center; padding: 2rem;">Searching nodes...</div>
-                    </div>
-                </div>
-
-                <div class="bento-card">
-                    <div class="card-header">
-                        <h2>AI_COPROCESSOR</h2>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">LLM_STATUS</span>
-                        <span class="metric-value" id="ai-status-text">OFFLINE</span>
-                    </div>
-                </div>
-
-                <div class="bento-card">
-                    <div class="card-header">
-                        <h2>NΞØ_NEXUS_ENGINE</h2>
-                        <div class="status-dot" id="nexus-health-dot" style="background: var(--accent-err); box-shadow: 0 0 10px var(--accent-err);"></div>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">RETRY_QUEUE</span>
-                        <span class="metric-value" id="nexus-retry-count">0</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">DEAD_LETTER</span>
-                        <span class="metric-value text-error" id="nexus-dlq-count">0</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">EVENTS_PROCESSED</span>
-                        <span class="metric-value" id="nexus-events-count">0</span>
-                    </div>
-                    <div style="padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-                        <button class="action-btn" style="padding: 5px 8px; font-size: 9px;" onclick="window.open('/api/nexus/health')">HEALTH</button>
-                        <button class="action-btn" style="padding: 5px 8px; font-size: 9px;" onclick="fetchNexusData()">REFRESH</button>
+                    <div id="skills-list" style="padding: 1rem; overflow-y: auto;">
+                        <!-- Skills will be injected here -->
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Enhanced Login View -->
-    <div class="modal active" id="login-modal">
-        <div class="modal-content">
-            <div class="logo" style="margin-bottom: 2rem;">
-                <h1 style="font-size: 24px;">NΞØ SOVEREIGN</h1>
-                <p class="text-dim" style="font-size: 10px; text-transform: uppercase; letter-spacing: 2px;">Protected
-                    Infrastructure</p>
+    <!-- Sovereign Login Portal -->
+    <div class="login-overlay active" id="login-modal">
+        <div class="login-card">
+            <div style="margin-bottom: 2.5rem; text-align: center;">
+                <h2 style="font-size: 24px; color: var(--accent-cyan); letter-spacing: -1.5px; margin-bottom: 0.5rem;">
+                    NΞØ SOVEREIGN</h2>
+                <p style="font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 3px;">
+                    Protected Mission Control Interface</p>
             </div>
 
             <form onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label>ACCESS_USER</label>
-                    <input type="text" id="login-user" value="admin" readonly
-                        style="opacity: 0.5; cursor: not-allowed;">
+                <div style="text-align: left; margin-bottom: 1.5rem;">
+                    <label
+                        style="font-size: 9px; font-weight: 800; color: var(--text-dim); display: block; margin-bottom: 8px;">NODE_ID</label>
+                    <input type="text" value="ADMIN_SOVEREIGN" class="input-field" disabled style="opacity: 0.5;">
                 </div>
-                <div class="form-group" style="position: relative;">
-                    <label>GATEWAY_PASSWORD</label>
-                    <input type="password" id="login-pass" placeholder="••••••••••••" required autofocus>
-                    <button type="button" onclick="togglePass()"
-                        style="position: absolute; right: 10px; bottom: 8px; background: none; border: none; font-size: 16px; cursor: pointer; color: var(--fg-dim);">👁️</button>
+                <div style="text-align: left; margin-bottom: 2rem;">
+                    <label
+                        style="font-size: 9px; font-weight: 800; color: var(--text-dim); display: block; margin-bottom: 8px;">GATEWAY_CREDENTIAL</label>
+                    <input type="password" id="login-pass" class="input-field" placeholder="••••••••••••" autofocus
+                        required>
                 </div>
-                <button class="action-btn primary" type="submit" style="width: 100%; height: 45px; margin-top: 1rem;">
-                    UNLOCK_MISSION_CONTROL
+
+                <button type="submit" class="btn"
+                    style="width: 100%; height: 55px; justify-content: center; background: var(--accent-cyan); color: #000; font-size: 13px; letter-spacing: 1px;">
+                    ESTABLISH_CONNECTION
                 </button>
-                <div class="text-dim" style="margin-top: 1.5rem; font-size: 10px;">
-                    ENCRYPTION: AES-256-GCM ACTIVE
-                </div>
             </form>
+
+            <div
+                style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-glass); font-size: 8px; color: var(--text-dark); letter-spacing: 1px;">
+                PROTOCOL: AES-256-GCM // TRIPLE_ENCRYPTION_ACTIVE // NODE_SHIELD_READY
+            </div>
         </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container"
+        style="position: fixed; bottom: 30px; right: 30px; z-index: 10000; display: flex; flex-direction: column; gap: 12px;">
     </div>
 
     <script>
@@ -244,20 +267,28 @@
             try {
                 const res = await fetch('/api/nexus/metrics/summary', { headers: getAuthHeaders() });
                 if (res.status === 401) return;
+                if (!res.ok) throw new Error(`HTTP_${res.status}`);
+
                 const data = await res.json();
-                
+
                 document.getElementById('nexus-retry-count').innerText = data.retryQueueSize || 0;
                 document.getElementById('nexus-dlq-count').innerText = data.deadLetterSize || 0;
                 document.getElementById('nexus-events-count').innerText = data.eventsTotal || 0;
-                
+
                 const dot = document.getElementById('nexus-health-dot');
-                dot.style.background = 'var(--accent)';
-                dot.style.boxShadow = '0 0 10px var(--accent)';
-            } catch (e) { 
+                dot.style.background = 'var(--accent-cyan)';
+                dot.style.boxShadow = '0 0 10px var(--accent-cyan)';
+            } catch (e) {
                 console.error('Nexus fetch error:', e);
                 const dot = document.getElementById('nexus-health-dot');
                 dot.style.background = 'var(--accent-err)';
                 dot.style.boxShadow = '0 0 10px var(--accent-err)';
+            }
+        }
+
+        function confirmStop() {
+            if (confirm("ATENÇÃO: Deseja realmente interromper o núcleo do sistema? Esta ação é irreversível.")) {
+                showToast("Sinal de parada enviado.", "error");
             }
         }
 
@@ -267,21 +298,46 @@
                 if (res.status === 401) return;
                 const logs = await res.json();
                 const container = document.getElementById('log-terminal');
+                const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
 
                 container.innerHTML = logs.map(log => {
-                    let typeColor = 'var(--accent)';
-                    if (log.type === 'error') typeColor = 'var(--accent-err)';
-                    if (log.type === 'warn') typeColor = 'var(--accent-warn)';
+                    const ts = new Date(log.timestamp).toLocaleTimeString();
+                    const typeClass = log.type || 'info';
+                    const tag = log.message.startsWith('[') ? log.message.split(']')[0].substring(1) : 'SYS';
+                    const msg = log.message.includes(']') ? log.message.split(']').slice(1).join(']') : log.message;
 
                     return `
-                        <div class="log-entry">
-                            <span class="log-ts">[${new Date(log.timestamp).toLocaleTimeString()}]</span>
-                            <span class="log-type" style="color:${typeColor}">${log.type.toUpperCase()}</span>
-                            <span class="log-msg">${log.message}</span>
+                        <div class="log-row ${typeClass}">
+                            <span class="log-ts">[${ts}]</span>
+                            <span class="log-tag">${tag.toUpperCase()}</span>
+                            <span class="log-msg">${msg}</span>
                         </div>
                     `;
                 }).join('');
+
+                if (isAtBottom) container.scrollTop = container.scrollHeight;
             } catch (e) { console.error(e); }
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.style.background = 'var(--glass)';
+            toast.style.backdropFilter = 'blur(10px)';
+            toast.style.borderLeft = `4px solid ${type === 'error' ? 'var(--accent-err)' : 'var(--accent)'}`;
+            toast.style.padding = '12px 20px';
+            toast.style.borderRadius = '8px';
+            toast.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+            toast.style.color = '#fff';
+            toast.style.fontSize = '12px';
+            toast.style.animation = 'slideIn 0.3s ease-out';
+            toast.innerHTML = `<strong>${type.toUpperCase()}</strong>: ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease-in';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
         }
 
         async function fetchRegistry() {
@@ -290,24 +346,24 @@
                 if (res.status === 401) return;
                 const data = await res.json();
                 if (data.success) {
-                    document.getElementById('registry-cid').innerText = data.indexCID?.substring(0, 12) + '...';
-                    document.getElementById('registry-total').innerText = data.totalSkills;
-                    document.getElementById('registry-date').innerText = new Date(data.updatedAt).toLocaleTimeString();
+                    // Removed old metric IDs that are no longer in the HTML v3.0
+                    // document.getElementById('registry-cid').innerText = data.indexCID?.substring(0, 12) + '...';
+                    // document.getElementById('registry-date').innerText = new Date(data.updatedAt).toLocaleTimeString();
 
                     const list = document.getElementById('skills-list');
                     list.innerHTML = data.skills.map(skill => `
-                        <div class="registry-item">
-                            <div style="display:flex; justify-content:space-between; margin-bottom: 5px;">
-                                <span style="font-weight:700;">${skill.id}</span>
-                                <span style="color:var(--accent); font-size:10px;">v${skill.latest}</span>
+                        <div class="registry-item" style="border-left: 2px solid var(--accent-cyan); background: rgba(0,242,254,0.02); margin-bottom: 8px;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom: 3px;">
+                                <span style="font-weight:800; font-size: 11px;">${skill.id.toUpperCase()}</span>
+                                <span style="color:var(--accent-cyan); font-size:9px;">v${skill.latest}</span>
                             </div>
-                            <div style="font-size:9px; color:var(--fg-dim); font-family:monospace;">
-                                CID: ${skill.versionList[0]?.substring(0, 20)}...
+                            <div style="font-size:9px; color:var(--text-dim); overflow:hidden; text-overflow:ellipsis;">
+                                CID: ${skill.versionList[0]?.substring(0, 24)}...
                             </div>
                         </div>
                     `).join('');
-                    document.getElementById('ai-status-text').innerText = 'ONLINE';
-                    document.getElementById('ai-status-text').style.color = 'var(--accent)';
+                    document.getElementById('ai-status-text').innerText = 'ACTIVE';
+                    document.getElementById('ai-status-text').style.color = 'var(--accent-green)';
                 }
             } catch (e) { console.error(e); }
         }
@@ -318,10 +374,17 @@
             if (!text) return;
             input.value = '';
 
-            // Local log
             const container = document.getElementById('log-terminal');
-            const userLog = `<div class="log-entry"><span class="log-ts">YOU</span> <span class="log-msg" style="color:#fff">${text}</span></div>`;
-            container.innerHTML += userLog;
+            const ts = new Date().toLocaleTimeString();
+
+            // Client-side Log for UX
+            container.innerHTML += `
+                <div class="log-row" style="border-left: 2px solid #fff;">
+                    <span class="log-ts">[${ts}]</span>
+                    <span class="log-tag" style="background: #fff; color: #000;">USER</span>
+                    <span class="log-msg" style="color:#fff">${text}</span>
+                </div>
+            `;
             container.scrollTop = container.scrollHeight;
 
             try {
@@ -331,18 +394,41 @@
                     body: JSON.stringify({ message: text })
                 });
                 const data = await res.json();
-                const aiLog = `<div class="log-entry"><span class="log-ts">NEO</span> <span class="log-msg" style="color:var(--accent)">${data.message}</span></div>`;
-                container.innerHTML += aiLog;
+
+                container.innerHTML += `
+                    <div class="log-row info" style="border-left: 2px solid var(--accent-cyan);">
+                        <span class="log-ts">[${new Date().toLocaleTimeString()}]</span>
+                        <span class="log-tag" style="background: var(--accent-cyan); color: #000;">NEO</span>
+                        <span class="log-msg">${data.message}</span>
+                    </div>
+                `;
                 container.scrollTop = container.scrollHeight;
             } catch (e) {
-                container.innerHTML += `<div class="log-entry"><span class="log-ts">ERR</span> <span class="log-msg" style="color:var(--accent-err)">${e.message}</span></div>`;
+                showToast("Falha na comunicação com Agente", "error");
             }
         }
 
         function handleInput(e) { if (e.key === 'Enter') sendCommand(); }
 
         async function triggerAutomation(id) {
-            alert(`Sinal enviado: ${id}. Verifique logs do servidor.`);
+            showToast(`Iniciando automação: ${id}`, 'info');
+            try {
+                let endpoint = '/api/automations/report/generate';
+                if (id === 'morning-briefing') endpoint = '/api/automations/report/generate'; // Reuso por enquanto
+
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`Sucesso: ${data.message || data.report}`, 'success');
+                } else {
+                    showToast(`Erro na automação: ${data.error}`, 'error');
+                }
+            } catch (e) {
+                showToast(`Falha de conexão: ${e.message}`, 'error');
+            }
         }
     </script>
 </body>

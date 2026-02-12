@@ -32,12 +32,13 @@ router.get('/health', async (req, res) => {
 router.get('/metrics/summary', async (req, res) => {
     try {
         const nexusUrl = process.env.NEXUS_API_URL || 'https://nexus.neoprotocol.space';
-        const response = await fetch(`${nexusUrl}/metrics`);
+        console.log(`[DEBUG] Attempting Nexus fetch: ${nexusUrl}/metrics`);
+        const response = await fetch(new URL('/metrics', nexusUrl).toString());
         const text = await response.text();
 
-        // Simple extraction for dashboard consumption
+        // Improved extraction for dashboard (handles labels and exact matches)
         const extract = (metricName) => {
-            const regex = new RegExp(`^${metricName}\\s+(\\d+(\\.\\d+)?)$`, 'm');
+            const regex = new RegExp(`^${metricName}(?:\\{[^\\}]*\\})?\\s+(\\d+(\\.\\d+)?)$`, 'm');
             const match = text.match(regex);
             return match ? parseFloat(match[1]) : 0;
         };

@@ -1,6 +1,13 @@
+import fs from 'fs';
 import Anthropic from "@anthropic-ai/sdk";
 import dotenv from 'dotenv';
+
 dotenv.config();
+if (fs.existsSync('neo-config.env')) {
+  dotenv.config({ path: 'neo-config.env', override: true });
+} else if (fs.existsSync('.env.local')) {
+  dotenv.config({ path: '.env.local', override: true });
+}
 
 export interface Message {
   role: "user" | "assistant";
@@ -31,14 +38,14 @@ const CACHE_CONFIG = {
   TTL: 3600000, // 1 hora
 };
 
-// 🎯 Model Selection - Using Sonnet 4 (best available)
+// 🎯 Model Selection - Using Sonnet 4.5 (latest)
 // 💡 Main savings come from CACHE, not model switching
 const MODEL_FOR_TASK = {
-  "simple-chat": "claude-sonnet-4-20250514", // Com cache = grande economia
-  "code-review": "claude-sonnet-4-20250514", // Precisa ser smart
-  "long-analysis": "claude-sonnet-4-20250514", // Precisa contexto
-  "bug-analysis": "claude-sonnet-4-20250514", // Análise profunda
-  "quick-question": "claude-sonnet-4-20250514", // Com cache = rápido e barato
+  "simple-chat": "claude-sonnet-4-5-20250929",
+  "code-review": "claude-sonnet-4-5-20250929",
+  "long-analysis": "claude-sonnet-4-5-20250929",
+  "bug-analysis": "claude-sonnet-4-5-20250929",
+  "quick-question": "claude-sonnet-4-5-20250929",
 };
 
 export class ClaudeService {
@@ -712,7 +719,8 @@ Economia estimada: ~40-60% vs usar apenas Sonnet
 
     } catch (error) {
       console.error("Admin Chat Error:", error);
-      return `❌ Erro no Admin Console: ${error.message}`;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return `❌ Erro no Admin Console: ${errorMessage}`;
     }
   }
 }

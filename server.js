@@ -1,3 +1,4 @@
+import fs from 'fs';
 import { exec, spawn } from 'child_process';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -10,8 +11,13 @@ import automationRoutes from './automation-routes.js';
 import neoRoutes from './neo-routes.js';
 import nexusRoutes from './nexus-routes.js';
 
+// Load environment variables with priority for neo-config.env (fixes system permissions issues)
 dotenv.config();
-// import { initializeAutomations } from '../dist/automations/index.js';
+if (fs.existsSync('neo-config.env')) {
+    dotenv.config({ path: 'neo-config.env', override: true });
+} else if (fs.existsSync('.env.local')) {
+    dotenv.config({ path: '.env.local', override: true });
+}
 
 const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
@@ -25,14 +31,31 @@ const serverLogs = [];
 
 function captureLog(type, args) {
     const timestamp = new Date().toISOString();
-    const message = args.map(arg =>
-        typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
-    ).join(' ');
+    const rawMessage = args.map(arg => {
+        if (arg instanceof Error) return arg.stack || arg.message;
+        if (typeof arg === 'object' && arg !== null) {
+            try { return JSON.stringify(arg); } catch (e) { return '[Circular or Unstringifiable Object]'; }
+        }
+        return String(arg);
+    }).join(' ');
+
+    // Filter repetitive or noisy logs from the dashboard stream
+    if (rawMessage.includes('Attempting Nexus fetch')) return;
+    if (rawMessage.includes('Nexus fetch error')) type = 'warn'; // Downgrade expected minor errors
+
+    // Auto-tagging for cleaner UI
+    let message = rawMessage;
+    if (!message.startsWith('[')) {
+        if (message.toLowerCase().includes('database')) message = `[DB] ${message}`;
+        else if (message.toLowerCase().includes('telegram')) message = `[TG] ${message}`;
+        else if (message.toLowerCase().includes('api')) message = `[API] ${message}`;
+        else if (message.toLowerCase().includes('nexus')) message = `[NEXUS] ${message}`;
+        else message = `[SYS] ${message}`;
+    }
 
     serverLogs.unshift({ timestamp, type, message });
     if (serverLogs.length > MAX_LOGS) serverLogs.pop();
 
-    // Pass through to original stdout/stderr
     process.stdout.write(`[${type.toUpperCase()}] ${message}\n`);
 }
 

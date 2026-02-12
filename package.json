@@ -6,7 +6,7 @@
     "main": "server.js",
     "scripts": {
         "start": "node --import tsx server.js",
-        "dev": "nodemon --loader tsx server.js"
+        "dev": "nodemon --import tsx server.js"
     },
     "dependencies": {
         "@anthropic-ai/sdk": "^0.71.2",
