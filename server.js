@@ -265,7 +265,7 @@ app.post('/api/messages', async (req, res) => {
 
     try {
         const scriptPath = path.join(__dirname, '../skills/telegram/scripts/telegram.ts');
-        const child = spawn('pnpm', ['tsx', scriptPath, '--to', to, '--message', message], {
+        const child = spawn('npx', ['tsx', scriptPath, '--to', to, '--message', message], {
             cwd: path.join(__dirname, '..'),
             stdio: ['ignore', 'pipe', 'pipe']
         });

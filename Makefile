@@ -1,7 +1,12 @@
 # Ξ NΞØ PROTOCOL // Dashboard Makefile
 # Control Center for Mission Control Deployment
 
-.PHONY: help install dev start prod kill-port setup-ipfs doctor clean-env health clean
+.PHONY: help install dev start prod kill-port setup-ipfs doctor clean-env health clean build
+
+build:
+	@echo "🏗 Building project..."
+	@npm run build
+	@echo "✓ Build complete."
 
 clean:
 	@echo "🧹 Cleaning project..."

@@ -6,7 +6,8 @@
     "main": "server.js",
     "scripts": {
         "start": "node --import tsx server.js",
-        "dev": "nodemon --import tsx server.js"
+        "dev": "nodemon --import tsx server.js",
+        "build": "echo 'No build step required for this project structure'"
     },
     "dependencies": {
         "cors": "^2.8.5",
