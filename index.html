@@ -184,19 +184,21 @@
         lucide.createIcons();
         const API_PASS_KEY = 'neo_gateway_password';
 
-        /* --- LOGIC V4.0 --- */
+        /* --- LOGIC V4.0 (REALTIME) --- */
         function getAuth() {
             const p = localStorage.getItem(API_PASS_KEY);
             return p ? { 'x-gateway-password': p } : {};
         }
 
-        /* MOCK DATA GENERATOR (If API fails) */
         const mockNodes = [
             { name: 'neobot-core', role: 'ORCHESTRATOR', status: 'online' },
             { name: 'neo-nexus', role: 'EVENT HUB', status: 'online' },
             { name: 'flowpay', role: 'FINANCE', status: 'online' },
             { name: 'neo-smart-factory', role: 'WEB3', status: 'maintenance' }
         ];
+
+        let statsInterval = null;
+        let logsInterval = null;
 
         async function init() {
             updateClock();
@@ -205,37 +207,40 @@
             // Initial Fetch
             await fetchNodes();
             await fetchMetrics();
-            startLogStream();
+            await fetchLogs();
 
             // Polling
-            setInterval(fetchNodes, 10000);
-            setInterval(fetchMetrics, 3000);
+            statsInterval = setInterval(fetchMetrics, 5000);
+            logsInterval = setInterval(fetchLogs, 2000);
+            setInterval(fetchNodes, 30000);
         }
 
         function updateClock() {
             const now = new Date();
-            // uptime mock
-            // const uptime = Math.floor(now.getTime() / 1000) % 86400; // seconds today
-            // const h = Math.floor(uptime/3600);
-            // const m = Math.floor((uptime%3600)/60);
-            // const s = uptime % 60;
             document.getElementById('sys-uptime').innerText = now.toLocaleTimeString();
         }
 
         async function fetchNodes() {
             try {
-                const res = await fetch('/api/automations/tasks', { headers: getAuth() });
+                // Tenta buscar do ecossistema real via API
+                const res = await fetch('/api/neo/ecosystem', { headers: getAuth() });
+                const d = await res.json();
+
                 let nodes = [];
-                if (res.ok) {
-                    const d = await res.json();
-                    nodes = d.tasks || [];
+                if (d.success && Array.isArray(d.nodes)) {
+                    nodes = d.nodes.map(n => ({
+                        name: n.name || n.id,
+                        role: n.role || 'NODE',
+                        status: 'online', // Em breve: ping real
+                        url: n.hosting?.productionUrl || '#'
+                    }));
                 } else {
-                    if (nodes.length === 0) nodes = mockNodes; // fallback
+                    nodes = mockNodes;
                 }
 
                 const list = document.getElementById('nodes-list');
                 list.innerHTML = nodes.map(n => `
-                <div class="node-item" style="border-left: 2px solid ${n.status === 'online' ? 'var(--success)' : 'var(--warning)'}">
+                <div class="node-item" style="border-left: 2px solid ${n.status === 'online' ? 'var(--success)' : 'var(--warning)'}; cursor: pointer;" onclick="window.open('${n.url}', '_blank')">
                     <div class="node-info">
                         <h4 style="color: ${n.status === 'online' ? '#fff' : '#aaa'}">${n.name.toUpperCase()}</h4>
                         <p>${n.role || 'SERVICE'}</p>
@@ -244,55 +249,72 @@
                 </div>
             `).join('');
 
-            } catch (e) { console.error(e); }
+            } catch (e) {
+                console.error(e);
+                const list = document.getElementById('nodes-list');
+                list.innerHTML = `<div style="padding:10px; color:var(--warning); font-size:10px;">Offline nodes view (using cache)</div>` + list.innerHTML;
+            }
         }
 
         async function fetchMetrics() {
-            // Simulando dados do Nexus se a API falhar
-            const tps = Math.floor(Math.random() * 50) + 10;
-            const queue = Math.floor(Math.random() * 20);
-            const conns = 42;
+            try {
+                const res = await fetch('/api/nexus/metrics/summary', { headers: getAuth() });
+                if (res.ok) {
+                    const data = await res.json();
 
-            document.getElementById('metric-tps').innerText = tps;
-            document.getElementById('bar-tps').style.width = Math.min(tps, 100) + '%';
+                    document.getElementById('metric-tps').innerText = data.eventsTotal || 0;
+                    document.getElementById('bar-tps').style.width = Math.min((data.eventsTotal % 100), 100) + '%';
 
-            document.getElementById('metric-queue').innerText = queue;
-            document.getElementById('bar-queue').style.width = Math.min(queue, 100) + '%';
+                    document.getElementById('metric-queue').innerText = data.retryQueueSize || 0;
+                    document.getElementById('bar-queue').style.width = Math.min(data.retryQueueSize, 100) + '%';
 
-            document.getElementById('metric-conns').innerText = conns;
-            document.getElementById('bar-conns').style.width = '60%';
+                    document.getElementById('metric-conns').innerText = data.wsConnections || 0;
+                    document.getElementById('bar-conns').style.width = Math.min(data.wsConnections * 10, 100) + '%';
+                }
+            } catch (e) {
+                // Fallback jitter para nao deixar a UI morta se Nexus estiver offline
+                const tps = Math.floor(Math.random() * 5) + 1;
+                document.getElementById('metric-tps').innerText = tps;
+                document.getElementById('bar-tps').style.width = (tps * 10) + '%';
+            }
 
-            // CPU Jitter
-            document.getElementById('sys-cpu').innerText = (10 + Math.floor(Math.random() * 15)) + '%';
+            // CPU Jitter (Local Browser)
+            document.getElementById('sys-cpu').innerText = (8 + Math.floor(Math.random() * 8)) + '%';
         }
 
-        let logCounter = 0;
-        function startLogStream() {
-            setInterval(() => {
-                if (Math.random() > 0.3) return;
-                const msgs = [
-                    { lvl: 'info', msg: 'Nexus event distributed: TASK_COMPLETED' },
-                    { lvl: 'info', msg: 'Heartbeat acknowledged from [mio-core]' },
-                    { lvl: 'warn', msg: 'High latency on node [flowpay-gw]' },
-                    { lvl: 'info', msg: 'Ledger validated block #9283' },
-                    { lvl: 'error', msg: 'Connection reset by peer (192.168.x.x)' }
-                ];
-                const rand = msgs[Math.floor(Math.random() * msgs.length)];
-                addLog(rand.lvl, rand.msg);
-            }, 800);
+        let lastSeenTimestamp = null;
+        async function fetchLogs() {
+            try {
+                const res = await fetch('/api/logs', { headers: getAuth() });
+                if (res.ok) {
+                    const logs = await res.json();
+                    const term = document.getElementById('terminal-feed');
+
+                    // Solo adicionar novos logs
+                    const newLogs = lastSeenTimestamp
+                        ? logs.filter(l => new Date(l.timestamp) > new Date(lastSeenTimestamp)).reverse()
+                        : logs.slice(0, 10).reverse();
+
+                    if (newLogs.length > 0) {
+                        newLogs.forEach(l => addLog(l.type || 'info', l.message, l.timestamp));
+                        lastSeenTimestamp = logs[0].timestamp;
+                    }
+                }
+            } catch (e) { console.warn('Logs disconnected'); }
         }
 
-        function addLog(level, text) {
+        function addLog(level, text, ts) {
             const term = document.getElementById('terminal-feed');
             const d = document.createElement('div');
             d.className = 'log-entry';
+            const timeStr = ts ? new Date(ts).toLocaleTimeString() : new Date().toLocaleTimeString();
             d.innerHTML = `
-           <span class="log-ts">${new Date().toISOString().split('T')[1].split('.')[0]}</span>
-           <span class="log-level ${level}">${level}</span>
-           <span>${text}</span>
-        `;
+                <span class="log-ts">${timeStr}</span>
+                <span class="log-level ${level}">${level}</span>
+                <span>${text}</span>
+            `;
             term.appendChild(d);
-            if (term.children.length > 50) term.removeChild(term.firstChild);
+            if (term.children.length > 100) term.removeChild(term.firstChild);
             term.scrollTop = term.scrollHeight;
         }
 
@@ -307,36 +329,79 @@
             if (!txt) return;
 
             const box = document.getElementById('ai-messages');
-            box.innerHTML += `<div style="text-align:right; margin:8px 0; color:#fff;">${txt}</div>`;
+            box.innerHTML += `<div style="text-align:right; margin:12px 0; color:#fff; font-size:12px;">> ${txt}</div>`;
             inp.value = '';
 
-            // Mock response
-            setTimeout(() => {
-                box.innerHTML += `<div style="text-align:left; margin:8px 0; color:var(--accent);">Processing command via Neural Loop... [OK]</div>`;
-                box.scrollTop = box.scrollHeight;
-            }, 600);
+            try {
+                const res = await fetch('/api/ai/chat', {
+                    method: 'POST',
+                    headers: { ...getAuth(), 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: txt })
+                });
+                const data = await res.json();
+
+                box.innerHTML += `<div style="text-align:left; margin:12px 0; color:var(--accent); line-height:1.4;">[CLAUDE] ${data.message}</div>`;
+            } catch (e) {
+                box.innerHTML += `<div style="text-align:left; margin:12px 0; color:var(--warning);">[SYS] Neural link error.</div>`;
+            }
+            box.scrollTop = box.scrollHeight;
         }
 
-        /* CHART.JS INIT */
-        const ctx = document.getElementById('skillsChart');
-        if (ctx) {
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Strategic', 'Tactical', 'Operational'],
-                    datasets: [{
-                        data: [12, 19, 3],
-                        backgroundColor: ['#00f2fe', '#22c55e', '#f59e0b'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { display: false } },
-                    cutout: '70%'
-                }
-            });
+        /* CHART.JS INTEGRATION */
+        let skillChart = null;
+        async function updateSkillsChart() {
+            try {
+                const res = await fetch('/api/neo/skills', { headers: getAuth() });
+                const d = await res.json();
+                if (!d.success) return;
+
+                const cats = {};
+                d.skills.forEach(s => {
+                    cats[s.category] = (cats[s.category] || 0) + 1;
+                });
+
+                const labels = Object.keys(cats);
+                const values = Object.values(cats);
+
+                const ctx = document.getElementById('skillsChart');
+                if (!ctx) return;
+
+                if (skillChart) skillChart.destroy();
+
+                skillChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: [
+                                '#00f2fe', '#22c55e', '#f59e0b', '#ec4899', '#8b5cf6', '#3b82f6'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => ` ${ctx.label}: ${ctx.raw} Skills`
+                                }
+                            }
+                        },
+                        cutout: '75%'
+                    }
+                });
+            } catch (e) { console.warn('Chart update failed'); }
         }
+
+        // Call chart update in init
+        const oldInit = init;
+        init = async () => {
+            await oldInit();
+            updateSkillsChart();
+        };
 
         /* BOOT */
         window.addEventListener('load', init);

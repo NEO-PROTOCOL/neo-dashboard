@@ -1,4 +1,6 @@
 import express from 'express';
+import fs from 'node:fs';
+import path from 'node:path';
 
 const router = express.Router();
 
@@ -130,6 +132,26 @@ router.get('/search', async (req, res) => {
         s.category.includes(q) || s.description.toLowerCase().includes(q)
     );
     res.json({ success: true, results });
+});
+
+// GET /api/neo/ecosystem — load actual ecosystem.json from architect node
+router.get('/ecosystem', async (req, res) => {
+    const ECOSYSTEM_PATH = path.resolve(process.cwd(), '../neobot/config/ecosystem.json');
+    try {
+        if (fs.existsSync(ECOSYSTEM_PATH)) {
+            const data = fs.readFileSync(ECOSYSTEM_PATH, 'utf8');
+            return res.json({ success: true, nodes: JSON.parse(data) });
+        }
+    } catch (e) {
+        console.warn('Failed to read ecosystem.json:', e.message);
+    }
+    
+    // Ensaio de fallback se estiver em produção sem acesso ao FS local do neobot
+    res.json({ 
+        success: false, 
+        message: 'Source of truth (ecosystem.json) not accessible locally.',
+        hint: 'Link to https://github.com/NEO-PROTOCOL/neobot/blob/main/config/ecosystem.json'
+    });
 });
 
 export default router;
