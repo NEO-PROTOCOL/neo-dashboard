@@ -5,6 +5,7 @@ import path from 'node:path';
 const router = express.Router();
 
 const NEOBOT_URL = process.env.NEOBOT_API_URL || 'https://nexus.neoprotocol.space';
+const NEXUS_ECOSYSTEM_URL = process.env.NEXUS_ECOSYSTEM_URL || 'https://nexus.neoprotocol.space/api/ecosystem';
 const FETCH_TIMEOUT = 5000;
 
 // Static fallback: all 62 registered skills from neobot/skills/*/skill.json
@@ -145,12 +146,31 @@ router.get('/ecosystem', async (req, res) => {
     } catch (e) {
         console.warn('Failed to read ecosystem.json:', e.message);
     }
-    
-    // Ensaio de fallback se estiver em produção sem acesso ao FS local do neobot
+
+    // Railway/prod fallback: fetch source of truth from Nexus API.
+    try {
+        const r = await fetchWithTimeout(NEXUS_ECOSYSTEM_URL);
+        if (r.ok) {
+            const data = await r.json();
+            if (Array.isArray(data) && data.length > 0) {
+                return res.json({ success: true, nodes: data, source: 'nexus-api' });
+            }
+            if (Array.isArray(data?.ecosystem) && data.ecosystem.length > 0) {
+                return res.json({ success: true, nodes: data.ecosystem, source: 'nexus-api' });
+            }
+            if (Array.isArray(data?.nodes) && data.nodes.length > 0) {
+                return res.json({ success: true, nodes: data.nodes, source: 'nexus-api' });
+            }
+        }
+    } catch (e) {
+        console.warn('Failed to fetch ecosystem from Nexus API:', e.message);
+    }
+
+    // Ensaio de fallback se estiver em produção sem acesso ao FS local do neobot e sem Nexus.
     res.json({ 
         success: false, 
         message: 'Source of truth (ecosystem.json) not accessible locally.',
-        hint: 'Link to https://github.com/NEO-PROTOCOL/neobot/blob/main/config/ecosystem.json'
+        hint: 'Link to https://github.com/NEO-PROTOCOL/neobot/blob/main/config/ecosystem.json',
     });
 });
 
