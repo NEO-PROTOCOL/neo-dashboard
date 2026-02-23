@@ -38,6 +38,44 @@ function extractNodes(data) {
     return [];
 }
 
+function normalizePublicUrl(url) {
+    if (!url || typeof url !== 'string') return null;
+    const trimmed = url.trim();
+    if (!trimmed) return null;
+    if (trimmed.includes('.railway.internal') || trimmed.includes('localhost')) return null;
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+    if (trimmed.startsWith('/')) return null;
+    return `https://${trimmed}`;
+}
+
+function webhookBase(webhookUrl) {
+    if (!webhookUrl || typeof webhookUrl !== 'string') return null;
+    return webhookUrl
+        .replace('/api/webhook/nexus', '')
+        .replace('/api/webhook', '')
+        .replace('/api/events', '');
+}
+
+function resolveNodeUrl(node) {
+    const candidates = [
+        node?.url,
+        node?.hosting?.targetCustomDomain,
+        webhookBase(node?.webhookUrl?.production),
+        node?.infrastructure?.targetCustomDomain,
+        node?.infrastructure?.productionUrl,
+        node?.hosting?.productionUrl,
+        node?.infrastructure?.railwayUrl,
+        node?.hosting?.railwayUrl,
+    ];
+
+    for (const candidate of candidates) {
+        const normalized = normalizePublicUrl(candidate);
+        if (normalized) return normalized;
+    }
+
+    return null;
+}
+
 // Probe a node URL to check if it's online
 async function probeNode(url) {
     const normalizedUrl = (url || '').replace(/\/+$/, '');
@@ -76,7 +114,7 @@ router.get('/tasks', async (req, res) => {
     // Probe each node (parallel, best-effort, 5s timeout)
     const probed = await Promise.all(
         nodes.map(async (n) => {
-            const nodeUrl = n.url || n.hosting?.productionUrl || n.webhookUrl?.production?.replace('/api/webhook/nexus', '');
+            const nodeUrl = resolveNodeUrl(n);
             const status = nodeUrl ? await probeNode(nodeUrl) : 'unknown';
             return { id: n.id, name: n.name, role: n.role, url: nodeUrl, status };
         })
