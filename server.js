@@ -60,6 +60,7 @@ if (!process.env.NEXUS_API_URL || process.env.NEXUS_API_URL.includes('neoprotoco
 }
 
 const execAsync = promisify(exec);
+const MONITOR_FETCH_TIMEOUT_MS = Number(process.env.MONITOR_FETCH_TIMEOUT_MS || 5000);
 
 // ------------------------------------------------------------------
 // Log Capture System (In-Memory Ring Buffer)
@@ -194,6 +195,77 @@ app.use('/api/ai', aiRoutes);
 let reminders = [];
 let messages = [];
 let stats = { totalReminders: 0, totalMessages: 0 };
+let monitorState = {
+    lastCheckAt: null,
+    lastNexusStatus: 'unknown',
+    lastNexusLatencyMs: null,
+    lastNexusError: null,
+    checksTotal: 0,
+    alertsTotal: 0,
+};
+
+async function fetchJsonWithTimeout(url, timeoutMs = MONITOR_FETCH_TIMEOUT_MS) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        const response = await fetch(url, { signal: controller.signal });
+        const body = await response.json().catch(() => null);
+        return { ok: response.ok, status: response.status, body };
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
+async function collectMonitorSnapshot() {
+    const startedAt = Date.now();
+    const nexusUrl = process.env.NEXUS_API_URL || 'https://nexus.neoprotocol.space';
+    const target = `${nexusUrl.replace(/\/$/, '')}/health`;
+
+    let nexus = { status: 'unknown', http_status: null, latency_ms: null, error: null };
+
+    try {
+        const result = await fetchJsonWithTimeout(target);
+        nexus.latency_ms = Date.now() - startedAt;
+        nexus.http_status = result.status;
+        nexus.status = result.ok ? (result.body?.status || 'ok') : 'degraded';
+        if (!result.ok) {
+            nexus.error = result.body?.error || `HTTP ${result.status}`;
+        }
+    } catch (error) {
+        nexus.latency_ms = Date.now() - startedAt;
+        nexus.status = 'offline';
+        nexus.error = error?.message || 'Nexus request failed';
+    }
+
+    monitorState = {
+        ...monitorState,
+        lastCheckAt: new Date().toISOString(),
+        lastNexusStatus: nexus.status,
+        lastNexusLatencyMs: nexus.latency_ms,
+        lastNexusError: nexus.error,
+        checksTotal: monitorState.checksTotal + 1,
+    };
+
+    const heapMb = Math.round((process.memoryUsage().heapUsed / 1024 / 1024) * 100) / 100;
+    const rssMb = Math.round((process.memoryUsage().rss / 1024 / 1024) * 100) / 100;
+
+    return {
+        dashboard: {
+            status: 'ok',
+            uptime_seconds: Math.floor(process.uptime()),
+            memory_heap_mb: heapMb,
+            memory_rss_mb: rssMb,
+            logs_buffer_size: serverLogs.length,
+        },
+        nexus,
+        monitor: {
+            checks_total: monitorState.checksTotal,
+            alerts_total: monitorState.alertsTotal,
+            fetch_timeout_ms: MONITOR_FETCH_TIMEOUT_MS,
+        },
+        timestamp: new Date().toISOString(),
+    };
+}
 
 // ------------------------------------------------------------------
 // Standard API Routes
@@ -285,6 +357,85 @@ app.post('/api/messages', async (req, res) => {
 
 app.get('/mobile', (req, res) => {
     res.sendFile(path.join(__dirname, 'mobile.html'));
+});
+
+// ------------------------------------------------------------------
+// Monitoring API (/api/monitor/*)
+// ------------------------------------------------------------------
+app.get('/api/monitor/health', async (req, res) => {
+    const snapshot = await collectMonitorSnapshot();
+    const status = snapshot.nexus.status === 'offline' ? 'degraded' : 'healthy';
+    res.json({ status, ...snapshot });
+});
+
+app.get('/api/monitor/alerts', async (req, res) => {
+    const snapshot = await collectMonitorSnapshot();
+    const alerts = [];
+
+    if (snapshot.nexus.status === 'offline') {
+        alerts.push({
+            code: 'NEXUS_OFFLINE',
+            severity: 'high',
+            message: `Nexus indisponível (${snapshot.nexus.error || 'sem detalhe'})`,
+        });
+    } else if (snapshot.nexus.status !== 'ok') {
+        alerts.push({
+            code: 'NEXUS_DEGRADED',
+            severity: 'medium',
+            message: `Nexus retornou status ${snapshot.nexus.status}`,
+        });
+    }
+
+    if ((snapshot.nexus.latency_ms || 0) > 2000) {
+        alerts.push({
+            code: 'NEXUS_LATENCY_HIGH',
+            severity: 'medium',
+            message: `Latência Nexus alta (${snapshot.nexus.latency_ms}ms)`,
+        });
+    }
+
+    if (alerts.length > 0) {
+        monitorState.alertsTotal += alerts.length;
+    }
+
+    res.json({
+        hasAlert: alerts.length > 0,
+        alerts,
+        snapshot,
+        timestamp: new Date().toISOString(),
+    });
+});
+
+app.get('/api/monitor/metrics', async (req, res) => {
+    const snapshot = await collectMonitorSnapshot();
+    res.json({
+        snapshot,
+        process: {
+            memory: process.memoryUsage(),
+            cpu: process.cpuUsage(),
+            uptime: process.uptime(),
+            node: process.version,
+        },
+    });
+});
+
+app.post('/api/monitor/test-alert', async (req, res) => {
+    const chatId = process.env.TELEGRAM_CHAT_ID;
+    if (telegramBot?.token && chatId) {
+        await telegramBot.sendMessage(
+            chatId,
+            `🧪 TEST ALERT\nDashboard: ${process.env.PUBLIC_URL || `http://localhost:${PORT}`}\nTime: ${new Date().toISOString()}`,
+            { parse_mode: undefined }
+        );
+        monitorState.alertsTotal += 1;
+        return res.json({ success: true, sent: true });
+    }
+
+    return res.json({
+        success: true,
+        sent: false,
+        reason: 'Telegram not configured',
+    });
 });
 
 // ------------------------------------------------------------------
