@@ -97,12 +97,12 @@
                 <div class="card">
                     <div class="card-head">QUICK ACTIONS</div>
                     <div class="card-body action-grid">
-                        <div class="btn-action" onclick="window.open('/api/nexus/health', '_blank')">
+                        <div class="btn-action" onclick="openNexusHealth()">
                             <i data-lucide="heart-pulse" class="btn-icon"></i>
                             <span class="btn-title">Nexus Health</span>
                             <span class="btn-desc">Check Kernel Status</span>
                         </div>
-                        <div class="btn-action" onclick="fetch('/api/automations/report/generate', {method:'POST'})">
+                        <div class="btn-action" onclick="triggerIntelReport()">
                             <i data-lucide="file-bar-chart" class="btn-icon"></i>
                             <span class="btn-title">Intel Report</span>
                             <span class="btn-desc">Generate PDF Brief</span>
@@ -185,9 +185,54 @@
         const API_PASS_KEY = 'neo_gateway_password';
 
         /* --- LOGIC V4.0 (REALTIME) --- */
+        function getStoredPassword() {
+            return localStorage.getItem(API_PASS_KEY) || '';
+        }
+
+        function ensureApiPassword(force = false) {
+            let pass = getStoredPassword();
+            if (!pass || force) {
+                pass = (window.prompt('Digite a Gateway Password para habilitar sinais em tempo real:') || '').trim();
+                if (pass) localStorage.setItem(API_PASS_KEY, pass);
+            }
+            return pass;
+        }
+
         function getAuth() {
-            const p = localStorage.getItem(API_PASS_KEY);
+            const p = getStoredPassword();
             return p ? { 'x-gateway-password': p } : {};
+        }
+
+        async function fetchWithAuth(url, options = {}, retryOn401 = true) {
+            const first = await fetch(url, {
+                ...options,
+                headers: { ...(options.headers || {}), ...getAuth() }
+            });
+
+            if (first.status === 401 && retryOn401) {
+                const pass = ensureApiPassword(true);
+                if (pass) {
+                    return fetch(url, {
+                        ...options,
+                        headers: { ...(options.headers || {}), ...getAuth() }
+                    });
+                }
+            }
+
+            return first;
+        }
+
+        function openNexusHealth() {
+            const pass = ensureApiPassword(false);
+            const qs = pass ? `?password=${encodeURIComponent(pass)}` : '';
+            window.open(`/api/nexus/health${qs}`, '_blank');
+        }
+
+        async function triggerIntelReport() {
+            const res = await fetchWithAuth('/api/automations/report/generate', { method: 'POST' });
+            if (!res.ok) {
+                alert('Falha ao gerar Intel Report. Verifique Gateway Password.');
+            }
         }
 
         const mockNodes = [
@@ -201,6 +246,7 @@
         let logsInterval = null;
 
         async function init() {
+            ensureApiPassword(false);
             updateClock();
             setInterval(updateClock, 1000);
 
@@ -223,7 +269,8 @@
         async function fetchNodes() {
             try {
                 // Tenta buscar do ecossistema real via API
-                const res = await fetch('/api/neo/ecosystem', { headers: getAuth() });
+                const res = await fetchWithAuth('/api/neo/ecosystem');
+                if (!res.ok) throw new Error(`eco_http_${res.status}`);
                 const d = await res.json();
 
                 let nodes = [];
@@ -258,7 +305,7 @@
 
         async function fetchMetrics() {
             try {
-                const res = await fetch('/api/nexus/metrics/summary', { headers: getAuth() });
+                const res = await fetchWithAuth('/api/nexus/metrics/summary');
                 if (res.ok) {
                     const data = await res.json();
 
@@ -285,7 +332,7 @@
         let lastSeenTimestamp = null;
         async function fetchLogs() {
             try {
-                const res = await fetch('/api/logs', { headers: getAuth() });
+                const res = await fetchWithAuth('/api/logs');
                 if (res.ok) {
                     const logs = await res.json();
                     const term = document.getElementById('terminal-feed');
@@ -333,7 +380,7 @@
             inp.value = '';
 
             try {
-                const res = await fetch('/api/ai/chat', {
+                const res = await fetchWithAuth('/api/ai/chat', {
                     method: 'POST',
                     headers: { ...getAuth(), 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: txt })
@@ -351,7 +398,8 @@
         let skillChart = null;
         async function updateSkillsChart() {
             try {
-                const res = await fetch('/api/neo/skills', { headers: getAuth() });
+                const res = await fetchWithAuth('/api/neo/skills');
+                if (!res.ok) return;
                 const d = await res.json();
                 if (!d.success) return;
 
