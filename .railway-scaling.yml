@@ -1,0 +1,89 @@
+# Railway Scaling Configuration para flowpay-gw
+# Aplicar via Railway Dashboard ou railway.toml
+
+# ANTES (Atual - Causando latência alta):
+# Memory: 512Mi
+# CPU: 500m
+# Replicas: 1
+
+# DEPOIS (Recomendado - Reduz latência em ~40-50%):
+
+services:
+  flowpay-gw:
+    # ──────────────────────────────────────────────────────────
+    # Resource Scaling
+    # ──────────────────────────────────────────────────────────
+
+    # Memory: 512Mi → 2048Mi (4x aumento)
+    # Razão: Suporta mais transações simultâneas em cache
+    memory: "2048Mi"
+
+    # CPU: 500m → 1000m (2x aumento)
+    # Razão: Processamento mais rápido de requisições
+    cpu: "1000m"
+
+    # ──────────────────────────────────────────────────────────
+    # Replication
+    # ──────────────────────────────────────────────────────────
+
+    # De 1 replicate para 3 (médio prazo)
+    # Isso permite load balancing automático no Railway
+    instances: 1  # Começar com 1, escalar para 3 depois
+
+    # ──────────────────────────────────────────────────────────
+    # Performance Tuning
+    # ──────────────────────────────────────────────────────────
+
+    # Node.js Flags de Performance
+    env:
+      NODE_ENV: production
+      NODE_OPTIONS: "--max-old-space-size=1536 --enable-source-maps"
+      # Aumentar event loop monitoring
+      UV_THREADPOOL_SIZE: "128"
+
+    # Health Check (evita restart desnecessário)
+    healthCheck:
+      path: /health
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+    # ──────────────────────────────────────────────────────────
+    # Observability
+    # ──────────────────────────────────────────────────────────
+
+    # Logs estruturados
+    logging:
+      format: json
+      level: info  # Mude para debug apenas se necessário
+
+# ──────────────────────────────────────────────────────────────
+# Implementação no Railway Dashboard
+# ──────────────────────────────────────────────────────────────
+#
+# 1. Ir para Railway Dashboard → neo-dashboard-production
+# 2. Selecionar serviço flowpay-gw
+# 3. Em "Settings" → "Resource Allocation":
+#    - Memory: 2048 MB
+#    - CPU: 1000m
+# 4. Em "Deploy" → Redeploy
+# 5. Monitorar por 30 minutos no dashboard de métricas
+#
+# Resultado esperado:
+# - Latência: 500-800ms → 200-400ms (redução de 50%)
+# - P95 latência: < 1000ms
+# - Error rate: < 1%
+# ──────────────────────────────────────────────────────────────
+
+# ──────────────────────────────────────────────────────────────
+# Scaling Horizontal (Próximo passo - em 1-2 semanas)
+# ──────────────────────────────────────────────────────────────
+#
+# Se a latência continuar alta com 2048Mi + 1000m:
+#
+# 1. Aumentar instances de 1 para 3
+# 2. Configurar load balancer automático
+# 3. Adicionar cache Redis compartilhado
+#
+# Railway auto-distribui requisições entre replicas
+# ──────────────────────────────────────────────────────────────

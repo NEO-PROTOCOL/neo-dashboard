@@ -27,6 +27,14 @@ help:
 	@echo "  make doctor       - Run system diagnostics"
 	@echo "  make clean-env    - Re-create neo-config.env from .env"
 	@echo "  make health       - Check if server is responding"
+	@echo ""
+	@echo "  $(GREEN)Tunnel Operations (NΞØ Tunnel)$(RESET)"
+	@echo "    tunnel-neo-agent   Start tunnel for WhatsApp/TG Agent (8042)"
+	@echo "    tunnel-flowpay     Start tunnel for FlowPay Gateway (4321)"
+	@echo "    tunnel-nexus       Start tunnel for Protocol Nexus (3000)"
+	@echo "    tunnel-neobot      Start tunnel for Neobot Architect (19000)"
+	@echo "    tunnel-status      Check status of the tunnel server"
+	@echo ""
 
 install:
 	@echo "⦿ Installing dependencies..."
@@ -66,3 +74,20 @@ clean-env:
 health:
 	@echo "◬ Checking Mission Control Health..."
 	@curl -fsS --max-time 5 http://localhost:$(PORT)/api/health || echo "✗ Server status: UNREACHABLE"
+
+# --- TUNNEL OPERATIONS -------------------------------------------------------
+
+tunnel-neo-agent: ## Start tunnel for neo-agent
+	@cd ../neo-tunnel && $(MAKE) client-neo-agent
+
+tunnel-flowpay: ## Start tunnel for flowpay
+	@cd ../neo-tunnel && $(MAKE) client-flowpay
+
+tunnel-nexus: ## Start tunnel for nexus
+	@cd ../neo-tunnel && $(MAKE) client-nexus
+
+tunnel-neobot: ## Start tunnel for neobot
+	@cd ../neo-tunnel && $(MAKE) client-neobot
+
+tunnel-status: ## Check tunnel server status
+	@cd ../neo-tunnel && $(MAKE) status

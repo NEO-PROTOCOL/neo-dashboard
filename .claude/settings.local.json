@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(/Users/nettomello/neomello/01-neo-protocol-org/neo-dashboard-deploy/P0-SOLUTION-START-HERE.md:*)",
+      "Bash(ls:*)"
+    ]
+  }
+}
