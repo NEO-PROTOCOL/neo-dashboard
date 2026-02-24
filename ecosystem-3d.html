@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NEØ Ecosytem 3D Graph</title>
+    <title>NEØ Ecosystem Graph</title>
     <style>
       body {
         margin: 0;
@@ -111,7 +111,21 @@
         });
       }
 
-      async function ensureGraphLibrary() {
+      function supportsWebGL() {
+        try {
+          const c = document.createElement('canvas');
+          return !!(
+            window.WebGLRenderingContext &&
+            (c.getContext('webgl2') ||
+              c.getContext('webgl') ||
+              c.getContext('experimental-webgl'))
+          );
+        } catch (_e) {
+          return false;
+        }
+      }
+
+      async function ensure3DLibrary() {
         const sources = [
           'https://unpkg.com/3d-force-graph',
           'https://cdn.jsdelivr.net/npm/3d-force-graph',
@@ -127,6 +141,22 @@
         throw new Error('3d-force-graph library unavailable');
       }
 
+      async function ensure2DLibrary() {
+        const sources = [
+          'https://unpkg.com/force-graph',
+          'https://cdn.jsdelivr.net/npm/force-graph',
+        ];
+        for (const src of sources) {
+          try {
+            await loadScript(src);
+            if (typeof ForceGraph === 'function') return;
+          } catch (e) {
+            console.warn(e.message);
+          }
+        }
+        throw new Error('force-graph library unavailable');
+      }
+
       function renderFallback(data, reason) {
         const nodes = (data?.nodes || []).slice(0, 60);
         graphContainer.innerHTML = `
@@ -136,85 +166,104 @@
         `;
       }
 
+      function render2D(data, reason = 'webgl_unavailable') {
+        if (typeof ForceGraph !== 'function') {
+          renderFallback(data, reason);
+          return;
+        }
+        graphContainer.innerHTML = '';
+        const graph = ForceGraph()(graphContainer)
+          .graphData(data)
+          .backgroundColor('#0a0a0a')
+          .nodeLabel((n) => `${n.name}\n${n.group || ''}`)
+          .nodeCanvasObject((node, ctx, globalScale) => {
+            const label = node.name || '';
+            const fontSize = 10 / globalScale;
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, 3, 0, 2 * Math.PI, false);
+            ctx.fillStyle = colorMap[node.group] || '#ffffff';
+            ctx.fill();
+            ctx.font = `${fontSize}px Inter, sans-serif`;
+            ctx.fillStyle = '#9aa4b2';
+            ctx.fillText(label, node.x + 6, node.y + 3);
+          })
+          .linkColor(() => '#2a3240')
+          .linkWidth(0.6)
+          .cooldownTime(2500);
+
+        setTimeout(() => {
+          try {
+            graph.zoomToFit(400, 40);
+          } catch (_e) {}
+        }, 500);
+      }
+
       fetch('ecosystem-graph.json')
         .then((res) => res.json())
         .then(async (data) => {
-          try {
-            await ensureGraphLibrary();
-          } catch (e) {
-            renderFallback(data, 'script');
-            return;
-          }
+          const canUse3D = supportsWebGL();
 
-          if (typeof ForceGraph3D !== 'function') {
-            renderFallback(data, 'runtime');
-            return;
-          }
-
-          const Graph = ForceGraph3D()(
-            graphContainer
-          )
-            .graphData(data)
-            .backgroundColor('#0a0a0a')
-            .nodeLabel(
-              (node) =>
-                `<span style="color:${colorMap[node.group] || '#fff'}"><b>${node.name}</b></span><br/>${node.group}`
-            )
-            .nodeColor((node) => colorMap[node.group] || '#fff')
-            .nodeVal((node) => node.val)
-            .nodeRelSize(8)
-            .nodeResolution(24) // Smoother spheres
-            .linkDirectionalParticles(2)
-            .linkDirectionalParticleSpeed((d) => 0.005)
-            .linkDirectionalParticleWidth(2)
-            .linkWidth(1)
-            .linkColor(() => '#333')
-            .onNodeClick((node) => {
-              // Aim at node from outside
-              const distance = 40;
-              const distRatio =
-                1 + distance / Math.hypot(node.x, node.y, node.z);
-
-              Graph.cameraPosition(
-                {
-                  x: node.x * distRatio,
-                  y: node.y * distRatio,
-                  z: node.z * distRatio,
-                }, // new pos
-                node, // lookAt node
-                3000 // ms transition duration
-              );
-            });
-
-          // Ensure first render is visible (avoid empty-looking initial camera).
-          setTimeout(() => {
+          if (!canUse3D) {
             try {
-              Graph.zoomToFit(800, 60);
+              await ensure2DLibrary();
+              render2D(data, 'webgl_unavailable');
+              return;
             } catch (e) {
-              console.warn('zoomToFit failed:', e);
+              renderFallback(data, e?.message || '2d_script');
+              return;
             }
-          }, 700);
+          }
 
-          // Add bloom effect for that premium neon look (guarded — may not be available in this build)
           try {
-            if (typeof Graph.postProcessingComposer === 'function') {
-              const composer = Graph.postProcessingComposer();
-              const UnrealBloom =
-                (window.THREE && THREE.UnrealBloomPass) ||
-                window.UnrealBloomPass;
-              if (composer && UnrealBloom && window.THREE && THREE.Vector2) {
-                composer.addPass(
-                  new UnrealBloom(
-                    new THREE.Vector2(window.innerWidth, window.innerHeight),
-                    1.5,
-                    0.4,
-                    0.85
-                  )
-                );
-              }
+            await ensure3DLibrary();
+            if (typeof ForceGraph3D !== 'function') {
+              throw new Error('3d_runtime');
             }
+
+            const Graph = ForceGraph3D()(graphContainer)
+              .graphData(data)
+              .backgroundColor('#0a0a0a')
+              .nodeLabel(
+                (node) =>
+                  `<span style="color:${colorMap[node.group] || '#fff'}"><b>${node.name}</b></span><br/>${node.group}`
+              )
+              .nodeColor((node) => colorMap[node.group] || '#fff')
+              .nodeVal((node) => node.val)
+              .nodeRelSize(8)
+              .nodeResolution(24)
+              .linkDirectionalParticles(2)
+              .linkDirectionalParticleSpeed((d) => 0.005)
+              .linkDirectionalParticleWidth(2)
+              .linkWidth(1)
+              .linkColor(() => '#333')
+              .onNodeClick((node) => {
+                const distance = 40;
+                const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
+                Graph.cameraPosition(
+                  {
+                    x: node.x * distRatio,
+                    y: node.y * distRatio,
+                    z: node.z * distRatio,
+                  },
+                  node,
+                  3000
+                );
+              });
+
+            setTimeout(() => {
+              try {
+                Graph.zoomToFit(800, 60);
+              } catch (e) {
+                console.warn('zoomToFit failed:', e);
+              }
+            }, 700);
           } catch (e) {
-            console.warn('Bloom pass not applied:', e);
+            try {
+              await ensure2DLibrary();
+              render2D(data, e?.message || '3d_init');
+            } catch (e2) {
+              renderFallback(data, e2?.message || '2d_runtime');
+            }
           }
         })
         .catch((e) => {
