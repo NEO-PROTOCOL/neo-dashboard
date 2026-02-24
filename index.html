@@ -244,11 +244,18 @@
 
         let statsInterval = null;
         let logsInterval = null;
+        let feedBootMessageShown = false;
+        let feedIdleMessageShown = false;
 
         async function init() {
             ensureApiPassword(false);
             updateClock();
             setInterval(updateClock, 1000);
+
+            if (!feedBootMessageShown) {
+                addLog('info', '[SYS] Feed channel linked. Awaiting live events...');
+                feedBootMessageShown = true;
+            }
 
             // Initial Fetch
             await fetchNodes();
@@ -337,12 +344,18 @@
                     const logs = await res.json();
                     const term = document.getElementById('terminal-feed');
 
+                    if (Array.isArray(logs) && logs.length === 0 && !feedIdleMessageShown) {
+                        addLog('info', '[SYS] No server logs yet. Monitoring is active.');
+                        feedIdleMessageShown = true;
+                    }
+
                     // Solo adicionar novos logs
                     const newLogs = lastSeenTimestamp
                         ? logs.filter(l => new Date(l.timestamp) > new Date(lastSeenTimestamp)).reverse()
                         : logs.slice(0, 10).reverse();
 
                     if (newLogs.length > 0) {
+                        feedIdleMessageShown = false;
                         newLogs.forEach(l => addLog(l.type || 'info', l.message, l.timestamp));
                         lastSeenTimestamp = logs[0].timestamp;
                     }
