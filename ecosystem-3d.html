@@ -88,6 +88,7 @@
     </div>
 
     <script>
+      const API_PASS_KEY = 'neo_gateway_password';
       const colorMap = {
         'NEO Protocol': '#ff4444',
         'Neo Smart Factory': '#00ccff',
@@ -99,6 +100,120 @@
       };
 
       const graphContainer = document.getElementById('graph-container');
+
+      function getGatewayPassword() {
+        try {
+          const fromStorage = localStorage.getItem(API_PASS_KEY) || '';
+          if (fromStorage) return fromStorage;
+        } catch (_e) {}
+        const params = new URLSearchParams(window.location.search);
+        return params.get('password') || '';
+      }
+
+      function normalizeGroup(n) {
+        const org = String(n?.org || '').toLowerCase();
+        const mix = `${n?.id || ''} ${n?.name || ''} ${n?.role || ''}`.toLowerCase();
+
+        if (org.includes('flowpay') || mix.includes('flowpay')) return 'FlowPay';
+        if (org.includes('fluxx') || mix.includes('fluxx')) return 'Fluxx Dao';
+        if (org.includes('smart factory') || mix.includes('smart ')) return 'Neo Smart Factory';
+        if (mix.includes('wod')) return 'WOD Game';
+        if (mix.includes('flowoff') || mix.includes('pro-ia') || mix.includes('node neø run') || mix.includes('node neo run')) return 'FlowOFF Agency';
+        if (org.includes('neo protocol') || mix.includes('neo')) return 'NEO Protocol';
+        return 'DApps & Tools';
+      }
+
+      function computeNodeVal(n, group) {
+        const role = String(n?.role || '').toLowerCase();
+        const id = String(n?.id || '').toLowerCase();
+        if (role.includes('orchestrator') || role.includes('event hub') || role.includes('sovereign')) return 12;
+        if (id.includes('nexus') || id.includes('architect')) return 11;
+        if (role.includes('protocol') || role.includes('contract')) return 9;
+        if (group === 'FlowPay' || group === 'Neo Smart Factory') return 8;
+        return 6;
+      }
+
+      function buildGraphFromEcosystem(rawNodes) {
+        const valid = Array.isArray(rawNodes) ? rawNodes : [];
+        const nodes = [];
+        const seen = new Set();
+
+        valid.forEach((n, idx) => {
+          const id = String(n?.id || n?.name || `node-${idx}`).trim();
+          if (!id || seen.has(id)) return;
+          seen.add(id);
+          const group = normalizeGroup(n);
+          nodes.push({
+            id,
+            name: String(n?.name || id),
+            group,
+            val: computeNodeVal(n, group),
+          });
+        });
+
+        const links = [];
+        const linkKey = new Set();
+        const byGroup = new Map();
+
+        nodes.forEach((node, idx) => {
+          if (!byGroup.has(node.group)) byGroup.set(node.group, []);
+          byGroup.get(node.group).push({ ...node, idx });
+        });
+
+        // Connect each group to a representative hub.
+        for (const [, groupNodes] of byGroup.entries()) {
+          if (groupNodes.length <= 1) continue;
+          const hub = groupNodes.reduce((best, cur) => (cur.val > best.val ? cur : best), groupNodes[0]);
+          groupNodes.forEach((n) => {
+            if (n.id === hub.id) return;
+            const k = `${n.id}->${hub.id}`;
+            if (!linkKey.has(k)) {
+              linkKey.add(k);
+              links.push({ source: n.id, target: hub.id, label: 'group' });
+            }
+          });
+        }
+
+        // Connect ecosystem nodes to Nexus when integration hints exist.
+        const nexusNode = valid.find((n) => String(n?.id || '').toLowerCase().includes('nexus'));
+        const nexusId = nexusNode ? String(nexusNode.id) : null;
+        if (nexusId && seen.has(nexusId)) {
+          valid.forEach((n) => {
+            const id = String(n?.id || '').trim();
+            if (!id || id === nexusId || !seen.has(id)) return;
+            if (n?.webhookUrl || n?.nexusEvents) {
+              const k = `${id}->${nexusId}`;
+              if (!linkKey.has(k)) {
+                linkKey.add(k);
+                links.push({ source: id, target: nexusId, label: 'nexus' });
+              }
+            }
+          });
+        }
+
+        return { nodes, links };
+      }
+
+      async function fetchEcosystemGraphData() {
+        // Primary source: API backed by neobot/config/ecosystem.json or Nexus fallback.
+        try {
+          const password = getGatewayPassword();
+          const res = await fetch('/api/neo/ecosystem', {
+            headers: password ? { 'x-gateway-password': password } : {},
+          });
+          if (res.ok) {
+            const payload = await res.json();
+            const raw = Array.isArray(payload?.nodes) ? payload.nodes : Array.isArray(payload) ? payload : [];
+            if (raw.length > 0) return buildGraphFromEcosystem(raw);
+          }
+        } catch (e) {
+          console.warn('ecosystem API unavailable:', e?.message || e);
+        }
+
+        // Static fallback.
+        const staticRes = await fetch('ecosystem-graph.json');
+        return staticRes.json();
+      }
 
       function loadScript(src) {
         return new Promise((resolve, reject) => {
@@ -261,8 +376,7 @@
         }, 500);
       }
 
-      fetch('ecosystem-graph.json')
-        .then((res) => res.json())
+      fetchEcosystemGraphData()
         .then(async (data) => {
           const canUse3D = supportsWebGL();
 
