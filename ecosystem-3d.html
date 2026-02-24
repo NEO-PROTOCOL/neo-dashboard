@@ -113,6 +113,8 @@
 
       function supportsWebGL() {
         try {
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('force2d') === '1') return false;
           const c = document.createElement('canvas');
           return !!(
             window.WebGLRenderingContext &&
@@ -166,9 +168,70 @@
         `;
       }
 
+      function renderStaticSvg(data, reason = 'static_svg') {
+        const nodes = Array.isArray(data?.nodes) ? data.nodes : [];
+        const links = Array.isArray(data?.links) ? data.links : [];
+
+        if (!nodes.length) {
+          renderFallback(data, reason);
+          return;
+        }
+
+        const width = Math.max(graphContainer.clientWidth || 900, 600);
+        const height = Math.max(graphContainer.clientHeight || 520, 420);
+        const cx = width / 2;
+        const cy = height / 2;
+        const radius = Math.min(width, height) * 0.34;
+
+        const idx = new Map();
+        nodes.forEach((n, i) => idx.set(n.id ?? n.name ?? i, i));
+
+        const positioned = nodes.map((n, i) => {
+          const a = (i / nodes.length) * Math.PI * 2;
+          return {
+            ...n,
+            x: cx + radius * Math.cos(a),
+            y: cy + radius * Math.sin(a),
+            color: colorMap[n.group] || '#9aa4b2',
+          };
+        });
+
+        const svgLinks = links
+          .map((l) => {
+            const sIdx = idx.get(l.source);
+            const tIdx = idx.get(l.target);
+            if (sIdx == null || tIdx == null) return '';
+            const s = positioned[sIdx];
+            const t = positioned[tIdx];
+            return `<line x1="${s.x}" y1="${s.y}" x2="${t.x}" y2="${t.y}" stroke="#223042" stroke-width="1" opacity="0.7" />`;
+          })
+          .join('');
+
+        const svgNodes = positioned
+          .map(
+            (n) => `
+            <g>
+              <circle cx="${n.x}" cy="${n.y}" r="5" fill="${n.color}" />
+              <text x="${n.x + 8}" y="${n.y + 4}" fill="#9aa4b2" font-size="11" font-family="Inter, sans-serif">${(n.name || '').replace(/</g, '&lt;')}</text>
+            </g>
+          `
+          )
+          .join('');
+
+        graphContainer.innerHTML = `
+          <div style="position:absolute;left:12px;bottom:10px;color:#6e7d93;font-size:11px;">
+            Static map mode (${reason}) • nodes: ${nodes.length}
+          </div>
+          <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" style="display:block;">
+            ${svgLinks}
+            ${svgNodes}
+          </svg>
+        `;
+      }
+
       function render2D(data, reason = 'webgl_unavailable') {
         if (typeof ForceGraph !== 'function') {
-          renderFallback(data, reason);
+          renderStaticSvg(data, `${reason}_no_force_graph`);
           return;
         }
         graphContainer.innerHTML = '';
@@ -262,7 +325,7 @@
               await ensure2DLibrary();
               render2D(data, e?.message || '3d_init');
             } catch (e2) {
-              renderFallback(data, e2?.message || '2d_runtime');
+              renderStaticSvg(data, e2?.message || '2d_runtime');
             }
           }
         })
