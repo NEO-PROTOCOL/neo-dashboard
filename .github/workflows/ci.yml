@@ -19,7 +19,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
 
       - name: JavaScript Syntax Check
         run: |
@@ -36,3 +36,7 @@ jobs:
           grep -q "\/api\/neo\/ecosystem\/live" ecosystem-3d.html
           grep -q "setInterval(refreshGraph, LIVE_REFRESH_MS)" ecosystem-3d.html
           grep -q "router.get(\"/ecosystem/live\"" neo-routes.js
+
+      - name: Static Ecosystem Integrity
+        run: |
+          node scripts/validate-ecosystem-graph.mjs

@@ -1,24 +1,26 @@
 {
-    "name": "neobot-dashboard",
-    "version": "1.0.0",
-    "type": "module",
-    "description": "Premium Dashboard for NΞØ BOT",
-    "main": "server.js",
-    "scripts": {
-        "start": "node --import tsx server.js",
-        "dev": "nodemon --import tsx server.js",
-        "build": "echo 'No build step required for this project structure'"
-    },
-    "dependencies": {
-        "cors": "^2.8.5",
-        "dotenv": "^17.2.3",
-        "esbuild": "0.27.3",
-        "express": "^4.18.2",
-        "glob": "^10.3.10",
-        "kubo-rpc-client": "^6.1.0",
-        "tsx": "^4.19.1"
-    },
-    "devDependencies": {
-        "nodemon": "^3.0.2"
-    }
+  "name": "neobot-dashboard",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Premium Dashboard for NΞØ BOT",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --import tsx server.js",
+    "dev": "nodemon --import tsx server.js",
+    "build": "echo 'No build step required for this project structure'",
+    "sync:ecosystem-graph": "node scripts/sync-ecosystem-graph.mjs",
+    "validate:ecosystem-graph": "node scripts/validate-ecosystem-graph.mjs"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "esbuild": "0.27.3",
+    "express": "^4.18.2",
+    "glob": "^10.3.10",
+    "kubo-rpc-client": "^6.1.0",
+    "tsx": "^4.19.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
 }
