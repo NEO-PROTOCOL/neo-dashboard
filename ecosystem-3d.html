@@ -148,6 +148,7 @@
       const changedUntilById = new Map();
       const transitionLog = [];
       const latestNodeMeta = new Map();
+      let lastTopologySignature = null;
 
       function getGatewayPassword() {
         try {
@@ -161,6 +162,60 @@
       function pushTransition(line) {
         transitionLog.unshift(line);
         transitionLog.splice(MAX_EVENT_LINES);
+      }
+
+      function topologySignature(data) {
+        const nodes = Array.isArray(data?.nodes) ? data.nodes : [];
+        const links = Array.isArray(data?.links) ? data.links : [];
+        const nodeIds = nodes
+          .map((n) => String(n?.id || ""))
+          .filter(Boolean)
+          .sort()
+          .join("|");
+        const linkIds = links
+          .map(
+            (l) =>
+              `${String(l?.source || "")}->${String(l?.target || "")}:${String(l?.label || "")}`,
+          )
+          .sort()
+          .join("|");
+        return `${nodeIds}::${linkIds}`;
+      }
+
+      function preserveLayoutState(prevData, nextData) {
+        const prevNodes = Array.isArray(prevData?.nodes) ? prevData.nodes : [];
+        const nextNodes = Array.isArray(nextData?.nodes) ? nextData.nodes : [];
+        if (!prevNodes.length || !nextNodes.length) return nextData;
+
+        const prevById = new Map();
+        prevNodes.forEach((n) => {
+          const id = String(n?.id || "");
+          if (!id) return;
+          prevById.set(id, n);
+        });
+
+        const nodes = nextNodes.map((n) => {
+          const id = String(n?.id || "");
+          const prev = prevById.get(id);
+          if (!prev) return n;
+          return {
+            ...n,
+            x: prev.x,
+            y: prev.y,
+            z: prev.z,
+            vx: prev.vx,
+            vy: prev.vy,
+            vz: prev.vz,
+            fx: prev.fx,
+            fy: prev.fy,
+            fz: prev.fz,
+          };
+        });
+
+        return {
+          ...nextData,
+          nodes,
+        };
       }
 
       function normalizeGroup(n) {
@@ -672,10 +727,24 @@
 
       function updateGraphData(data) {
         if (!graphInstance) return;
-        graphInstance.graphData(data);
-        if (typeof graphInstance.d3ReheatSimulation === "function") {
+        const prevData =
+          typeof graphInstance.graphData === "function"
+            ? graphInstance.graphData()
+            : null;
+        const nextData = preserveLayoutState(prevData, data);
+        graphInstance.graphData(nextData);
+
+        const nextSignature = topologySignature(nextData);
+        const topologyChanged =
+          lastTopologySignature !== null &&
+          lastTopologySignature !== nextSignature;
+        if (
+          topologyChanged &&
+          typeof graphInstance.d3ReheatSimulation === "function"
+        ) {
           graphInstance.d3ReheatSimulation();
         }
+        lastTopologySignature = nextSignature;
       }
 
       async function refreshGraph() {
@@ -687,6 +756,7 @@
           if (!graphInstance) {
             try {
               await initGraph(payload.graphData);
+              lastTopologySignature = topologySignature(payload.graphData);
             } catch (e) {
               renderStaticSvg(payload.graphData, e?.message || "init_failed");
               graphMode = "static";
