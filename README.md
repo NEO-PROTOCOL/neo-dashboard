@@ -1,455 +1,143 @@
-# 🎨 NeoBot Dashboard - iOS Style
+# NEØ Dashboard
 
-Dashboard moderno com design inspirado no iOS, usando glassmorphism, animações suaves e interface intuitiva.
+Painel de comando operacional do ecossistema NEØ PROTOCOL.
 
-## ✨ Features
+Owner oficial: **NEØ MELLØ**.
 
-### Design iOS-like
+Este projeto nao foi desenhado para estetica isolada. Ele existe para expor saude da malha, detectar desconexao entre nos e reduzir tempo de resposta operacional.
 
-- 🌈 **Glassmorphism**: Efeitos de vidro com blur e transparência
-- 🎭 **Dynamic Gradients**: Gradientes animados e coloridos
-- ⚡ **Spring Animations**: Animações suaves estilo iOS
-- 📱 **Responsive**: Adapta perfeitamente a mobile
-- 🌙 **Dark Mode**: Design dark elegante
+## Proposito
 
-### Funcionalidades
+- Consolidar observabilidade da stack NEØ PROTOCOL em uma interface unica.
+- Exibir estado de conectividade entre nos em tempo quase real.
+- Servir como plano de comando para Nexus, automacoes, IA e operacoes.
 
-- ⟁ **Visualização em Tempo Real**: Status do sistema atualizado automaticamente
-- 🤖 **Chat com Claude AI**: Interface de chat integrada
-- 📅 **Gerenciamento de Lembretes**: Criar e visualizar lembretes
-- 💬 **Envio de Mensagens**: Telegram integrado
-- 🐛 **Analisador de Bugs**: Análise automática de erros com IA
-- ⨷ **Automações**: Controle completo de automações avançadas
-- 📄 **Relatórios**: Geração de relatórios inteligentes
+## Ambientes e dominio
 
-## ⟠ Início Rápido
+- Producao: `https://dashboard.neoprotocol.space`
+- Origem atual (Railway): `https://neo-dashboard-production-2e56.up.railway.app`
+- Runtime: Node.js + Express (sem etapa de build de frontend)
 
-### Instalação
+## Arquitetura real
+
+### Backend
+
+- `server.js`
+  - serve arquivos estaticos
+  - protege `/api/*` com `x-gateway-password`
+  - monta rotas:
+    - `/api/neo`
+    - `/api/nexus`
+    - `/api/automations`
+    - `/api/ai`
+
+- `neo-routes.js`
+  - `GET /api/neo/ecosystem`: carrega `ecosystem.json` local (quando existe) ou fallback via Nexus API
+  - `GET /api/neo/ecosystem/live`: adiciona telemetria de conectividade por no
+    - status por no: `online`, `degraded`, `offline`, `unknown`
+    - sinal de integracao: `linked` ou `unlinked`
+    - cache curto para reduzir carga de probe
+
+### Frontend
+
+- `index.html`
+  - painel principal
+  - polling operacional de metricas, logs e nos
+
+- `ecosystem-3d.html`
+  - visualizacao 3D/2D do grafo do ecossistema
+  - consumo prioritario de `/api/neo/ecosystem/live`
+  - refresh continuo a cada 8 segundos
+  - HUD de saude com contadores e feed de transicoes
+  - destaque visual para nos sem ligacao com Nexus (`missing-nexus`)
+
+## Realtime do grafo
+
+Contrato atual do `ecosystem-3d.html`:
+
+1. Busca telemetria viva em `/api/neo/ecosystem/live`.
+2. Recalcula grafo continuamente (`setInterval(refreshGraph, LIVE_REFRESH_MS)`).
+3. Marca no com degradacao ou queda de conectividade.
+4. Exibe alertas quando ha:
+   - nos offline
+   - nos sem integracao Nexus
+   - mudanca de estado entre ciclos
+
+Fallback controlado:
+
+- 1: `/api/neo/ecosystem/live`
+- 2: `/api/neo/ecosystem`
+- 3: `ecosystem-graph.json`
+
+## Seguranca
+
+- Toda rota em `/api` exige `x-gateway-password` quando `GATEWAY_PASSWORD` esta definido.
+- Em producao, iniciar sem `GATEWAY_PASSWORD` aborta o processo.
+
+## Variaveis de ambiente
+
+Base (`.env.example`):
+
+- `GATEWAY_PASSWORD` (obrigatoria em producao)
+- `PORT` (default `3000`)
+- `NEXUS_API_URL` (opcional, fallback interno configurado no server)
+- `NEXUS_ECOSYSTEM_URL` (opcional)
+- `PUBLIC_URL` (opcional)
+- `ANTHROPIC_API_KEY` (chat/admin IA)
+- `TELEGRAM_BOT_TOKEN` (opcional)
+- `TELEGRAM_CHAT_ID` (opcional)
+
+## Executar localmente
 
 ```bash
-cd dashboard
 npm install
+npm run dev
 ```
 
-### Configuração
-
-1. Configure as variáveis de ambiente no arquivo `.env` na raiz do projeto:
-
-```env
-TELEGRAM_BOT_TOKEN=seu_token
-TELEGRAM_ADMIN_CHAT=seu_chat_id
-ANTHROPIC_API_KEY=sua_chave_claude
-```
-
-1. Inicie o servidor:
+Ou:
 
 ```bash
-node server.js
+npm start
 ```
 
-1. Acesse o dashboard:
+Acesso local:
 
-```
-http://localhost:3000
-```
+- `http://localhost:3000`
 
-## 🎨 Guia de Estilo
+## Governanca de repositorio
 
-### Cores
+Ativo em `main`:
 
-```css
-/* Primary Colors */
---accent-primary: #007AFF   /* iOS Blue */
---accent-secondary: #5856D6  /* iOS Purple */
---accent-success: #34C759    /* iOS Green */
---accent-warning: #FF9500    /* iOS Orange */
---accent-danger: #FF3B30     /* iOS Red */
+- Branch protection
+- Pull request obrigatorio
+- 1 aprovacao obrigatoria
+- Code Owner review obrigatorio
+- Status checks obrigatorios
+- `force-push` bloqueado
+- delete de branch protegida bloqueado
 
-/* Background */
---bg-primary: #000000
---bg-secondary: #1c1c1e
---bg-glass: rgba(255, 255, 255, 0.05)
+Arquivos de governanca:
 
-/* Text */
---text-primary: #FFFFFF
---text-secondary: rgba(235, 235, 245, 0.6)
---text-muted: rgba(235, 235, 245, 0.3)
-```
+- `.github/CODEOWNERS`
+- `.github/workflows/ci.yml`
 
-### Componentes
+Check obrigatorio atual:
 
-#### Bento Grid
+- `syntax-and-guards`
 
-Layout em grade responsivo que se adapta ao conteúdo:
+## Fluxo oficial de entrega
 
-```html
-<div class="bento-grid">
-    <div class="bento-card">Normal</div>
-    <div class="bento-card card-tall">Alta</div>
-    <div class="bento-card card-wide">Larga</div>
-</div>
-```
+1. branch de feature
+2. pull request
+3. CI verde + aprovacao
+4. merge em `main`
+5. deploy no Railway
+6. verificacao operacional em:
+   - `/` (painel)
+   - `/ecosystem-3d.html` (grafo vivo)
 
-**Variantes:**
+## Escopo e limite
 
-- `.card-primary` - Azul (ações principais)
-- `.card-accent` - Verde (saúde/status)
-- `.card-stats` - Laranja (estatísticas)
-- `.card-tall` - Altura 2x
-- `.card-wide` - Largura 2x
+Este repositorio representa o dashboard do ecossistema NEØ PROTOCOL.
 
-#### Action Buttons
-
-Botões iOS-style com animação de shine:
-
-```html
-<button class="action-btn">
-    <span class="btn-icon">⟠</span>
-    <span>Novo Lembrete</span>
-</button>
-```
-
-#### Modals
-
-Modais com blur backdrop e animação slideUp:
-
-```javascript
-function openModal() {
-    document.getElementById('my-modal').classList.add('active');
-}
-
-function closeModal() {
-    document.getElementById('my-modal').classList.remove('active');
-}
-```
-
-### Animações
-
-#### Float Animation (Logo)
-
-```css
-@keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-}
-```
-
-#### Pulse Animation (Status Dot)
-
-```css
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
-```
-
-#### Slide Up (Modal)
-
-```css
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-```
-
-## 📱 Seções do Dashboard
-
-### 1. Header
-
-Status badge animado e logo com float effect.
-
-```html
-<header class="header">
-    <div class="logo">
-        <span class="logo-icon">Ξ</span>
-        <h1>NΞØ BOT</h1>
-    </div>
-    <div class="status-badge">
-        <span class="status-dot"></span>
-        <span>Sistema Ativo</span>
-    </div>
-</header>
-```
-
-### 2. Ações Rápidas
-
-Botões para ações principais do sistema.
-
-### 3. Lembretes Agendados
-
-Lista scrollável de lembretes com auto-refresh.
-
-### 4. Saúde do Sistema
-
-Métricas em tempo real:
-
-- Status Telegram
-- Status Scheduler
-- Contagem de lembretes
-
-### 5. Mensagens Recentes
-
-Histórico das últimas mensagens enviadas.
-
-### 6. Chat com Claude AI
-
-Interface de chat em tempo real:
-
-- Mensagens do usuário (direita, azul)
-- Respostas da IA (esquerda, cinza)
-- Input com envio rápido
-- Histórico persistente
-
-### 7. Estatísticas de IA
-
-Métricas de uso do Claude:
-
-- Total de requests
-- Tokens consumidos
-- Custo acumulado
-- Tempo médio de resposta
-
-### 8. Automações Avançadas
-
-Lista de todas as automações com:
-
-- Status (ativa/pausada)
-- Schedule (cron)
-- Contadores (runs/errors)
-- Controles (executar/toggle)
-
-### 9. Gerador de Relatórios
-
-Botão para gerar relatórios sob demanda com preview.
-
-### 10. Estatísticas de Automações
-
-Contadores rápidos:
-
-- Automações ativas
-- Execuções do dia
-
-## 🔧 Customização
-
-### Adicionar Nova Seção
-
-1. Adicione o HTML no `index.html`:
-
-```html
-<div class="bento-card">
-    <div class="card-header">
-        <h2>🎯 Minha Seção</h2>
-        <button class="icon-btn" onclick="loadMyData()">↻</button>
-    </div>
-    <div id="my-data" class="my-container">
-        <!-- Conteúdo -->
-    </div>
-</div>
-```
-
-1. Adicione estilos no `styles.css`:
-
-```css
-.my-container {
-    /* seus estilos */
-}
-```
-
-1. Adicione lógica no `app.js`:
-
-```javascript
-async function loadMyData() {
-    const response = await fetch(`${API_BASE}/my-endpoint`);
-    const data = await response.json();
-    // Renderizar dados
-}
-```
-
-### Modificar Cores
-
-Edite as variáveis CSS no início de `styles.css`:
-
-```css
-:root {
-    --accent-primary: #007AFF; /* Sua cor aqui */
-}
-```
-
-### Adicionar Animação
-
-```css
-.minha-classe {
-    animation: minhaAnimacao 2s ease-in-out infinite;
-}
-
-@keyframes minhaAnimacao {
-    0% { /* estado inicial */ }
-    50% { /* meio */ }
-    100% { /* estado final */ }
-}
-```
-
-## 🎯 Boas Práticas
-
-### Performance
-
-1. **Use backdrop-filter com moderação**: É pesado para GPU
-2. **Limite auto-refresh**: 30s é um bom intervalo
-3. **Lazy load**: Carregue dados sob demanda
-4. **Debounce inputs**: Em campos de busca e chat
-
-### Acessibilidade
-
-1. **Contraste**: Mantenha contraste mínimo de 4.5:1
-2. **Focus states**: Sempre visível em elementos interativos
-3. **Alt text**: Em todas as imagens
-4. **ARIA labels**: Em botões sem texto
-
-### Responsividade
-
-O dashboard usa CSS Grid com auto-fit:
-
-```css
-.bento-grid {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-}
-```
-
-Em mobile (< 768px):
-
-- Grid colapsa para 1 coluna
-- Cards wide/tall voltam ao tamanho normal
-- Padding reduzido
-
-## 🐛 Debug
-
-### Console do navegador
-
-Abra com F12 e verifique:
-
-1. **Network**: Requisições API
-2. **Console**: Erros JavaScript
-3. **Elements**: Inspecionar estilos
-
-### Logs do servidor
-
-```bash
-# No terminal do servidor
-# Veja logs de requests e errors
-```
-
-### Testar API manualmente
-
-```bash
-# Health check
-curl http://localhost:3000/api/health
-
-# Automações
-curl http://localhost:3000/api/automations/tasks
-
-# AI Stats
-curl http://localhost:3000/api/ai/stats
-```
-
-## 📚 Recursos
-
-- [SF Symbols](https://developer.apple.com/sf-symbols/) - Ícones iOS
-- [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/)
-- [iOS Color Palette](https://developer.apple.com/design/human-interface-guidelines/color)
-- [Glassmorphism Generator](https://hype4.academy/tools/glassmorphism-generator)
-
-## 🎨 Screenshots
-
-### Desktop View
-
-- Layout em grid com múltiplas colunas
-- Glassmorphism effects
-- Hover animations
-
-### Mobile View
-
-- Single column
-- Touch-friendly buttons
-- Optimized spacing
-
-## ⨷ Auto-refresh
-
-O dashboard atualiza automaticamente:
-
-- **Reminders**: A cada 30s
-- **Messages**: A cada 30s
-- **AI Stats**: Ao enviar mensagem
-- **Automations**: A cada 30s
-- **System Health**: A cada 30s
-
-## 💡 Tips
-
-1. **Use Command/Ctrl + R**: Refresh rápido
-2. **Atalho do Chat**: Enter para enviar
-3. **Modais**: Clique fora para fechar (adicione se quiser)
-4. **Mobile**: Adicione à tela inicial para app-like experience
-
-## ⨂ Deploy
-
-### Opção 1: Servidor Local
-
-```bash
-node server.js
-```
-
-### Opção 2: Docker
-
-```dockerfile
-FROM node:22
-WORKDIR /app
-COPY dashboard/package*.json ./
-RUN npm install
-COPY dashboard/ ./
-EXPOSE 3000
-CMD ["node", "server.js"]
-```
-
-### Opção 3: Render/Vercel
-
-1. Configure variáveis de ambiente
-2. Deploy com `npm start`
-3. Configure domínio customizado
-
-## 🎯 Performance & Otimizações (v1.1.0)
-
-### ⚡ Melhorias de Performance
-
-- **Hover Effects Otimizados**: Transições 2.6x mais rápidas (0.4s → 0.15s)
-- **Sem Transform Pesados**: Removido translateX/Y, scale e rotate
-- **CPU/GPU Otimizado**: Redução significativa de uso de recursos
-- **Cache Inteligente**: Sistema de cache para requisições da IA
-- **Batch Processing**: Processar múltiplas operações em paralelo
-
-### 🐛 Correções de Bugs
-
-- ✓ Corrigido 11 null pointer errors
-- ✓ Validação de DOM elements antes de acessar
-- ✓ Fail gracefully quando elementos não existem
-- ✓ Error handling robusto em todas as funções
-
-### 💰 Economia de IA (30-50%)
-
-- Cache agressivo com TTL de 1 hora
-- Auto-limpeza de cache a cada 30 minutos
-- Tracking de economia em tempo real
-- Ver: [OPTIMIZATIONS.md](../OPTIMIZATIONS.md)
-
-## 📄 License
-
-MIT
-
----
-
-**Made with ❤️ for NeoBot** | v1.1.0 | Design inspired by iOS 17
-*Optimized for performance and cost efficiency* ⚡💰
+Nao usar este projeto para mapear ou fundir a trilha externa `flowpay-core` dentro da stack NEØ. Essa fronteira e intencional.
