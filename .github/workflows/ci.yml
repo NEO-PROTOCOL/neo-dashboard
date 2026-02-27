@@ -1,0 +1,38 @@
+name: Dashboard CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  syntax-and-guards:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: JavaScript Syntax Check
+        run: |
+          node --check server.js
+          node --check neo-routes.js
+          node --check nexus-routes.js
+          node --check nexus-routes-v2.js
+          node --check automation-routes.js
+          node --check ai-routes.js
+          node --check report-routes.js
+
+      - name: Realtime Graph Guardrails
+        run: |
+          grep -q "\/api\/neo\/ecosystem\/live" ecosystem-3d.html
+          grep -q "setInterval(refreshGraph, LIVE_REFRESH_MS)" ecosystem-3d.html
+          grep -q "router.get(\"/ecosystem/live\"" neo-routes.js
