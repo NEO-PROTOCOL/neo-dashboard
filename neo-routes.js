@@ -582,6 +582,7 @@ async function probeNodeStatus(url) {
 }
 
 async function loadEcosystemNodes() {
+  // Source 1: neobot local filesystem (dev environment only)
   const ecosystemPath = path.resolve(
     process.cwd(),
     "../neobot/config/ecosystem.json",
@@ -598,6 +599,7 @@ async function loadEcosystemNodes() {
     console.warn("Failed to read ecosystem.json:", e.message);
   }
 
+  // Source 2: Nexus API (when neobot is online)
   try {
     const r = await fetchWithTimeout(NEXUS_ECOSYSTEM_URL);
     if (r.ok) {
@@ -614,6 +616,23 @@ async function loadEcosystemNodes() {
     }
   } catch (e) {
     console.warn("Failed to fetch ecosystem from Nexus API:", e.message);
+  }
+
+  // Source 3: ecosystem-graph.json bundled in the repo (autonomous fallback)
+  // This file is enriched with production URLs via `npm run sync:ecosystem-graph`
+  // and allows the dashboard to probe node health without depending on neobot.
+  const graphPath = path.resolve(process.cwd(), "ecosystem-graph.json");
+  try {
+    if (fs.existsSync(graphPath)) {
+      const raw = fs.readFileSync(graphPath, "utf8");
+      const parsed = JSON.parse(raw);
+      const nodes = Array.isArray(parsed?.nodes) ? parsed.nodes : [];
+      if (nodes.length > 0) {
+        return { success: true, nodes, source: "graph-file" };
+      }
+    }
+  } catch (e) {
+    console.warn("Failed to read ecosystem-graph.json:", e.message);
   }
 
   return { success: false, nodes: [], source: "unavailable" };

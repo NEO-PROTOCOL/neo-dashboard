@@ -45,6 +45,24 @@ function hasNexusIntegration(node) {
   return Boolean(node?.webhookUrl || node?.webhookRoutes || node?.nexusEvents);
 }
 
+function resolveProductionUrl(node) {
+  const candidates = [
+    node?.hosting?.targetCustomDomain,
+    node?.hosting?.productionUrl,
+    node?.infrastructure?.productionUrl,
+    node?.hosting?.railwayUrl,
+    node?.infrastructure?.railwayUrl,
+  ];
+  for (const c of candidates) {
+    if (!c || typeof c !== 'string') continue;
+    const t = c.trim();
+    if (!t || t.includes('.railway.internal') || t.includes('localhost')) continue;
+    if (t.startsWith('http://') || t.startsWith('https://')) return t;
+    return `https://${t}`;
+  }
+  return null;
+}
+
 function addLink(links, keySet, source, target, label) {
   if (!source || !target || source === target) return;
   const key = `${source}->${target}:${label}`;
@@ -66,14 +84,24 @@ for (const rawNode of sourceNodes) {
   if (!id || dedup.has(id)) continue;
 
   const group = normalizeGroup(rawNode);
-  dedup.set(id, {
+  const url = resolveProductionUrl(rawNode);
+
+  const entry = {
     id,
     name: String(rawNode?.name || id),
     group,
     status: 'unknown',
     nexusConnection: hasNexusIntegration(rawNode) ? 'linked' : 'unlinked',
     val: computeNodeVal(rawNode, group),
-  });
+  };
+
+  // preserve URL data so the dashboard can probe nodes without neobot
+  if (url) entry.url = url;
+  if (rawNode?.hosting) entry.hosting = rawNode.hosting;
+  if (rawNode?.webhookUrl) entry.webhookUrl = rawNode.webhookUrl;
+  if (rawNode?.webhookRoutes) entry.webhookRoutes = rawNode.webhookRoutes;
+
+  dedup.set(id, entry);
 }
 
 const nodes = [...dedup.values()].sort((a, b) => a.id.localeCompare(b.id));
