@@ -82,7 +82,7 @@
         Fluxx Dao
       </div>
       <div class="legend-item">
-        <div class="dot" style="background: #ffcc00"></div>
+        <div class="dot" style="background: #9aa4b2"></div>
         DApps & Tools
       </div>
     </div>
@@ -100,7 +100,6 @@
         "Fluxx Dao": "#4488ff",
         "FlowOFF Agency": "#ff00ff",
         "WOD Game": "#ffcc00",
-        "Neo Tooling": "#aaaaaa",
         "DApps & Tools": "#9aa4b2",
       };
 
@@ -176,6 +175,7 @@
           return "Neo Smart Factory";
         if (mix.includes("wod")) return "WOD Game";
         if (
+          org.includes("neo-flowoff") ||
           mix.includes("flowoff") ||
           mix.includes("pro-ia") ||
           mix.includes("node neø run") ||
