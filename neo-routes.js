@@ -600,7 +600,9 @@ async function loadEcosystemNodes() {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
         const nodes = parsed.filter((n) => !ECOSYSTEM_EXCLUDE_IDS.has(n?.id));
-        return { success: true, nodes, source: "local-file" };
+        if (nodes.length > 0) {
+          return { success: true, nodes, source: "local-file" };
+        }
       }
     }
   } catch (e) {
@@ -614,15 +616,21 @@ async function loadEcosystemNodes() {
       const data = await r.json();
       if (Array.isArray(data) && data.length > 0) {
         const nodes = data.filter((n) => !ECOSYSTEM_EXCLUDE_IDS.has(n?.id));
-        return { success: true, nodes, source: "nexus-api" };
+        if (nodes.length > 0) {
+          return { success: true, nodes, source: "nexus-api" };
+        }
       }
       if (Array.isArray(data?.ecosystem) && data.ecosystem.length > 0) {
         const nodes = data.ecosystem.filter((n) => !ECOSYSTEM_EXCLUDE_IDS.has(n?.id));
-        return { success: true, nodes, source: "nexus-api" };
+        if (nodes.length > 0) {
+          return { success: true, nodes, source: "nexus-api" };
+        }
       }
       if (Array.isArray(data?.nodes) && data.nodes.length > 0) {
         const nodes = data.nodes.filter((n) => !ECOSYSTEM_EXCLUDE_IDS.has(n?.id));
-        return { success: true, nodes, source: "nexus-api" };
+        if (nodes.length > 0) {
+          return { success: true, nodes, source: "nexus-api" };
+        }
       }
     }
   } catch (e) {
