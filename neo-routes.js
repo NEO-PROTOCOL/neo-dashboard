@@ -17,6 +17,13 @@ const PROBE_CACHE_TTL_MS = Number(
   process.env.ECOSYSTEM_PROBE_CACHE_TTL_MS || 12000,
 );
 
+// Nodes explicitly excluded from the ecosystem graph.
+// These exist in external data sources (e.g. Nexus API) but are NOT part of
+// the NEO Protocol stack and must not appear in the dashboard graph.
+const ECOSYSTEM_EXCLUDE_IDS = new Set([
+  "flowpay-core", // standalone commercial product — see stackBoundary.doNotConfuseWith in ecosystem.json
+]);
+
 const liveProbeCache = {
   checkedAt: 0,
   payload: null,
@@ -592,7 +599,8 @@ async function loadEcosystemNodes() {
       const raw = fs.readFileSync(ecosystemPath, "utf8");
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return { success: true, nodes: parsed, source: "local-file" };
+        const nodes = parsed.filter((n) => !ECOSYSTEM_EXCLUDE_IDS.has(n?.id));
+        return { success: true, nodes, source: "local-file" };
       }
     }
   } catch (e) {
@@ -605,13 +613,16 @@ async function loadEcosystemNodes() {
     if (r.ok) {
       const data = await r.json();
       if (Array.isArray(data) && data.length > 0) {
-        return { success: true, nodes: data, source: "nexus-api" };
+        const nodes = data.filter((n) => !ECOSYSTEM_EXCLUDE_IDS.has(n?.id));
+        return { success: true, nodes, source: "nexus-api" };
       }
       if (Array.isArray(data?.ecosystem) && data.ecosystem.length > 0) {
-        return { success: true, nodes: data.ecosystem, source: "nexus-api" };
+        const nodes = data.ecosystem.filter((n) => !ECOSYSTEM_EXCLUDE_IDS.has(n?.id));
+        return { success: true, nodes, source: "nexus-api" };
       }
       if (Array.isArray(data?.nodes) && data.nodes.length > 0) {
-        return { success: true, nodes: data.nodes, source: "nexus-api" };
+        const nodes = data.nodes.filter((n) => !ECOSYSTEM_EXCLUDE_IDS.has(n?.id));
+        return { success: true, nodes, source: "nexus-api" };
       }
     }
   } catch (e) {
@@ -626,7 +637,8 @@ async function loadEcosystemNodes() {
     if (fs.existsSync(graphPath)) {
       const raw = fs.readFileSync(graphPath, "utf8");
       const parsed = JSON.parse(raw);
-      const nodes = Array.isArray(parsed?.nodes) ? parsed.nodes : [];
+      const rawNodes = Array.isArray(parsed?.nodes) ? parsed.nodes : [];
+      const nodes = rawNodes.filter((n) => !ECOSYSTEM_EXCLUDE_IDS.has(n?.id));
       if (nodes.length > 0) {
         return { success: true, nodes, source: "graph-file" };
       }
