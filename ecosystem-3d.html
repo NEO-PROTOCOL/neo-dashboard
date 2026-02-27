@@ -9,7 +9,7 @@
         margin: 0;
         background: #0a0a0a;
         color: #fff;
-        font-family: 'Inter', sans-serif;
+        font-family: "Inter", sans-serif;
         overflow: hidden;
       }
       #graph-container {
@@ -88,105 +88,250 @@
     </div>
 
     <script>
-      const API_PASS_KEY = 'neo_gateway_password';
+      const API_PASS_KEY = "neo_gateway_password";
+      const LIVE_REFRESH_MS = 8000;
+      const CHANGE_FLASH_MS = 20000;
+      const MAX_EVENT_LINES = 8;
+
       const colorMap = {
-        'NEO Protocol': '#ff4444',
-        'Neo Smart Factory': '#00ccff',
-        FlowPay: '#00ffcc',
-        'Fluxx Dao': '#4488ff',
-        'FlowOFF Agency': '#ff00ff', // Magenta FlowOFF
-        'WOD Game': '#ffcc00',
-        'Neo Tooling': '#aaaaaa',
+        "NEO Protocol": "#ff4444",
+        "Neo Smart Factory": "#00ccff",
+        FlowPay: "#00ffcc",
+        "Fluxx Dao": "#4488ff",
+        "FlowOFF Agency": "#ff00ff",
+        "WOD Game": "#ffcc00",
+        "Neo Tooling": "#aaaaaa",
+        "DApps & Tools": "#9aa4b2",
       };
 
-      const graphContainer = document.getElementById('graph-container');
+      const statusColors = {
+        online: "#39d98a",
+        degraded: "#ffb74d",
+        offline: "#ff4d67",
+        unknown: "#7b8797",
+      };
+
+      const graphContainer = document.getElementById("graph-container");
+      const overlay = document.querySelector(".overlay");
+      const legend = document.querySelector(".legend");
+
+      overlay.insertAdjacentHTML(
+        "beforeend",
+        `
+          <div id="live-hud" style="margin-top:10px;max-width:430px;background:rgba(0,0,0,.62);border:1px solid #2a3240;border-radius:8px;padding:10px 12px;pointer-events:auto;">
+            <div id="live-summary" style="font-size:12px;color:#b4c0d1;">Loading live telemetry...</div>
+            <div id="live-meta" style="font-size:11px;color:#748099;margin-top:5px;"></div>
+            <div id="live-alerts" style="font-size:11px;color:#ffb74d;margin-top:8px;line-height:1.35;"></div>
+          </div>
+        `,
+      );
+
+      legend.insertAdjacentHTML(
+        "beforeend",
+        `
+          <hr style="border:none;border-top:1px solid #2a3240;margin:8px 0" />
+          <div class="legend-item"><div class="dot" style="background:${statusColors.online}"></div>Online</div>
+          <div class="legend-item"><div class="dot" style="background:${statusColors.degraded}"></div>Degraded</div>
+          <div class="legend-item"><div class="dot" style="background:${statusColors.offline}"></div>Offline</div>
+          <div class="legend-item"><div class="dot" style="background:${statusColors.unknown}"></div>Unknown</div>
+        `,
+      );
+
+      const liveSummaryEl = document.getElementById("live-summary");
+      const liveMetaEl = document.getElementById("live-meta");
+      const liveAlertsEl = document.getElementById("live-alerts");
+
+      let graphMode = "none";
+      let graphInstance = null;
+      let fetchInFlight = false;
+      let refreshTimer = null;
+      const lastStatusById = new Map();
+      const changedUntilById = new Map();
+      const transitionLog = [];
+      const latestNodeMeta = new Map();
 
       function getGatewayPassword() {
         try {
-          const fromStorage = localStorage.getItem(API_PASS_KEY) || '';
+          const fromStorage = localStorage.getItem(API_PASS_KEY) || "";
           if (fromStorage) return fromStorage;
         } catch (_e) {}
         const params = new URLSearchParams(window.location.search);
-        return params.get('password') || '';
+        return params.get("password") || "";
+      }
+
+      function pushTransition(line) {
+        transitionLog.unshift(line);
+        transitionLog.splice(MAX_EVENT_LINES);
       }
 
       function normalizeGroup(n) {
-        const org = String(n?.org || '').toLowerCase();
-        const mix = `${n?.id || ''} ${n?.name || ''} ${n?.role || ''}`.toLowerCase();
+        const org = String(n?.org || "").toLowerCase();
+        const mix =
+          `${n?.id || ""} ${n?.name || ""} ${n?.role || ""}`.toLowerCase();
 
-        if (org.includes('flowpay') || mix.includes('flowpay')) return 'FlowPay';
-        if (org.includes('fluxx') || mix.includes('fluxx')) return 'Fluxx Dao';
-        if (org.includes('smart factory') || mix.includes('smart ')) return 'Neo Smart Factory';
-        if (mix.includes('wod')) return 'WOD Game';
-        if (mix.includes('flowoff') || mix.includes('pro-ia') || mix.includes('node neø run') || mix.includes('node neo run')) return 'FlowOFF Agency';
-        if (org.includes('neo protocol') || mix.includes('neo')) return 'NEO Protocol';
-        return 'DApps & Tools';
+        if (org.includes("flowpay") || mix.includes("flowpay"))
+          return "FlowPay";
+        if (org.includes("fluxx") || mix.includes("fluxx")) return "Fluxx Dao";
+        if (org.includes("smart factory") || mix.includes("smart "))
+          return "Neo Smart Factory";
+        if (mix.includes("wod")) return "WOD Game";
+        if (
+          mix.includes("flowoff") ||
+          mix.includes("pro-ia") ||
+          mix.includes("node neø run") ||
+          mix.includes("node neo run")
+        ) {
+          return "FlowOFF Agency";
+        }
+        if (org.includes("neo protocol") || mix.includes("neo"))
+          return "NEO Protocol";
+        return "DApps & Tools";
       }
 
       function computeNodeVal(n, group) {
-        const role = String(n?.role || '').toLowerCase();
-        const id = String(n?.id || '').toLowerCase();
-        if (role.includes('orchestrator') || role.includes('event hub') || role.includes('sovereign')) return 12;
-        if (id.includes('nexus') || id.includes('architect')) return 11;
-        if (role.includes('protocol') || role.includes('contract')) return 9;
-        if (group === 'FlowPay' || group === 'Neo Smart Factory') return 8;
+        const role = String(n?.role || "").toLowerCase();
+        const id = String(n?.id || "").toLowerCase();
+        if (
+          role.includes("orchestrator") ||
+          role.includes("event hub") ||
+          role.includes("sovereign")
+        )
+          return 12;
+        if (id.includes("nexus") || id.includes("architect")) return 11;
+        if (role.includes("protocol") || role.includes("contract")) return 9;
+        if (group === "FlowPay" || group === "Neo Smart Factory") return 8;
         return 6;
+      }
+
+      function nodeStatus(rawNode) {
+        return String(
+          rawNode?._live?.status || rawNode?.status || "unknown",
+        ).toLowerCase();
+      }
+
+      function nodeNexusConnection(rawNode) {
+        if (rawNode?._live?.nexusConnection)
+          return rawNode._live.nexusConnection;
+        if (
+          rawNode?.webhookUrl ||
+          rawNode?.webhookRoutes ||
+          rawNode?.nexusEvents
+        )
+          return "linked";
+        return "unlinked";
+      }
+
+      function nodeColor(node) {
+        if (node.status === "online") return colorMap[node.group] || "#9aa4b2";
+        return statusColors[node.status] || statusColors.unknown;
+      }
+
+      function linkColor(link) {
+        if (link.label === "missing-nexus") return "#ff4d67";
+        const source = latestNodeMeta.get(String(link.source));
+        const target = latestNodeMeta.get(String(link.target));
+        if (source?.status === "offline" || target?.status === "offline")
+          return "#ff7d8e";
+        if (source?.status === "degraded" || target?.status === "degraded")
+          return "#ffb74d";
+        return "#2f3948";
+      }
+
+      function normalizeGraphData(data) {
+        return {
+          nodes: (data?.nodes || []).map((n) => ({
+            ...n,
+            status: n.status || "unknown",
+            nexusConnection: n.nexusConnection || "unknown",
+          })),
+          links: Array.isArray(data?.links) ? data.links : [],
+        };
       }
 
       function buildGraphFromEcosystem(rawNodes) {
         const valid = Array.isArray(rawNodes) ? rawNodes : [];
+        const now = Date.now();
         const nodes = [];
+        const links = [];
+        latestNodeMeta.clear();
         const seen = new Set();
+        const byGroup = new Map();
+        const linkKey = new Set();
 
-        valid.forEach((n, idx) => {
-          const id = String(n?.id || n?.name || `node-${idx}`).trim();
+        valid.forEach((raw, idx) => {
+          const id = String(raw?.id || raw?.name || `node-${idx}`).trim();
           if (!id || seen.has(id)) return;
           seen.add(id);
-          const group = normalizeGroup(n);
-          nodes.push({
+
+          const status = nodeStatus(raw);
+          const nexusConnection = nodeNexusConnection(raw);
+          const prevStatus = lastStatusById.get(id);
+          if (prevStatus && prevStatus !== status) {
+            changedUntilById.set(id, now + CHANGE_FLASH_MS);
+            pushTransition(
+              `[${new Date().toLocaleTimeString()}] ${raw?.name || id}: ${prevStatus} -> ${status}`,
+            );
+          }
+          lastStatusById.set(id, status);
+
+          const group = normalizeGroup(raw);
+          const isFlashing = (changedUntilById.get(id) || 0) > now;
+          const baseVal = computeNodeVal(raw, group);
+          const statusPenalty =
+            status === "offline" ? -2 : status === "degraded" ? -1 : 0;
+
+          const node = {
             id,
-            name: String(n?.name || id),
+            name: String(raw?.name || id),
             group,
-            val: computeNodeVal(n, group),
-          });
+            status,
+            url: raw?._live?.url || raw?.hosting?.productionUrl || null,
+            nexusConnection,
+            val: Math.max(3, baseVal + statusPenalty + (isFlashing ? 3 : 0)),
+          };
+          nodes.push(node);
+          latestNodeMeta.set(id, node);
+
+          if (!byGroup.has(group)) byGroup.set(group, []);
+          byGroup.get(group).push(node);
         });
 
-        const links = [];
-        const linkKey = new Set();
-        const byGroup = new Map();
+        for (const [id, until] of changedUntilById.entries()) {
+          if (until < now) changedUntilById.delete(id);
+        }
 
-        nodes.forEach((node, idx) => {
-          if (!byGroup.has(node.group)) byGroup.set(node.group, []);
-          byGroup.get(node.group).push({ ...node, idx });
-        });
-
-        // Connect each group to a representative hub.
         for (const [, groupNodes] of byGroup.entries()) {
           if (groupNodes.length <= 1) continue;
-          const hub = groupNodes.reduce((best, cur) => (cur.val > best.val ? cur : best), groupNodes[0]);
+          const hub = groupNodes.reduce(
+            (best, cur) => (cur.val > best.val ? cur : best),
+            groupNodes[0],
+          );
           groupNodes.forEach((n) => {
             if (n.id === hub.id) return;
-            const k = `${n.id}->${hub.id}`;
-            if (!linkKey.has(k)) {
-              linkKey.add(k);
-              links.push({ source: n.id, target: hub.id, label: 'group' });
+            const key = `${n.id}->${hub.id}`;
+            if (!linkKey.has(key)) {
+              linkKey.add(key);
+              links.push({ source: n.id, target: hub.id, label: "group" });
             }
           });
         }
 
-        // Connect ecosystem nodes to Nexus when integration hints exist.
-        const nexusNode = valid.find((n) => String(n?.id || '').toLowerCase().includes('nexus'));
-        const nexusId = nexusNode ? String(nexusNode.id) : null;
+        const nexusNode = nodes.find((n) =>
+          n.id.toLowerCase().includes("nexus"),
+        );
+        const nexusId = nexusNode?.id || null;
         if (nexusId && seen.has(nexusId)) {
-          valid.forEach((n) => {
-            const id = String(n?.id || '').trim();
-            if (!id || id === nexusId || !seen.has(id)) return;
-            if (n?.webhookUrl || n?.nexusEvents) {
-              const k = `${id}->${nexusId}`;
-              if (!linkKey.has(k)) {
-                linkKey.add(k);
-                links.push({ source: id, target: nexusId, label: 'nexus' });
-              }
+          nodes.forEach((n) => {
+            if (n.id === nexusId) return;
+            const key = `${n.id}->${nexusId}`;
+            if (!linkKey.has(key)) {
+              linkKey.add(key);
+              links.push({
+                source: n.id,
+                target: nexusId,
+                label:
+                  n.nexusConnection === "linked" ? "nexus" : "missing-nexus",
+              });
             }
           });
         }
@@ -194,30 +339,109 @@
         return { nodes, links };
       }
 
-      async function fetchEcosystemGraphData() {
-        // Primary source: API backed by neobot/config/ecosystem.json or Nexus fallback.
+      async function fetchGraphPayload() {
+        const password = getGatewayPassword();
+        const headers = password ? { "x-gateway-password": password } : {};
+
         try {
-          const password = getGatewayPassword();
-          const res = await fetch('/api/neo/ecosystem', {
-            headers: password ? { 'x-gateway-password': password } : {},
-          });
-          if (res.ok) {
-            const payload = await res.json();
-            const raw = Array.isArray(payload?.nodes) ? payload.nodes : Array.isArray(payload) ? payload : [];
-            if (raw.length > 0) return buildGraphFromEcosystem(raw);
+          const liveRes = await fetch("/api/neo/ecosystem/live", { headers });
+          if (liveRes.ok) {
+            const payload = await liveRes.json();
+            if (
+              payload?.success &&
+              Array.isArray(payload.nodes) &&
+              payload.nodes.length > 0
+            ) {
+              return {
+                mode: "live",
+                source: payload.source || "live-api",
+                checkedAt: payload.checkedAt,
+                summary: payload.summary || null,
+                graphData: buildGraphFromEcosystem(payload.nodes),
+              };
+            }
+          } else if (liveRes.status === 401) {
+            throw new Error("auth_required");
           }
         } catch (e) {
-          console.warn('ecosystem API unavailable:', e?.message || e);
+          console.warn("live ecosystem unavailable:", e?.message || e);
         }
 
-        // Static fallback.
-        const staticRes = await fetch('ecosystem-graph.json');
-        return staticRes.json();
+        try {
+          const res = await fetch("/api/neo/ecosystem", { headers });
+          if (res.ok) {
+            const payload = await res.json();
+            const raw = Array.isArray(payload?.nodes)
+              ? payload.nodes
+              : Array.isArray(payload)
+                ? payload
+                : [];
+            if (raw.length > 0) {
+              return {
+                mode: "snapshot",
+                source: payload.source || "ecosystem-api",
+                checkedAt: new Date().toISOString(),
+                summary: null,
+                graphData: buildGraphFromEcosystem(raw),
+              };
+            }
+          }
+        } catch (e) {
+          console.warn("ecosystem API unavailable:", e?.message || e);
+        }
+
+        const staticRes = await fetch("ecosystem-graph.json");
+        return {
+          mode: "static",
+          source: "static-json",
+          checkedAt: new Date().toISOString(),
+          summary: null,
+          graphData: normalizeGraphData(await staticRes.json()),
+        };
+      }
+
+      function renderHud(payload) {
+        const graphData = payload.graphData || { nodes: [] };
+        const statusCount = graphData.nodes.reduce(
+          (acc, node) => {
+            const st = node.status || "unknown";
+            acc[st] = (acc[st] || 0) + 1;
+            if (node.nexusConnection === "unlinked") acc.unlinked += 1;
+            return acc;
+          },
+          { online: 0, degraded: 0, offline: 0, unknown: 0, unlinked: 0 },
+        );
+
+        liveSummaryEl.textContent = `Nodes: ${graphData.nodes.length} | Online: ${statusCount.online} | Degraded: ${statusCount.degraded} | Offline: ${statusCount.offline} | Unlinked: ${statusCount.unlinked}`;
+
+        liveMetaEl.textContent = `Source: ${payload.source} | Mode: ${payload.mode} | Checked: ${new Date(
+          payload.checkedAt,
+        ).toLocaleTimeString()}`;
+
+        const alertLines = [];
+        if (payload.mode !== "live") {
+          alertLines.push(
+            "[WARN] Live probe endpoint indisponivel. Exibindo snapshot.",
+          );
+        }
+        if (statusCount.offline > 0) {
+          alertLines.push(`[ALERT] ${statusCount.offline} node(s) offline.`);
+        }
+        if (statusCount.unlinked > 0) {
+          alertLines.push(
+            `[ALERT] ${statusCount.unlinked} node(s) sem link de integracao com Nexus.`,
+          );
+        }
+        transitionLog.forEach((line) => alertLines.push(line));
+
+        liveAlertsEl.innerHTML = alertLines.length
+          ? alertLines.map((line) => `<div>${line}</div>`).join("")
+          : '<div style="color:#39d98a;">No critical transitions in current window.</div>';
       }
 
       function loadScript(src) {
         return new Promise((resolve, reject) => {
-          const el = document.createElement('script');
+          const el = document.createElement("script");
           el.src = src;
           el.async = true;
           el.onload = () => resolve(src);
@@ -229,13 +453,13 @@
       function supportsWebGL() {
         try {
           const params = new URLSearchParams(window.location.search);
-          if (params.get('force2d') === '1') return false;
-          const c = document.createElement('canvas');
+          if (params.get("force2d") === "1") return false;
+          const c = document.createElement("canvas");
           return !!(
             window.WebGLRenderingContext &&
-            (c.getContext('webgl2') ||
-              c.getContext('webgl') ||
-              c.getContext('experimental-webgl'))
+            (c.getContext("webgl2") ||
+              c.getContext("webgl") ||
+              c.getContext("experimental-webgl"))
           );
         } catch (_e) {
           return false;
@@ -244,34 +468,34 @@
 
       async function ensure3DLibrary() {
         const sources = [
-          'https://unpkg.com/3d-force-graph',
-          'https://cdn.jsdelivr.net/npm/3d-force-graph',
+          "https://unpkg.com/3d-force-graph",
+          "https://cdn.jsdelivr.net/npm/3d-force-graph",
         ];
         for (const src of sources) {
           try {
             await loadScript(src);
-            if (typeof ForceGraph3D === 'function') return;
+            if (typeof ForceGraph3D === "function") return;
           } catch (e) {
             console.warn(e.message);
           }
         }
-        throw new Error('3d-force-graph library unavailable');
+        throw new Error("3d-force-graph library unavailable");
       }
 
       async function ensure2DLibrary() {
         const sources = [
-          'https://unpkg.com/force-graph',
-          'https://cdn.jsdelivr.net/npm/force-graph',
+          "https://unpkg.com/force-graph",
+          "https://cdn.jsdelivr.net/npm/force-graph",
         ];
         for (const src of sources) {
           try {
             await loadScript(src);
-            if (typeof ForceGraph === 'function') return;
+            if (typeof ForceGraph === "function") return;
           } catch (e) {
             console.warn(e.message);
           }
         }
-        throw new Error('force-graph library unavailable');
+        throw new Error("force-graph library unavailable");
       }
 
       function renderFallback(data, reason) {
@@ -283,10 +507,9 @@
         `;
       }
 
-      function renderStaticSvg(data, reason = 'static_svg') {
+      function renderStaticSvg(data, reason = "static_svg") {
         const nodes = Array.isArray(data?.nodes) ? data.nodes : [];
         const links = Array.isArray(data?.links) ? data.links : [];
-
         if (!nodes.length) {
           renderFallback(data, reason);
           return;
@@ -297,7 +520,6 @@
         const cx = width / 2;
         const cy = height / 2;
         const radius = Math.min(width, height) * 0.34;
-
         const idx = new Map();
         nodes.forEach((n, i) => idx.set(n.id ?? n.name ?? i, i));
 
@@ -307,7 +529,7 @@
             ...n,
             x: cx + radius * Math.cos(a),
             y: cy + radius * Math.sin(a),
-            color: colorMap[n.group] || '#9aa4b2',
+            color: nodeColor(n),
           };
         });
 
@@ -315,23 +537,23 @@
           .map((l) => {
             const sIdx = idx.get(l.source);
             const tIdx = idx.get(l.target);
-            if (sIdx == null || tIdx == null) return '';
+            if (sIdx == null || tIdx == null) return "";
             const s = positioned[sIdx];
             const t = positioned[tIdx];
-            return `<line x1="${s.x}" y1="${s.y}" x2="${t.x}" y2="${t.y}" stroke="#223042" stroke-width="1" opacity="0.7" />`;
+            return `<line x1="${s.x}" y1="${s.y}" x2="${t.x}" y2="${t.y}" stroke="${linkColor(l)}" stroke-width="${l.label === "missing-nexus" ? 1.8 : 1}" opacity="0.75" />`;
           })
-          .join('');
+          .join("");
 
         const svgNodes = positioned
           .map(
             (n) => `
             <g>
               <circle cx="${n.x}" cy="${n.y}" r="5" fill="${n.color}" />
-              <text x="${n.x + 8}" y="${n.y + 4}" fill="#9aa4b2" font-size="11" font-family="Inter, sans-serif">${(n.name || '').replace(/</g, '&lt;')}</text>
+              <text x="${n.x + 8}" y="${n.y + 4}" fill="#9aa4b2" font-size="11" font-family="Inter, sans-serif">${(n.name || "").replace(/</g, "&lt;")}</text>
             </g>
-          `
+          `,
           )
-          .join('');
+          .join("");
 
         graphContainer.innerHTML = `
           <div style="position:absolute;left:12px;bottom:10px;color:#6e7d93;font-size:11px;">
@@ -344,108 +566,154 @@
         `;
       }
 
-      function render2D(data, reason = 'webgl_unavailable') {
-        if (typeof ForceGraph !== 'function') {
+      function render2D(data, reason = "webgl_unavailable") {
+        if (typeof ForceGraph !== "function") {
           renderStaticSvg(data, `${reason}_no_force_graph`);
           return;
         }
-        graphContainer.innerHTML = '';
-        const graph = ForceGraph()(graphContainer)
+        graphContainer.innerHTML = "";
+        graphMode = "2d";
+        graphInstance = ForceGraph()(graphContainer)
           .graphData(data)
-          .backgroundColor('#0a0a0a')
-          .nodeLabel((n) => `${n.name}\n${n.group || ''}`)
+          .backgroundColor("#0a0a0a")
+          .nodeLabel(
+            (n) =>
+              `${n.name}\n${n.group || ""}\nstatus: ${n.status}\nnexus: ${n.nexusConnection}`,
+          )
           .nodeCanvasObject((node, ctx, globalScale) => {
-            const label = node.name || '';
+            const label = node.name || "";
             const fontSize = 10 / globalScale;
             ctx.beginPath();
             ctx.arc(node.x, node.y, 3, 0, 2 * Math.PI, false);
-            ctx.fillStyle = colorMap[node.group] || '#ffffff';
+            ctx.fillStyle = nodeColor(node);
             ctx.fill();
+            if (node.nexusConnection === "unlinked") {
+              ctx.strokeStyle = "#ff4d67";
+              ctx.lineWidth = 1.2 / globalScale;
+              ctx.stroke();
+            }
             ctx.font = `${fontSize}px Inter, sans-serif`;
-            ctx.fillStyle = '#9aa4b2';
+            ctx.fillStyle = "#9aa4b2";
             ctx.fillText(label, node.x + 6, node.y + 3);
           })
-          .linkColor(() => '#2a3240')
-          .linkWidth(0.6)
+          .linkColor((link) => linkColor(link))
+          .linkWidth((link) => (link.label === "missing-nexus" ? 1.6 : 0.7))
           .cooldownTime(2500);
 
         setTimeout(() => {
           try {
-            graph.zoomToFit(400, 40);
+            graphInstance.zoomToFit(400, 40);
           } catch (_e) {}
         }, 500);
       }
 
-      fetchEcosystemGraphData()
-        .then(async (data) => {
-          const canUse3D = supportsWebGL();
+      function render3D(data) {
+        graphMode = "3d";
+        graphContainer.innerHTML = "";
+        graphInstance = ForceGraph3D()(graphContainer)
+          .graphData(data)
+          .backgroundColor("#0a0a0a")
+          .nodeLabel(
+            (node) =>
+              `<span style="color:${nodeColor(node)}"><b>${node.name}</b></span><br/>${node.group}<br/>status: ${node.status}<br/>nexus: ${node.nexusConnection}`,
+          )
+          .nodeColor((node) => nodeColor(node))
+          .nodeVal((node) => node.val)
+          .nodeRelSize(8)
+          .nodeResolution(24)
+          .linkDirectionalParticles((link) =>
+            link.label === "missing-nexus" ? 4 : 2,
+          )
+          .linkDirectionalParticleSpeed(() => 0.005)
+          .linkDirectionalParticleWidth((link) =>
+            link.label === "missing-nexus" ? 2.6 : 1.8,
+          )
+          .linkWidth((link) => (link.label === "missing-nexus" ? 1.8 : 1))
+          .linkColor((link) => linkColor(link))
+          .onNodeClick((node) => {
+            const distance = 40;
+            const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
+            graphInstance.cameraPosition(
+              {
+                x: node.x * distRatio,
+                y: node.y * distRatio,
+                z: node.z * distRatio,
+              },
+              node,
+              3000,
+            );
+          });
 
-          if (!canUse3D) {
-            try {
-              await ensure2DLibrary();
-              render2D(data, 'webgl_unavailable');
-              return;
-            } catch (e) {
-              renderFallback(data, e?.message || '2d_script');
-              return;
-            }
-          }
-
+        setTimeout(() => {
           try {
-            await ensure3DLibrary();
-            if (typeof ForceGraph3D !== 'function') {
-              throw new Error('3d_runtime');
-            }
-
-            const Graph = ForceGraph3D()(graphContainer)
-              .graphData(data)
-              .backgroundColor('#0a0a0a')
-              .nodeLabel(
-                (node) =>
-                  `<span style="color:${colorMap[node.group] || '#fff'}"><b>${node.name}</b></span><br/>${node.group}`
-              )
-              .nodeColor((node) => colorMap[node.group] || '#fff')
-              .nodeVal((node) => node.val)
-              .nodeRelSize(8)
-              .nodeResolution(24)
-              .linkDirectionalParticles(2)
-              .linkDirectionalParticleSpeed((d) => 0.005)
-              .linkDirectionalParticleWidth(2)
-              .linkWidth(1)
-              .linkColor(() => '#333')
-              .onNodeClick((node) => {
-                const distance = 40;
-                const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
-                Graph.cameraPosition(
-                  {
-                    x: node.x * distRatio,
-                    y: node.y * distRatio,
-                    z: node.z * distRatio,
-                  },
-                  node,
-                  3000
-                );
-              });
-
-            setTimeout(() => {
-              try {
-                Graph.zoomToFit(800, 60);
-              } catch (e) {
-                console.warn('zoomToFit failed:', e);
-              }
-            }, 700);
+            graphInstance.zoomToFit(800, 60);
           } catch (e) {
-            try {
-              await ensure2DLibrary();
-              render2D(data, e?.message || '3d_init');
-            } catch (e2) {
-              renderStaticSvg(data, e2?.message || '2d_runtime');
-            }
+            console.warn("zoomToFit failed:", e);
           }
-        })
-        .catch((e) => {
-          renderFallback({ nodes: [] }, e?.message || 'fetch');
-        });
+        }, 700);
+      }
+
+      async function initGraph(data) {
+        const canUse3D = supportsWebGL();
+        if (!canUse3D) {
+          await ensure2DLibrary();
+          render2D(data, "webgl_unavailable");
+          return;
+        }
+        try {
+          await ensure3DLibrary();
+          if (typeof ForceGraph3D !== "function") throw new Error("3d_runtime");
+          render3D(data);
+        } catch (e) {
+          await ensure2DLibrary();
+          render2D(data, e?.message || "3d_init");
+        }
+      }
+
+      function updateGraphData(data) {
+        if (!graphInstance) return;
+        graphInstance.graphData(data);
+        if (typeof graphInstance.d3ReheatSimulation === "function") {
+          graphInstance.d3ReheatSimulation();
+        }
+      }
+
+      async function refreshGraph() {
+        if (fetchInFlight) return;
+        fetchInFlight = true;
+        try {
+          const payload = await fetchGraphPayload();
+          renderHud(payload);
+          if (!graphInstance) {
+            try {
+              await initGraph(payload.graphData);
+            } catch (e) {
+              renderStaticSvg(payload.graphData, e?.message || "init_failed");
+              graphMode = "static";
+            }
+          } else if (graphMode === "static") {
+            renderStaticSvg(payload.graphData, "static_refresh");
+          } else {
+            updateGraphData(payload.graphData);
+          }
+        } catch (e) {
+          liveSummaryEl.textContent = "Live telemetry error";
+          liveMetaEl.textContent = e?.message || "graph_refresh_failed";
+          liveAlertsEl.innerHTML = `<div>[ALERT] Graph refresh failure: ${e?.message || "unknown"}</div>`;
+          renderFallback({ nodes: [] }, e?.message || "fetch");
+        } finally {
+          fetchInFlight = false;
+        }
+      }
+
+      (async () => {
+        await refreshGraph();
+        refreshTimer = setInterval(refreshGraph, LIVE_REFRESH_MS);
+      })();
+
+      window.addEventListener("beforeunload", () => {
+        if (refreshTimer) clearInterval(refreshTimer);
+      });
     </script>
   </body>
 </html>
