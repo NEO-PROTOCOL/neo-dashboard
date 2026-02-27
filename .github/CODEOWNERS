@@ -5,4 +5,7 @@
 /server.js @neomello
 /neo-routes.js @neomello
 /ecosystem-3d.html @neomello
+/ecosystem-graph.json @neomello
+/scripts/validate-ecosystem-graph.mjs @neomello
+/scripts/sync-ecosystem-graph.mjs @neomello
 /.github/workflows/ @neomello

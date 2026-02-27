@@ -1,251 +1,532 @@
 {
   "nodes": [
     {
-      "id": "flowcloser-agent",
-      "name": "FlowCloser Agent (Neobot Core)",
-      "group": "NEO Protocol",
-      "val": 10
+      "id": "ceo-escalavel-miniapp",
+      "name": "CEO Escalável MiniApp",
+      "group": "FlowOFF Agency",
+      "status": "unknown",
+      "nexusConnection": "unlinked",
+      "val": 5
     },
     {
-      "id": "mio-system",
-      "name": "MIO System",
-      "group": "NEO Protocol",
-      "val": 10
-    },
-    {
-      "id": "neo-dashboard",
-      "name": "Neo Dashboard",
-      "group": "NEO Protocol",
-      "val": 10
-    },
-    {
-      "id": "neo-protocol-landing",
-      "name": "Neo Protocol Landing",
-      "group": "NEO Protocol",
-      "val": 10
-    },
-    {
-      "id": "neo-protocol-contracts",
-      "name": "NEO Protocol Contracts",
-      "group": "NEO Protocol",
-      "val": 10
-    },
-    {
-      "id": "neoflw-token-ops",
-      "name": "NeoFLW Token Ops",
-      "group": "NEO Protocol",
-      "val": 10
-    },
-    {
-      "id": "smart-token-neoflw",
-      "name": "Smart Token NeoFLW",
-      "group": "NEO Protocol",
-      "val": 10
-    },
-    {
-      "id": "neo-agent-full",
-      "name": "Neo Agent Full",
-      "group": "NEO Protocol",
-      "val": 10
-    },
-    {
-      "id": "neo-smart-factory",
-      "name": "Neo Smart Factory",
-      "group": "Neo Smart Factory",
+      "id": "flowpay",
+      "name": "FlowPay App (Checkout Astro)",
+      "group": "FlowPay",
+      "status": "unknown",
+      "nexusConnection": "linked",
       "val": 8
     },
     {
-      "id": "smart-core",
-      "name": "Smart Core",
-      "group": "Neo Smart Factory",
-      "val": 8
+      "id": "fluxx-app",
+      "name": "Fluxx DAO App",
+      "group": "Fluxx DAO",
+      "status": "unknown",
+      "nexusConnection": "unlinked",
+      "val": 7
     },
     {
-      "id": "smart-cli",
-      "name": "Smart CLI",
-      "group": "Neo Smart Factory",
-      "val": 8
+      "id": "fluxx-contracts",
+      "name": "Fluxx DAO Contracts",
+      "group": "Fluxx DAO",
+      "status": "unknown",
+      "nexusConnection": "unlinked",
+      "val": 9
     },
     {
-      "id": "smart-ui",
-      "name": "Smart UI",
-      "group": "Neo Smart Factory",
-      "val": 8
-    },
-    {
-      "id": "smart-ui-landing",
-      "name": "Smart UI Landing",
-      "group": "Neo Smart Factory",
-      "val": 8
-    },
-    {
-      "id": "smart-factory-docs",
-      "name": "Smart Factory Docs",
-      "group": "Neo Smart Factory",
-      "val": 8
+      "id": "fluxx-landing",
+      "name": "Fluxx DAO Landing",
+      "group": "Fluxx DAO",
+      "status": "unknown",
+      "nexusConnection": "unlinked",
+      "val": 7
     },
     {
       "id": "internal-ops",
       "name": "Internal Ops",
       "group": "Neo Smart Factory",
+      "status": "unknown",
+      "nexusConnection": "unlinked",
       "val": 8
     },
     {
-      "id": "smart-ui-mobile",
-      "name": "Smart UI Mobile (MiniApp)",
-      "group": "Neo Smart Factory",
-      "val": 8
+      "id": "mio-system",
+      "name": "MIO System (Identity)",
+      "group": "NEO Protocol",
+      "status": "unknown",
+      "nexusConnection": "linked",
+      "val": 6
     },
     {
-      "id": "flowpay",
-      "name": "FlowPay Sovereign",
-      "group": "FlowPay",
-      "val": 8
+      "id": "neo-agent-full",
+      "name": "NEO Agent Full (WhatsApp/TG)",
+      "group": "NEO Protocol",
+      "status": "unknown",
+      "nexusConnection": "linked",
+      "val": 6
     },
     {
-      "id": "flowpay-core",
-      "name": "FlowPay Core (Open Source)",
-      "group": "FlowPay",
-      "val": 8
+      "id": "neo-dashboard",
+      "name": "Neo Dashboard",
+      "group": "NEO Protocol",
+      "status": "unknown",
+      "nexusConnection": "unlinked",
+      "val": 6
     },
     {
       "id": "neo-flowoff-landing",
       "name": "FlowOFF Landing",
       "group": "FlowOFF Agency",
+      "status": "unknown",
+      "nexusConnection": "unlinked",
       "val": 5
     },
     {
       "id": "neo-flowoff-pwa",
       "name": "FlowOFF PWA",
       "group": "FlowOFF Agency",
+      "status": "unknown",
+      "nexusConnection": "unlinked",
       "val": 5
     },
     {
-      "id": "agent-neo-flowoff",
-      "name": "Agent FlowOFF",
-      "group": "FlowOFF Agency",
-      "val": 5
+      "id": "neo-nexus",
+      "name": "NEO Nexus (Event Hub — standalone)",
+      "group": "NEO Protocol",
+      "status": "unknown",
+      "nexusConnection": "linked",
+      "val": 12
     },
     {
-      "id": "nodemello-run",
-      "name": "NODE NEØ Run",
-      "group": "FlowOFF Agency",
-      "val": 5
+      "id": "neo-protcl",
+      "name": "NEO Protocol WebApp (Boot/Landing)",
+      "group": "NEO Protocol",
+      "status": "unknown",
+      "nexusConnection": "unlinked",
+      "val": 6
+    },
+    {
+      "id": "neo-tunnel",
+      "name": "NΞØ Tunnel (open-tunneling)",
+      "group": "NEO Protocol",
+      "status": "unknown",
+      "nexusConnection": "linked",
+      "val": 6
+    },
+    {
+      "id": "neobot-architect",
+      "name": "Neobot — Node Warrior / NEO Nexus",
+      "group": "NEO Protocol",
+      "status": "unknown",
+      "nexusConnection": "linked",
+      "val": 12
     },
     {
       "id": "pro-ia",
       "name": "Pro-IA",
       "group": "FlowOFF Agency",
+      "status": "unknown",
+      "nexusConnection": "unlinked",
       "val": 5
     },
     {
-      "id": "ceo-escalavel-miniapp",
-      "name": "CEO Escalável MiniApp",
-      "group": "FlowOFF Agency",
-      "val": 5
+      "id": "smart-cli",
+      "name": "Smart CLI",
+      "group": "Neo Smart Factory",
+      "status": "unknown",
+      "nexusConnection": "unlinked",
+      "val": 8
     },
     {
-      "id": "wod-x-pro",
-      "name": "WOD [X] PRO (App)",
-      "group": "WOD Game",
-      "val": 6
+      "id": "smart-core",
+      "name": "Smart Core",
+      "group": "Neo Smart Factory",
+      "status": "unknown",
+      "nexusConnection": "unlinked",
+      "val": 9
+    },
+    {
+      "id": "smart-factory",
+      "name": "NEO Smart Factory Hub",
+      "group": "Neo Smart Factory",
+      "status": "unknown",
+      "nexusConnection": "linked",
+      "val": 8
+    },
+    {
+      "id": "smart-factory-docs",
+      "name": "Smart Factory Docs",
+      "group": "Neo Smart Factory",
+      "status": "unknown",
+      "nexusConnection": "unlinked",
+      "val": 8
+    },
+    {
+      "id": "smart-nft",
+      "name": "Smart NFT",
+      "group": "Neo Smart Factory",
+      "status": "unknown",
+      "nexusConnection": "unlinked",
+      "val": 8
+    },
+    {
+      "id": "smart-ui",
+      "name": "Smart UI",
+      "group": "Neo Smart Factory",
+      "status": "unknown",
+      "nexusConnection": "unlinked",
+      "val": 8
+    },
+    {
+      "id": "smart-ui-landing",
+      "name": "Smart UI Landing",
+      "group": "Neo Smart Factory",
+      "status": "unknown",
+      "nexusConnection": "unlinked",
+      "val": 8
+    },
+    {
+      "id": "smart-ui-mobile",
+      "name": "Smart UI Mobile (MiniApp)",
+      "group": "Neo Smart Factory",
+      "status": "unknown",
+      "nexusConnection": "unlinked",
+      "val": 8
     },
     {
       "id": "wod-eth",
       "name": "WOD Core API / Contracts",
       "group": "WOD Game",
-      "val": 6
+      "status": "unknown",
+      "nexusConnection": "unlinked",
+      "val": 9
     },
     {
       "id": "wod-protocol",
       "name": "WOD Protocol (Docs/Landing)",
       "group": "WOD Game",
+      "status": "unknown",
+      "nexusConnection": "unlinked",
       "val": 6
     },
     {
-      "id": "fluxx-contracts",
-      "name": "Fluxx DAO Contracts",
-      "group": "Fluxx Dao",
-      "val": 7
-    },
-    {
-      "id": "fluxx-app",
-      "name": "Fluxx DAO App",
-      "group": "Fluxx Dao",
-      "val": 7
-    },
-    {
-      "id": "neo-ig-cli",
-      "name": "Neo IG CLI",
-      "group": "Neo Tooling",
-      "val": 3
+      "id": "wod-x-pro",
+      "name": "WOD [X] PRO (App)",
+      "group": "WOD Game",
+      "status": "unknown",
+      "nexusConnection": "unlinked",
+      "val": 6
     }
   ],
   "links": [
     {
-      "source": "flowcloser-agent",
-      "target": "neo-smart-factory",
-      "label": "orchestration"
+      "source": "neo-flowoff-landing",
+      "target": "ceo-escalavel-miniapp",
+      "label": "group"
     },
     {
-      "source": "flowcloser-agent",
-      "target": "flowpay",
-      "label": "orchestration"
+      "source": "neo-flowoff-pwa",
+      "target": "ceo-escalavel-miniapp",
+      "label": "group"
     },
     {
-      "source": "flowcloser-agent",
-      "target": "mio-system",
-      "label": "orchestration"
+      "source": "pro-ia",
+      "target": "ceo-escalavel-miniapp",
+      "label": "group"
     },
     {
-      "source": "flowcloser-agent",
-      "target": "agent-neo-flowoff",
-      "label": "orchestration"
-    },
-    {
-      "source": "flowcloser-agent",
+      "source": "fluxx-app",
       "target": "fluxx-contracts",
-      "label": "orchestration"
+      "label": "group"
     },
     {
-      "source": "smart-core",
-      "target": "neo-smart-factory",
-      "label": "internal"
-    },
-    {
-      "source": "smart-cli",
-      "target": "neo-smart-factory",
-      "label": "internal"
-    },
-    {
-      "source": "smart-ui",
-      "target": "neo-smart-factory",
-      "label": "internal"
-    },
-    {
-      "source": "smart-ui-landing",
-      "target": "neo-smart-factory",
-      "label": "internal"
-    },
-    {
-      "source": "smart-factory-docs",
-      "target": "neo-smart-factory",
-      "label": "internal"
+      "source": "fluxx-landing",
+      "target": "fluxx-contracts",
+      "label": "group"
     },
     {
       "source": "internal-ops",
-      "target": "neo-smart-factory",
-      "label": "internal"
+      "target": "smart-core",
+      "label": "group"
+    },
+    {
+      "source": "smart-cli",
+      "target": "smart-core",
+      "label": "group"
+    },
+    {
+      "source": "smart-factory",
+      "target": "smart-core",
+      "label": "group"
+    },
+    {
+      "source": "smart-factory-docs",
+      "target": "smart-core",
+      "label": "group"
+    },
+    {
+      "source": "smart-nft",
+      "target": "smart-core",
+      "label": "group"
+    },
+    {
+      "source": "smart-ui",
+      "target": "smart-core",
+      "label": "group"
+    },
+    {
+      "source": "smart-ui-landing",
+      "target": "smart-core",
+      "label": "group"
     },
     {
       "source": "smart-ui-mobile",
-      "target": "neo-smart-factory",
-      "label": "internal"
+      "target": "smart-core",
+      "label": "group"
+    },
+    {
+      "source": "mio-system",
+      "target": "neo-nexus",
+      "label": "group"
+    },
+    {
+      "source": "neo-agent-full",
+      "target": "neo-nexus",
+      "label": "group"
+    },
+    {
+      "source": "neo-dashboard",
+      "target": "neo-nexus",
+      "label": "group"
+    },
+    {
+      "source": "neo-protcl",
+      "target": "neo-nexus",
+      "label": "group"
+    },
+    {
+      "source": "neo-tunnel",
+      "target": "neo-nexus",
+      "label": "group"
+    },
+    {
+      "source": "neobot-architect",
+      "target": "neo-nexus",
+      "label": "group"
+    },
+    {
+      "source": "wod-protocol",
+      "target": "wod-eth",
+      "label": "group"
     },
     {
       "source": "wod-x-pro",
       "target": "wod-eth",
+      "label": "group"
+    },
+    {
+      "source": "ceo-escalavel-miniapp",
+      "target": "neo-nexus",
+      "label": "missing-nexus"
+    },
+    {
+      "source": "flowpay",
+      "target": "neo-nexus",
+      "label": "nexus"
+    },
+    {
+      "source": "fluxx-app",
+      "target": "neo-nexus",
+      "label": "missing-nexus"
+    },
+    {
+      "source": "fluxx-contracts",
+      "target": "neo-nexus",
+      "label": "missing-nexus"
+    },
+    {
+      "source": "fluxx-landing",
+      "target": "neo-nexus",
+      "label": "missing-nexus"
+    },
+    {
+      "source": "internal-ops",
+      "target": "neo-nexus",
+      "label": "missing-nexus"
+    },
+    {
+      "source": "mio-system",
+      "target": "neo-nexus",
+      "label": "nexus"
+    },
+    {
+      "source": "neo-agent-full",
+      "target": "neo-nexus",
+      "label": "nexus"
+    },
+    {
+      "source": "neo-dashboard",
+      "target": "neo-nexus",
+      "label": "missing-nexus"
+    },
+    {
+      "source": "neo-flowoff-landing",
+      "target": "neo-nexus",
+      "label": "missing-nexus"
+    },
+    {
+      "source": "neo-flowoff-pwa",
+      "target": "neo-nexus",
+      "label": "missing-nexus"
+    },
+    {
+      "source": "neo-protcl",
+      "target": "neo-nexus",
+      "label": "missing-nexus"
+    },
+    {
+      "source": "neo-tunnel",
+      "target": "neo-nexus",
+      "label": "nexus"
+    },
+    {
+      "source": "neobot-architect",
+      "target": "neo-nexus",
+      "label": "nexus"
+    },
+    {
+      "source": "pro-ia",
+      "target": "neo-nexus",
+      "label": "missing-nexus"
+    },
+    {
+      "source": "smart-cli",
+      "target": "neo-nexus",
+      "label": "missing-nexus"
+    },
+    {
+      "source": "smart-core",
+      "target": "neo-nexus",
+      "label": "missing-nexus"
+    },
+    {
+      "source": "smart-factory",
+      "target": "neo-nexus",
+      "label": "nexus"
+    },
+    {
+      "source": "smart-factory-docs",
+      "target": "neo-nexus",
+      "label": "missing-nexus"
+    },
+    {
+      "source": "smart-nft",
+      "target": "neo-nexus",
+      "label": "missing-nexus"
+    },
+    {
+      "source": "smart-ui",
+      "target": "neo-nexus",
+      "label": "missing-nexus"
+    },
+    {
+      "source": "smart-ui-landing",
+      "target": "neo-nexus",
+      "label": "missing-nexus"
+    },
+    {
+      "source": "smart-ui-mobile",
+      "target": "neo-nexus",
+      "label": "missing-nexus"
+    },
+    {
+      "source": "wod-eth",
+      "target": "neo-nexus",
+      "label": "missing-nexus"
+    },
+    {
+      "source": "wod-protocol",
+      "target": "neo-nexus",
+      "label": "missing-nexus"
+    },
+    {
+      "source": "wod-x-pro",
+      "target": "neo-nexus",
+      "label": "missing-nexus"
+    },
+    {
+      "source": "neobot-architect",
+      "target": "mio-system",
+      "label": "core-identity"
+    },
+    {
+      "source": "neobot-architect",
+      "target": "smart-factory",
+      "label": "orchestration"
+    },
+    {
+      "source": "neobot-architect",
+      "target": "flowpay",
+      "label": "payments"
+    },
+    {
+      "source": "neobot-architect",
+      "target": "pro-ia",
+      "label": "coordination"
+    },
+    {
+      "source": "neobot-architect",
+      "target": "fluxx-app",
+      "label": "governance"
+    },
+    {
+      "source": "flowpay",
+      "target": "smart-factory",
+      "label": "audit-security"
+    },
+    {
+      "source": "smart-core",
+      "target": "smart-factory",
+      "label": "internal"
+    },
+    {
+      "source": "smart-cli",
+      "target": "smart-factory",
+      "label": "internal"
+    },
+    {
+      "source": "smart-ui",
+      "target": "smart-factory",
+      "label": "internal"
+    },
+    {
+      "source": "smart-ui-landing",
+      "target": "smart-ui",
+      "label": "drives-to"
+    },
+    {
+      "source": "smart-ui-mobile",
+      "target": "smart-ui",
+      "label": "interacts"
+    },
+    {
+      "source": "fluxx-app",
+      "target": "fluxx-contracts",
       "label": "contract"
+    },
+    {
+      "source": "wod-x-pro",
+      "target": "smart-factory",
+      "label": "uses"
+    },
+    {
+      "source": "neo-flowoff-landing",
+      "target": "pro-ia",
+      "label": "leads"
+    },
+    {
+      "source": "ceo-escalavel-miniapp",
+      "target": "pro-ia",
+      "label": "connected-to"
     }
   ]
 }
