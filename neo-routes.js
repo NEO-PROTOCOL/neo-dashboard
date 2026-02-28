@@ -16,6 +16,7 @@ const NODE_PROBE_TIMEOUT = Number(
 const PROBE_CACHE_TTL_MS = Number(
   process.env.ECOSYSTEM_PROBE_CACHE_TTL_MS || 12000,
 );
+const PAYMENT_ROUTE_SCHEMA_VERSION = "1.0.0";
 
 // Nodes explicitly excluded from the ecosystem graph.
 // These exist in external data sources (e.g. Nexus API) but are NOT part of
@@ -658,6 +659,139 @@ async function loadEcosystemNodes() {
   return { success: false, nodes: [], source: "unavailable" };
 }
 
+function isPaymentNode(node) {
+  const id = String(node?.id || "").toLowerCase();
+  const name = String(node?.name || "").toLowerCase();
+  const role = String(node?.role || "").toLowerCase();
+  const org = String(node?.org || "").toLowerCase();
+  const mix = `${id} ${name} ${role} ${org}`;
+  return (
+    mix.includes("flowpay") ||
+    role.includes("payment") ||
+    role.includes("checkout") ||
+    role.includes("financial")
+  );
+}
+
+function asPath(rawUrl) {
+  if (!rawUrl || typeof rawUrl !== "string") return null;
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return null;
+  try {
+    const parsed = new URL(
+      trimmed.startsWith("http://") || trimmed.startsWith("https://")
+        ? trimmed
+        : `https://${trimmed}`,
+    );
+    return parsed.pathname || "/";
+  } catch {
+    return null;
+  }
+}
+
+function makePaymentRoute(params) {
+  const { kind, env, url, method = null, sourceField = null, inferred = false } = params;
+  if (!url || typeof url !== "string") return null;
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+  return {
+    kind,
+    env,
+    method,
+    url: trimmed,
+    path: asPath(trimmed),
+    sourceField,
+    inferred,
+  };
+}
+
+function inferFlowpayApiRoutes(node) {
+  const routes = [];
+  const bases = {
+    local: node?.localUrl,
+    internal: node?.hosting?.internalUrl || node?.webhookUrl?.internal,
+    production: node?.hosting?.productionUrl || node?.webhookUrl?.production,
+  };
+  const ops = [
+    { method: "POST", op: "create-charge", path: "/api/create-charge" },
+    { method: "GET", op: "charge-status", path: "/api/charge-status" },
+    { method: "POST", op: "webhook-nexus", path: "/api/webhook/nexus" },
+  ];
+
+  for (const [env, base] of Object.entries(bases)) {
+    if (!base || typeof base !== "string") continue;
+    const normalizedBase = base.replace(/\/+$/, "");
+    for (const op of ops) {
+      routes.push(
+        makePaymentRoute({
+          kind: `api:${op.op}`,
+          env,
+          method: op.method,
+          url: `${normalizedBase}${op.path}`,
+          sourceField: `inferred:${env}`,
+          inferred: true,
+        }),
+      );
+    }
+  }
+
+  return routes.filter(Boolean);
+}
+
+function collectPaymentRoutes(node) {
+  const routes = [];
+
+  if (node?.webhookUrl && typeof node.webhookUrl === "object") {
+    for (const [env, url] of Object.entries(node.webhookUrl)) {
+      routes.push(
+        makePaymentRoute({
+          kind: "webhook",
+          env,
+          url,
+          sourceField: `webhookUrl.${env}`,
+        }),
+      );
+    }
+  }
+
+  if (node?.webhookRoutes && typeof node.webhookRoutes === "object") {
+    for (const [channel, url] of Object.entries(node.webhookRoutes)) {
+      routes.push(
+        makePaymentRoute({
+          kind: "gateway-hook",
+          env: channel,
+          url,
+          sourceField: `webhookRoutes.${channel}`,
+        }),
+      );
+    }
+  }
+
+  if (node?.nexusEvents?.nexusTarget && typeof node.nexusEvents.nexusTarget === "object") {
+    for (const [env, url] of Object.entries(node.nexusEvents.nexusTarget)) {
+      routes.push(
+        makePaymentRoute({
+          kind: "nexus-target",
+          env,
+          url,
+          sourceField: `nexusEvents.nexusTarget.${env}`,
+        }),
+      );
+    }
+  }
+
+  if (String(node?.id || "").toLowerCase() === "flowpay") {
+    routes.push(...inferFlowpayApiRoutes(node));
+  }
+
+  const dedup = new Map();
+  for (const route of routes.filter(Boolean)) {
+    const key = `${route.kind}|${route.env}|${route.method || "-"}|${route.url}`;
+    if (!dedup.has(key)) dedup.set(key, route);
+  }
+  return [...dedup.values()];
+}
+
 // GET /api/neo/skills — try neobot first, fallback to static registry
 router.get("/skills", async (req, res) => {
   try {
@@ -728,6 +862,53 @@ router.get("/search", async (req, res) => {
       s.description.toLowerCase().includes(q),
   );
   res.json({ success: true, results });
+});
+
+// GET /api/neo/ecosystem/payment-routes — strict payment-only route schema
+router.get("/ecosystem/payment-routes", async (_req, res) => {
+  const ecosystem = await loadEcosystemNodes();
+  if (!ecosystem.success || !Array.isArray(ecosystem.nodes) || ecosystem.nodes.length === 0) {
+    return res.status(503).json({
+      success: false,
+      schemaVersion: PAYMENT_ROUTE_SCHEMA_VERSION,
+      message: "Payment routes source unavailable",
+      source: ecosystem.source,
+    });
+  }
+
+  const paymentNodes = ecosystem.nodes.filter((node) => isPaymentNode(node));
+  const payloadNodes = paymentNodes.map((node) => {
+    const routes = collectPaymentRoutes(node);
+    return {
+      nodeId: node?.id || null,
+      name: node?.name || null,
+      org: node?.org || null,
+      role: node?.role || null,
+      repository: node?.repository || null,
+      routes,
+    };
+  });
+
+  const allRoutes = payloadNodes.flatMap((n) => n.routes);
+  const inferredRoutes = allRoutes.filter((r) => r.inferred).length;
+
+  return res.json({
+    success: true,
+    schemaVersion: PAYMENT_ROUTE_SCHEMA_VERSION,
+    generatedAt: new Date().toISOString(),
+    source: ecosystem.source,
+    schema: {
+      entity: "payment-routes",
+      requiredNodeFields: ["nodeId", "name", "org", "role", "routes"],
+      requiredRouteFields: ["kind", "env", "url", "path", "sourceField", "inferred"],
+    },
+    summary: {
+      paymentNodes: payloadNodes.length,
+      totalRoutes: allRoutes.length,
+      inferredRoutes,
+    },
+    nodes: payloadNodes,
+  });
 });
 
 // GET /api/neo/ecosystem — load actual ecosystem.json from architect node

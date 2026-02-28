@@ -54,6 +54,61 @@
         border-radius: 50%;
         margin-right: 10px;
       }
+      .control-panel {
+        margin-top: 10px;
+        max-width: 430px;
+        background: rgba(0, 0, 0, 0.62);
+        border: 1px solid #2a3240;
+        border-radius: 8px;
+        padding: 10px 12px;
+        pointer-events: auto;
+      }
+      .control-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+      }
+      .control-label {
+        display: block;
+        color: #8fa2bb;
+        font-size: 10px;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+      .control-select,
+      .control-input {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid #2a3240;
+        border-radius: 6px;
+        background: #0b121c;
+        color: #d4deea;
+        font-size: 11px;
+        padding: 6px 8px;
+      }
+      .control-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 8px;
+      }
+      .control-btn {
+        border: 1px solid #2a3240;
+        border-radius: 6px;
+        background: #111b28;
+        color: #c6d2e0;
+        font-size: 11px;
+        padding: 6px 10px;
+        cursor: pointer;
+      }
+      .control-btn:hover {
+        border-color: #3d4f66;
+      }
+      .control-meta {
+        color: #7f8ea3;
+        font-size: 10px;
+      }
     </style>
   </head>
   <body>
@@ -92,6 +147,7 @@
       const LIVE_REFRESH_MS = 8000;
       const CHANGE_FLASH_MS = 20000;
       const MAX_EVENT_LINES = 8;
+      const PAYMENT_ROUTES_TTL_MS = 30000;
 
       const colorMap = {
         "NEO Protocol": "#ff4444",
@@ -122,6 +178,76 @@
             <div id="live-meta" style="font-size:11px;color:#748099;margin-top:5px;"></div>
             <div id="live-alerts" style="font-size:11px;color:#ffb74d;margin-top:8px;line-height:1.35;"></div>
           </div>
+          <div class="control-panel">
+            <div style="font-size:11px;color:#b4c0d1;margin-bottom:8px;">Graph Filters</div>
+            <div class="control-grid">
+              <div>
+                <label class="control-label" for="filter-view">View</label>
+                <select id="filter-view" class="control-select">
+                  <option value="all">All Nodes</option>
+                  <option value="payment">Payment Nodes</option>
+                  <option value="issues">Offline / Degraded</option>
+                  <option value="unlinked">Nexus Unlinked</option>
+                </select>
+              </div>
+              <div>
+                <label class="control-label" for="filter-group">Group</label>
+                <select id="filter-group" class="control-select">
+                  <option value="all">All Groups</option>
+                </select>
+              </div>
+              <div>
+                <label class="control-label" for="filter-org">Org</label>
+                <select id="filter-org" class="control-select">
+                  <option value="all">All Orgs</option>
+                </select>
+              </div>
+              <div>
+                <label class="control-label" for="filter-role">Role</label>
+                <select id="filter-role" class="control-select">
+                  <option value="all">All Roles</option>
+                </select>
+              </div>
+              <div>
+                <label class="control-label" for="filter-status">Status</label>
+                <select id="filter-status" class="control-select">
+                  <option value="all">All Status</option>
+                  <option value="online">Online</option>
+                  <option value="degraded">Degraded</option>
+                  <option value="offline">Offline</option>
+                  <option value="unknown">Unknown</option>
+                </select>
+              </div>
+              <div>
+                <label class="control-label" for="filter-nexus">Nexus</label>
+                <select id="filter-nexus" class="control-select">
+                  <option value="all">Linked + Unlinked</option>
+                  <option value="linked">Only Linked</option>
+                  <option value="unlinked">Only Unlinked</option>
+                </select>
+              </div>
+              <div>
+                <label class="control-label" for="filter-route-env">Route Env</label>
+                <select id="filter-route-env" class="control-select">
+                  <option value="all">All Route Envs</option>
+                </select>
+              </div>
+              <div>
+                <label class="control-label" for="filter-route-kind">Route Kind</label>
+                <select id="filter-route-kind" class="control-select">
+                  <option value="all">All Route Kinds</option>
+                </select>
+              </div>
+              <div style="grid-column: 1 / -1;">
+                <label class="control-label" for="filter-search">Search</label>
+                <input id="filter-search" class="control-input" type="text" placeholder="id, name, role, org, route" />
+              </div>
+            </div>
+            <div class="control-actions">
+              <button id="filter-reset" class="control-btn" type="button">Reset Filters</button>
+              <span id="filter-meta" class="control-meta">Visible: 0/0</span>
+            </div>
+          </div>
         `,
       );
 
@@ -139,6 +265,17 @@
       const liveSummaryEl = document.getElementById("live-summary");
       const liveMetaEl = document.getElementById("live-meta");
       const liveAlertsEl = document.getElementById("live-alerts");
+      const filterViewEl = document.getElementById("filter-view");
+      const filterGroupEl = document.getElementById("filter-group");
+      const filterOrgEl = document.getElementById("filter-org");
+      const filterRoleEl = document.getElementById("filter-role");
+      const filterStatusEl = document.getElementById("filter-status");
+      const filterNexusEl = document.getElementById("filter-nexus");
+      const filterRouteEnvEl = document.getElementById("filter-route-env");
+      const filterRouteKindEl = document.getElementById("filter-route-kind");
+      const filterSearchEl = document.getElementById("filter-search");
+      const filterResetEl = document.getElementById("filter-reset");
+      const filterMetaEl = document.getElementById("filter-meta");
 
       let graphMode = "none";
       let graphInstance = null;
@@ -149,6 +286,24 @@
       const transitionLog = [];
       const latestNodeMeta = new Map();
       let lastTopologySignature = null;
+      let latestPayloadMeta = null;
+      let latestFullGraphData = null;
+      const paymentRoutesCache = {
+        checkedAt: 0,
+        payload: null,
+        inFlight: null,
+      };
+      const filterState = {
+        view: "all",
+        group: "all",
+        org: "all",
+        role: "all",
+        status: "all",
+        nexus: "all",
+        routeEnv: "all",
+        routeKind: "all",
+        search: "",
+      };
 
       function getGatewayPassword() {
         try {
@@ -180,6 +335,210 @@
           .sort()
           .join("|");
         return `${nodeIds}::${linkIds}`;
+      }
+
+      function authHeaders() {
+        const password = getGatewayPassword();
+        return password ? { "x-gateway-password": password } : {};
+      }
+
+      async function fetchPaymentRoutesCatalog() {
+        const now = Date.now();
+        if (
+          paymentRoutesCache.payload &&
+          now - paymentRoutesCache.checkedAt < PAYMENT_ROUTES_TTL_MS
+        ) {
+          return paymentRoutesCache.payload;
+        }
+        if (paymentRoutesCache.inFlight) return paymentRoutesCache.inFlight;
+
+        paymentRoutesCache.inFlight = (async () => {
+          try {
+            const res = await fetch("/api/neo/ecosystem/payment-routes", {
+              headers: authHeaders(),
+            });
+            if (!res.ok) return null;
+            const payload = await res.json();
+            if (!payload?.success || !Array.isArray(payload?.nodes)) return null;
+            paymentRoutesCache.payload = payload;
+            paymentRoutesCache.checkedAt = Date.now();
+            return payload;
+          } catch (_e) {
+            return null;
+          } finally {
+            paymentRoutesCache.inFlight = null;
+          }
+        })();
+
+        return paymentRoutesCache.inFlight;
+      }
+
+      function paymentRouteMap(paymentPayload) {
+        const map = new Map();
+        if (!Array.isArray(paymentPayload?.nodes)) return map;
+        paymentPayload.nodes.forEach((node) => {
+          const id = String(node?.nodeId || "").trim();
+          if (!id) return;
+          map.set(
+            id,
+            Array.isArray(node?.routes) ? node.routes : [],
+          );
+        });
+        return map;
+      }
+
+      function enrichWithPaymentData(graphData, paymentPayload) {
+        const nodes = Array.isArray(graphData?.nodes) ? graphData.nodes : [];
+        const links = Array.isArray(graphData?.links) ? graphData.links : [];
+        const routesByNode = paymentRouteMap(paymentPayload);
+        const enrichedNodes = nodes.map((node) => {
+          const id = String(node?.id || "");
+          const routes = routesByNode.get(id) || [];
+          return {
+            ...node,
+            _paymentRoutes: routes,
+            _isPaymentNode: routes.length > 0,
+          };
+        });
+        return { nodes: enrichedNodes, links };
+      }
+
+      function escapeHtml(value) {
+        return String(value || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function updateSelectOptions(selectEl, values, allLabel, stateKey) {
+        const current = selectEl.value || "all";
+        const normalizedValues = [...new Set((values || []).map((v) => String(v || "").trim()).filter(Boolean))].sort();
+        const options = [`<option value="all">${escapeHtml(allLabel)}</option>`]
+          .concat(normalizedValues.map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`))
+          .join("");
+        selectEl.innerHTML = options;
+        if (normalizedValues.includes(current)) selectEl.value = current;
+        else selectEl.value = "all";
+        filterState[stateKey] = selectEl.value;
+      }
+
+      function updateDynamicFilterOptions(nodes) {
+        const safeNodes = Array.isArray(nodes) ? nodes : [];
+        updateSelectOptions(
+          filterGroupEl,
+          safeNodes.map((n) => n?.group),
+          "All Groups",
+          "group",
+        );
+        updateSelectOptions(
+          filterOrgEl,
+          safeNodes.map((n) => n?.org),
+          "All Orgs",
+          "org",
+        );
+        updateSelectOptions(
+          filterRoleEl,
+          safeNodes.map((n) => n?.role),
+          "All Roles",
+          "role",
+        );
+        updateSelectOptions(
+          filterRouteEnvEl,
+          safeNodes.flatMap((n) =>
+            (Array.isArray(n?._paymentRoutes) ? n._paymentRoutes : []).map((r) =>
+              String(r?.env || "").trim(),
+            ),
+          ),
+          "All Route Envs",
+          "routeEnv",
+        );
+        updateSelectOptions(
+          filterRouteKindEl,
+          safeNodes.flatMap((n) =>
+            (Array.isArray(n?._paymentRoutes) ? n._paymentRoutes : []).map((r) =>
+              String(r?.kind || "").trim(),
+            ),
+          ),
+          "All Route Kinds",
+          "routeKind",
+        );
+      }
+
+      function nodeHasRouteByField(node, field, expected) {
+        if (expected === "all") return true;
+        const routes = Array.isArray(node?._paymentRoutes) ? node._paymentRoutes : [];
+        return routes.some((route) => String(route?.[field] || "") === expected);
+      }
+
+      function nodeMatchesSearch(node, search) {
+        if (!search) return true;
+        const routeText = (Array.isArray(node?._paymentRoutes) ? node._paymentRoutes : [])
+          .map((route) => `${route?.kind || ""} ${route?.env || ""} ${route?.method || ""} ${route?.url || ""} ${route?.path || ""}`)
+          .join(" ");
+        const hay = `${node?.id || ""} ${node?.name || ""} ${node?.group || ""} ${node?.org || ""} ${node?.role || ""} ${node?.status || ""} ${node?.nexusConnection || ""} ${routeText}`.toLowerCase();
+        return hay.includes(search);
+      }
+
+      function linkEndId(end) {
+        if (!end) return "";
+        if (typeof end === "object") return String(end.id || "");
+        return String(end);
+      }
+
+      function applyFiltersToGraphData(fullData) {
+        const nodes = Array.isArray(fullData?.nodes) ? fullData.nodes : [];
+        const links = Array.isArray(fullData?.links) ? fullData.links : [];
+        const search = filterState.search.trim().toLowerCase();
+
+        let filteredNodes = nodes.filter((node) => {
+          if (filterState.view === "payment" && !node?._isPaymentNode) return false;
+          if (
+            filterState.view === "issues" &&
+            !["offline", "degraded"].includes(String(node?.status || "").toLowerCase())
+          ) {
+            return false;
+          }
+          if (filterState.view === "unlinked" && node?.nexusConnection !== "unlinked") return false;
+          if (filterState.group !== "all" && String(node?.group || "") !== filterState.group) return false;
+          if (filterState.org !== "all" && String(node?.org || "") !== filterState.org) return false;
+          if (filterState.role !== "all" && String(node?.role || "") !== filterState.role) return false;
+          if (filterState.status !== "all" && String(node?.status || "") !== filterState.status) return false;
+          if (filterState.nexus !== "all" && String(node?.nexusConnection || "") !== filterState.nexus) return false;
+          if (!nodeHasRouteByField(node, "env", filterState.routeEnv)) return false;
+          if (!nodeHasRouteByField(node, "kind", filterState.routeKind)) return false;
+          if (!nodeMatchesSearch(node, search)) return false;
+          return true;
+        });
+
+        // Keep core context visible in payment and issue-focused views.
+        const strictSubFilterActive =
+          filterState.group !== "all" ||
+          filterState.org !== "all" ||
+          filterState.role !== "all" ||
+          filterState.status !== "all" ||
+          filterState.nexus !== "all" ||
+          filterState.routeEnv !== "all" ||
+          filterState.routeKind !== "all" ||
+          search.length > 0;
+        if (["payment", "issues", "unlinked"].includes(filterState.view) && !strictSubFilterActive) {
+          const keepIds = new Set(["neo-nexus", "neobot-orchestrator"]);
+          nodes.forEach((node) => {
+            if (keepIds.has(String(node?.id || "")) && !filteredNodes.find((n) => n.id === node.id)) {
+              filteredNodes.push(node);
+            }
+          });
+        }
+
+        const filteredIdSet = new Set(filteredNodes.map((n) => String(n?.id || "")).filter(Boolean));
+        const filteredLinks = links.filter((link) => {
+          const src = linkEndId(link?.source);
+          const tgt = linkEndId(link?.target);
+          return filteredIdSet.has(src) && filteredIdSet.has(tgt);
+        });
+
+        filterMetaEl.textContent = `Visible: ${filteredNodes.length}/${nodes.length}`;
+        return { nodes: filteredNodes, links: filteredLinks };
       }
 
       function preserveLayoutState(prevData, nextData) {
@@ -283,8 +642,8 @@
 
       function linkColor(link) {
         if (link.label === "missing-nexus") return "#ff4d67";
-        const source = latestNodeMeta.get(String(link.source));
-        const target = latestNodeMeta.get(String(link.target));
+        const source = latestNodeMeta.get(linkEndId(link.source));
+        const target = latestNodeMeta.get(linkEndId(link.target));
         if (source?.status === "offline" || target?.status === "offline")
           return "#ff7d8e";
         if (source?.status === "degraded" || target?.status === "degraded")
@@ -339,6 +698,8 @@
             id,
             name: String(raw?.name || id),
             group,
+            role: String(raw?.role || ""),
+            org: String(raw?.org || ""),
             status,
             url: raw?._live?.url || raw?.hosting?.productionUrl || null,
             nexusConnection,
@@ -395,8 +756,7 @@
       }
 
       async function fetchGraphPayload() {
-        const password = getGatewayPassword();
-        const headers = password ? { "x-gateway-password": password } : {};
+        const headers = authHeaders();
 
         try {
           const liveRes = await fetch("/api/neo/ecosystem/live", { headers });
@@ -455,19 +815,28 @@
         };
       }
 
-      function renderHud(payload) {
-        const graphData = payload.graphData || { nodes: [] };
-        const statusCount = graphData.nodes.reduce(
+      function renderHud(payload, fullGraphData, filteredGraphData) {
+        const allData = fullGraphData || { nodes: [] };
+        const visibleData = filteredGraphData || allData;
+        const statusCount = allData.nodes.reduce(
           (acc, node) => {
             const st = node.status || "unknown";
             acc[st] = (acc[st] || 0) + 1;
             if (node.nexusConnection === "unlinked") acc.unlinked += 1;
+            if (node._isPaymentNode) acc.payment += 1;
             return acc;
           },
-          { online: 0, degraded: 0, offline: 0, unknown: 0, unlinked: 0 },
+          {
+            online: 0,
+            degraded: 0,
+            offline: 0,
+            unknown: 0,
+            unlinked: 0,
+            payment: 0,
+          },
         );
 
-        liveSummaryEl.textContent = `Nodes: ${graphData.nodes.length} | Online: ${statusCount.online} | Degraded: ${statusCount.degraded} | Offline: ${statusCount.offline} | Unlinked: ${statusCount.unlinked}`;
+        liveSummaryEl.textContent = `Visible: ${visibleData.nodes.length}/${allData.nodes.length} | Payment: ${statusCount.payment} | Online: ${statusCount.online} | Degraded: ${statusCount.degraded} | Offline: ${statusCount.offline} | Unlinked: ${statusCount.unlinked}`;
 
         liveMetaEl.textContent = `Source: ${payload.source} | Mode: ${payload.mode} | Checked: ${new Date(
           payload.checkedAt,
@@ -477,6 +846,11 @@
         if (payload.mode !== "live") {
           alertLines.push(
             "[WARN] Live probe endpoint indisponivel. Exibindo snapshot.",
+          );
+        }
+        if (payload.source !== "local-file") {
+          alertLines.push(
+            `[WARN] Source atual nao e local-file (${payload.source}).`,
           );
         }
         if (statusCount.offline > 0) {
@@ -633,7 +1007,7 @@
           .backgroundColor("#0a0a0a")
           .nodeLabel(
             (n) =>
-              `${n.name}\n${n.group || ""}\nstatus: ${n.status}\nnexus: ${n.nexusConnection}`,
+              `${n.name}\n${n.group || ""}\nstatus: ${n.status}\nnexus: ${n.nexusConnection}\npayment-routes: ${Array.isArray(n._paymentRoutes) ? n._paymentRoutes.length : 0}`,
           )
           .nodeCanvasObject((node, ctx, globalScale) => {
             const label = node.name || "";
@@ -642,6 +1016,11 @@
             ctx.arc(node.x, node.y, 3, 0, 2 * Math.PI, false);
             ctx.fillStyle = nodeColor(node);
             ctx.fill();
+            if (node._isPaymentNode) {
+              ctx.strokeStyle = "#00ffcc";
+              ctx.lineWidth = 1.5 / globalScale;
+              ctx.stroke();
+            }
             if (node.nexusConnection === "unlinked") {
               ctx.strokeStyle = "#ff4d67";
               ctx.lineWidth = 1.2 / globalScale;
@@ -670,7 +1049,7 @@
           .backgroundColor("#0a0a0a")
           .nodeLabel(
             (node) =>
-              `<span style="color:${nodeColor(node)}"><b>${node.name}</b></span><br/>${node.group}<br/>status: ${node.status}<br/>nexus: ${node.nexusConnection}`,
+              `<span style="color:${nodeColor(node)}"><b>${node.name}</b></span><br/>${node.group}<br/>status: ${node.status}<br/>nexus: ${node.nexusConnection}<br/>payment-routes: ${Array.isArray(node._paymentRoutes) ? node._paymentRoutes.length : 0}`,
           )
           .nodeColor((node) => nodeColor(node))
           .nodeVal((node) => node.val)
@@ -747,25 +1126,83 @@
         lastTopologySignature = nextSignature;
       }
 
+      async function renderFromCurrentState() {
+        if (!latestPayloadMeta || !latestFullGraphData) return;
+        updateDynamicFilterOptions(latestFullGraphData.nodes);
+        const filteredData = applyFiltersToGraphData(latestFullGraphData);
+        renderHud(latestPayloadMeta, latestFullGraphData, filteredData);
+
+        if (!graphInstance) {
+          try {
+            await initGraph(filteredData);
+            lastTopologySignature = topologySignature(filteredData);
+          } catch (e) {
+            renderStaticSvg(filteredData, e?.message || "init_failed");
+            graphMode = "static";
+          }
+        } else if (graphMode === "static") {
+          renderStaticSvg(filteredData, "static_refresh");
+        } else {
+          updateGraphData(filteredData);
+        }
+      }
+
+      function bindFilterEvents() {
+        const syncFromInputs = () => {
+          filterState.view = filterViewEl.value || "all";
+          filterState.group = filterGroupEl.value || "all";
+          filterState.org = filterOrgEl.value || "all";
+          filterState.role = filterRoleEl.value || "all";
+          filterState.status = filterStatusEl.value || "all";
+          filterState.nexus = filterNexusEl.value || "all";
+          filterState.routeEnv = filterRouteEnvEl.value || "all";
+          filterState.routeKind = filterRouteKindEl.value || "all";
+          filterState.search = (filterSearchEl.value || "").trim();
+          renderFromCurrentState();
+        };
+
+        [
+          filterViewEl,
+          filterGroupEl,
+          filterOrgEl,
+          filterRoleEl,
+          filterStatusEl,
+          filterNexusEl,
+          filterRouteEnvEl,
+          filterRouteKindEl,
+        ].forEach(
+          (el) => el.addEventListener("change", syncFromInputs),
+        );
+
+        filterSearchEl.addEventListener("input", syncFromInputs);
+
+        filterResetEl.addEventListener("click", () => {
+          filterViewEl.value = "all";
+          filterGroupEl.value = "all";
+          filterOrgEl.value = "all";
+          filterRoleEl.value = "all";
+          filterStatusEl.value = "all";
+          filterNexusEl.value = "all";
+          filterRouteEnvEl.value = "all";
+          filterRouteKindEl.value = "all";
+          filterSearchEl.value = "";
+          syncFromInputs();
+        });
+      }
+
       async function refreshGraph() {
         if (fetchInFlight) return;
         fetchInFlight = true;
         try {
           const payload = await fetchGraphPayload();
-          renderHud(payload);
-          if (!graphInstance) {
-            try {
-              await initGraph(payload.graphData);
-              lastTopologySignature = topologySignature(payload.graphData);
-            } catch (e) {
-              renderStaticSvg(payload.graphData, e?.message || "init_failed");
-              graphMode = "static";
-            }
-          } else if (graphMode === "static") {
-            renderStaticSvg(payload.graphData, "static_refresh");
-          } else {
-            updateGraphData(payload.graphData);
-          }
+          const paymentPayload = await fetchPaymentRoutesCatalog();
+          const enrichedGraphData = enrichWithPaymentData(
+            payload.graphData,
+            paymentPayload,
+          );
+          latestPayloadMeta = payload;
+          latestFullGraphData = enrichedGraphData;
+          await renderFromCurrentState();
         } catch (e) {
           liveSummaryEl.textContent = "Live telemetry error";
           liveMetaEl.textContent = e?.message || "graph_refresh_failed";
@@ -775,6 +1212,8 @@
           fetchInFlight = false;
         }
       }
+
+      bindFilterEvents();
 
       (async () => {
         await refreshGraph();

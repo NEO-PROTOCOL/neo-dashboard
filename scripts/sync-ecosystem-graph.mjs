@@ -2,8 +2,21 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const repoRoot = process.cwd();
-const sourcePath = path.resolve(repoRoot, '../neobot/config/ecosystem.json');
 const targetPath = path.resolve(repoRoot, 'ecosystem-graph.json');
+
+const sourceCandidates = [
+  process.env.ECOSYSTEM_SOURCE_PATH,
+  path.resolve(repoRoot, '../neobot/config/ecosystem.json'),
+  path.resolve(repoRoot, 'neobot-source/config/ecosystem.json'),
+].filter(Boolean);
+
+const sourcePath = sourceCandidates.find((candidate) => fs.existsSync(candidate));
+
+if (!sourcePath) {
+  throw new Error(
+    `source ecosystem not found. tried: ${sourceCandidates.join(', ')}`,
+  );
+}
 
 function normalizeGroup(node) {
   const org = String(node?.org || '').toLowerCase();
@@ -134,11 +147,11 @@ if (nexusId) {
 }
 
 const macroLinks = [
-  ['neobot-architect', 'mio-system', 'core-identity'],
-  ['neobot-architect', 'smart-factory', 'orchestration'],
-  ['neobot-architect', 'flowpay', 'payments'],
-  ['neobot-architect', 'pro-ia', 'coordination'],
-  ['neobot-architect', 'fluxx-app', 'governance'],
+  ['neobot-orchestrator', 'mio-system', 'core-identity'],
+  ['neobot-orchestrator', 'smart-factory', 'orchestration'],
+  ['neobot-orchestrator', 'flowpay', 'payments'],
+  ['neobot-orchestrator', 'pro-ia', 'coordination'],
+  ['neobot-orchestrator', 'fluxx-app', 'governance'],
   ['flowpay', 'smart-factory', 'audit-security'],
   ['smart-core', 'smart-factory', 'internal'],
   ['smart-cli', 'smart-factory', 'internal'],
