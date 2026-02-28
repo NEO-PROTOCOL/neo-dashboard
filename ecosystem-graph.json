@@ -326,12 +326,10 @@
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 9,
-      "url": "https://smart.neoprotocol.space",
       "hosting": {
-        "platform": "Railway",
-        "productionUrl": "https://smart.neoprotocol.space",
+        "platform": "N/A (Contracts Repository)",
         "adminEmail": "neo@neoprotocol.space",
-        "targetCustomDomain": "smart.neoprotocol.space"
+        "note": "No public HTTP runtime. Contracts and deployment standards only."
       }
     },
     {
