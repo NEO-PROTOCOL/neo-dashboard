@@ -3,7 +3,7 @@
     {
       "id": "ceo-escalavel-miniapp",
       "name": "CEO Escalável MiniApp",
-      "group": "FlowOFF Agency",
+      "group": "NEO-FlowOFF",
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 5,
@@ -73,10 +73,11 @@
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 7,
-      "url": "https://www.fluxx.space",
+      "url": "https://fluxx-landing.vercel.app",
       "hosting": {
         "platform": "Vercel",
-        "productionUrl": "https://fluxx-landing.vercel.app",
+        "productionUrl": "https://www.fluxx.space",
+        "activeUrl": "https://fluxx-landing.vercel.app",
         "adminEmail": "team@fluxx.space",
         "targetCustomDomain": "www.fluxx.space"
       }
@@ -157,7 +158,7 @@
     {
       "id": "neo-flowoff-landing",
       "name": "FlowOFF Landing",
-      "group": "FlowOFF Agency",
+      "group": "NEO-FlowOFF",
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 5,
@@ -172,7 +173,7 @@
     {
       "id": "neo-flowoff-pwa",
       "name": "FlowOFF PWA",
-      "group": "FlowOFF Agency",
+      "group": "NEO-FlowOFF",
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 5,
@@ -279,7 +280,8 @@
       "url": "https://architect.neoprotocol.space",
       "hosting": {
         "platform": "Local / Railway (Production)",
-        "productionUrl": "http://neobot.railway.internal",
+        "productionUrl": "https://architect.neoprotocol.space",
+        "activeUrl": "http://neobot.railway.internal",
         "railwayUrl": "https://aryn3v88.up.railway.app",
         "targetCustomDomain": "architect.neoprotocol.space",
         "adminEmail": "neo@neoprotocol.space"
@@ -294,7 +296,7 @@
     {
       "id": "pro-ia",
       "name": "Pro-IA",
-      "group": "FlowOFF Agency",
+      "group": "NEO-FlowOFF",
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 5,
@@ -355,10 +357,11 @@
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 8,
-      "url": "https://docs.neoprotocol.space",
+      "url": "https://smart-ui-delta.vercel.app",
       "hosting": {
         "platform": "Vercel / IPFS",
-        "productionUrl": "https://smart-ui-delta.vercel.app",
+        "productionUrl": "https://docs.neoprotocol.space",
+        "activeUrl": "https://smart-ui-delta.vercel.app",
         "adminEmail": "neo@neoprotocol.space",
         "targetCustomDomain": "docs.neoprotocol.space"
       }
@@ -394,10 +397,11 @@
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 8,
-      "url": "https://landing.neoprotocol.space",
+      "url": "https://landing-jet-seven.vercel.app/",
       "hosting": {
         "platform": "Vercel (nodevercel/smart-ui-landing)",
-        "productionUrl": "https://landing-jet-seven.vercel.app/",
+        "productionUrl": "https://landing.neoprotocol.space",
+        "activeUrl": "https://landing-jet-seven.vercel.app/",
         "adminEmail": "neo@neoprotocol.space",
         "targetCustomDomain": "landing.neoprotocol.space"
       }
@@ -409,10 +413,11 @@
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 8,
-      "url": "https://mobile.neoprotocol.space",
+      "url": "https://miniapp-smartfactory.vercel.app",
       "hosting": {
         "platform": "Vercel (nodevercel/smart-ui-mobile)",
-        "productionUrl": "https://miniapp-smartfactory.vercel.app",
+        "productionUrl": "https://mobile.neoprotocol.space",
+        "activeUrl": "https://miniapp-smartfactory.vercel.app",
         "adminEmail": "neo@neoprotocol.space",
         "targetCustomDomain": "mobile.neoprotocol.space"
       }
@@ -438,10 +443,11 @@
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 6,
-      "url": "https://protocol.wodx.pro",
+      "url": "https://wod-protocol.vercel.app",
       "hosting": {
         "platform": "Vercel",
-        "productionUrl": "https://wod-protocol.vercel.app",
+        "productionUrl": "https://protocol.wodx.pro",
+        "activeUrl": "https://wod-protocol.vercel.app",
         "adminEmail": "neo@neoprotocol.space",
         "targetCustomDomain": "protocol.wodx.pro"
       }
@@ -453,10 +459,11 @@
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 6,
-      "url": "https://app.wodx.pro",
+      "url": "https://wod-x-pro.vercel.app",
       "hosting": {
         "platform": "Vercel",
-        "productionUrl": "https://wod-x-pro.vercel.app",
+        "productionUrl": "https://app.wodx.pro",
+        "activeUrl": "https://wod-x-pro.vercel.app",
         "adminEmail": "neo@neoprotocol.space",
         "targetCustomDomain": "app.wodx.pro"
       }

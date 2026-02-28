@@ -539,6 +539,7 @@ function webhookBase(webhookUrl) {
 function resolveNodeUrl(node) {
   const candidates = [
     node?.url,
+    node?.hosting?.activeUrl,
     node?.hosting?.targetCustomDomain,
     webhookBase(node?.webhookUrl?.production),
     node?.hosting?.productionUrl,
@@ -710,7 +711,10 @@ function inferFlowpayApiRoutes(node) {
   const bases = {
     local: node?.localUrl,
     internal: node?.hosting?.internalUrl || node?.webhookUrl?.internal,
-    production: node?.hosting?.productionUrl || node?.webhookUrl?.production,
+    production:
+      node?.hosting?.activeUrl ||
+      node?.hosting?.productionUrl ||
+      node?.webhookUrl?.production,
   };
   const ops = [
     { method: "POST", op: "create-charge", path: "/api/create-charge" },

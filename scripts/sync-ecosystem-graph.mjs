@@ -34,7 +34,7 @@ function normalizeGroup(node) {
     mix.includes('pro-ia') ||
     mix.includes('ceo escal')
   ) {
-    return 'FlowOFF Agency';
+    return 'NEO-FlowOFF';
   }
   if (org.includes('neo protocol') || mix.includes('neo')) return 'NEO Protocol';
   return node?.org || 'DApps & Tools';
@@ -50,7 +50,7 @@ function computeNodeVal(node, group) {
   if (group === 'FlowPay' || group === 'Neo Smart Factory') return 8;
   if (group === 'Fluxx DAO') return 7;
   if (group === 'WOD Game') return 6;
-  if (group === 'FlowOFF Agency') return 5;
+  if (group === 'NEO-FlowOFF') return 5;
   return 6;
 }
 
@@ -60,6 +60,7 @@ function hasNexusIntegration(node) {
 
 function resolveProductionUrl(node) {
   const candidates = [
+    node?.hosting?.activeUrl,
     node?.hosting?.targetCustomDomain,
     node?.hosting?.productionUrl,
     node?.infrastructure?.productionUrl,

@@ -154,7 +154,7 @@
         "Neo Smart Factory": "#00ccff",
         FlowPay: "#00ffcc",
         "Fluxx Dao": "#4488ff",
-        "FlowOFF Agency": "#ff00ff",
+        "NEO-FlowOFF": "#ff00ff",
         "WOD Game": "#ffcc00",
         "DApps & Tools": "#9aa4b2",
       };
@@ -595,7 +595,7 @@
           mix.includes("node neø run") ||
           mix.includes("node neo run")
         ) {
-          return "FlowOFF Agency";
+          return "NEO-FlowOFF";
         }
         if (org.includes("neo protocol") || mix.includes("neo"))
           return "NEO Protocol";
@@ -701,7 +701,11 @@
             role: String(raw?.role || ""),
             org: String(raw?.org || ""),
             status,
-            url: raw?._live?.url || raw?.hosting?.productionUrl || null,
+            url:
+              raw?._live?.url ||
+              raw?.hosting?.activeUrl ||
+              raw?.hosting?.productionUrl ||
+              null,
             nexusConnection,
             val: Math.max(3, baseVal + statusPenalty + (isFlashing ? 3 : 0)),
           };
