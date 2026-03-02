@@ -374,13 +374,14 @@
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 8,
-      "url": "https://nsfactory.xyz",
+      "url": "https://factory.neoprotocol.space",
       "hosting": {
-        "platform": "GitHub Organization / Distributed",
-        "productionUrl": "https://nsfactory.xyz",
-        "adminEmail": "team@nsfactory.xyz",
-        "targetCustomDomain": "nsfactory.xyz",
-        "note": "Metadata repo pending creation inside neo-smart-factory org"
+        "platform": "Railway",
+        "productionUrl": "https://nsfactory-metadata.up.railway.app",
+        "railwayUrl": "https://7o9m2kh2.up.railway.app",
+        "internalUrl": "http://smart-factory.railway.internal",
+        "adminEmail": "factory@neoprotocol.space",
+        "targetCustomDomain": "factory.neoprotocol.space"
       }
     },
     {
