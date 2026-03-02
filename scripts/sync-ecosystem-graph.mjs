@@ -114,6 +114,9 @@ for (const rawNode of sourceNodes) {
   if (rawNode?.hosting) entry.hosting = rawNode.hosting;
   if (rawNode?.webhookUrl) entry.webhookUrl = rawNode.webhookUrl;
   if (rawNode?.webhookRoutes) entry.webhookRoutes = rawNode.webhookRoutes;
+  if (rawNode?.contracts) entry.contracts = rawNode.contracts;
+  if (rawNode?.tokenCanonical) entry.tokenCanonical = rawNode.tokenCanonical;
+  if (rawNode?.canonicalRegistry) entry.canonicalRegistry = rawNode.canonicalRegistry;
 
   dedup.set(id, entry);
 }

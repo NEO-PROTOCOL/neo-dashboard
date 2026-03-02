@@ -39,6 +39,30 @@
         "local": "http://localhost:4321/api/webhook/nexus",
         "internal": "http://flowpay.railway.internal/api/webhook/nexus",
         "production": "https://flowpay.cash/api/webhook/nexus"
+      },
+      "contracts": {
+        "mainnet": {
+          "FlowPay": "0xD49d3Fb2C2CBBA78a1E710660a628919eE78D82A"
+        }
+      },
+      "tokenCanonical": {
+        "asset": {
+          "name": "FlowPay",
+          "symbol": "NEOPAY",
+          "standard": "ERC-20",
+          "network": "base",
+          "chainId": 8453,
+          "contractAddress": "0xD49d3Fb2C2CBBA78a1E710660a628919eE78D82A"
+        },
+        "sourceOfTruth": {
+          "repo": "https://github.com/neo-smart-factory/smart-core",
+          "path": "deployments/flowpay-base.json",
+          "verifiedAt": "2026-03-02"
+        },
+        "runtime": {
+          "proofMethod": "recordProof(bytes32,string,bytes32,string)",
+          "rewardMethod": "mintSettlementReward(address,uint256,bytes32)"
+        }
       }
     },
     {
@@ -330,6 +354,17 @@
         "platform": "N/A (Contracts Repository)",
         "adminEmail": "neo@neoprotocol.space",
         "note": "No public HTTP runtime. Contracts and deployment standards only."
+      },
+      "contracts": {
+        "mainnet": {
+          "FlowPay": "0xD49d3Fb2C2CBBA78a1E710660a628919eE78D82A",
+          "NeoSmartFactoryRouter": "0x2cE474b8F6a391a17C6aC58E447CF99d7aB14FD6"
+        }
+      },
+      "canonicalRegistry": {
+        "flowpayTokenDeployment": "deployments/flowpay-base.json",
+        "factoryRouterDeployment": "deployments/factory-router-base.json",
+        "repo": "https://github.com/neo-smart-factory/smart-core"
       }
     },
     {
