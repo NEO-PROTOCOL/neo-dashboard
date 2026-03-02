@@ -25,13 +25,6 @@ const ECOSYSTEM_EXCLUDE_IDS = new Set([
   "flowpay-core", // standalone commercial product — see stackBoundary.doNotConfuseWith in ecosystem.json
 ]);
 
-// Nodes explicitly excluded from the ecosystem graph.
-// These exist in external data sources (e.g. Nexus API) but are NOT part of
-// the NEO Protocol stack and must not appear in the dashboard graph.
-const ECOSYSTEM_EXCLUDE_IDS = new Set([
-  "flowpay-core", // standalone commercial product — see stackBoundary.doNotConfuseWith in ecosystem.json
-]);
-
 const liveProbeCache = {
   checkedAt: 0,
   payload: null,
@@ -630,13 +623,17 @@ async function loadEcosystemNodes() {
         }
       }
       if (Array.isArray(data?.ecosystem) && data.ecosystem.length > 0) {
-        const nodes = data.ecosystem.filter((n) => !ECOSYSTEM_EXCLUDE_IDS.has(n?.id));
+        const nodes = data.ecosystem.filter(
+          (n) => !ECOSYSTEM_EXCLUDE_IDS.has(n?.id),
+        );
         if (nodes.length > 0) {
           return { success: true, nodes, source: "nexus-api" };
         }
       }
       if (Array.isArray(data?.nodes) && data.nodes.length > 0) {
-        const nodes = data.nodes.filter((n) => !ECOSYSTEM_EXCLUDE_IDS.has(n?.id));
+        const nodes = data.nodes.filter(
+          (n) => !ECOSYSTEM_EXCLUDE_IDS.has(n?.id),
+        );
         if (nodes.length > 0) {
           return { success: true, nodes, source: "nexus-api" };
         }
@@ -698,7 +695,14 @@ function asPath(rawUrl) {
 }
 
 function makePaymentRoute(params) {
-  const { kind, env, url, method = null, sourceField = null, inferred = false } = params;
+  const {
+    kind,
+    env,
+    url,
+    method = null,
+    sourceField = null,
+    inferred = false,
+  } = params;
   if (!url || typeof url !== "string") return null;
   const trimmed = url.trim();
   if (!trimmed) return null;
@@ -778,7 +782,10 @@ function collectPaymentRoutes(node) {
     }
   }
 
-  if (node?.nexusEvents?.nexusTarget && typeof node.nexusEvents.nexusTarget === "object") {
+  if (
+    node?.nexusEvents?.nexusTarget &&
+    typeof node.nexusEvents.nexusTarget === "object"
+  ) {
     for (const [env, url] of Object.entries(node.nexusEvents.nexusTarget)) {
       routes.push(
         makePaymentRoute({
@@ -878,7 +885,11 @@ router.get("/search", async (req, res) => {
 // GET /api/neo/ecosystem/payment-routes — strict payment-only route schema
 router.get("/ecosystem/payment-routes", async (_req, res) => {
   const ecosystem = await loadEcosystemNodes();
-  if (!ecosystem.success || !Array.isArray(ecosystem.nodes) || ecosystem.nodes.length === 0) {
+  if (
+    !ecosystem.success ||
+    !Array.isArray(ecosystem.nodes) ||
+    ecosystem.nodes.length === 0
+  ) {
     return res.status(503).json({
       success: false,
       schemaVersion: PAYMENT_ROUTE_SCHEMA_VERSION,
@@ -911,7 +922,14 @@ router.get("/ecosystem/payment-routes", async (_req, res) => {
     schema: {
       entity: "payment-routes",
       requiredNodeFields: ["nodeId", "name", "org", "role", "routes"],
-      requiredRouteFields: ["kind", "env", "url", "path", "sourceField", "inferred"],
+      requiredRouteFields: [
+        "kind",
+        "env",
+        "url",
+        "path",
+        "sourceField",
+        "inferred",
+      ],
     },
     summary: {
       paymentNodes: payloadNodes.length,
