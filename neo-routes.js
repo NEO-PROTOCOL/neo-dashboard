@@ -25,6 +25,13 @@ const ECOSYSTEM_EXCLUDE_IDS = new Set([
   "flowpay-core", // standalone commercial product — see stackBoundary.doNotConfuseWith in ecosystem.json
 ]);
 
+// Nodes explicitly excluded from the ecosystem graph.
+// These exist in external data sources (e.g. Nexus API) but are NOT part of
+// the NEO Protocol stack and must not appear in the dashboard graph.
+const ECOSYSTEM_EXCLUDE_IDS = new Set([
+  "flowpay-core", // standalone commercial product — see stackBoundary.doNotConfuseWith in ecosystem.json
+]);
+
 const liveProbeCache = {
   checkedAt: 0,
   payload: null,
