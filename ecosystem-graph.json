@@ -97,7 +97,7 @@
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 7,
-      "url": "https://fluxx-landing.vercel.app",
+      "url": "https://www.fluxx.space",
       "hosting": {
         "platform": "Vercel",
         "productionUrl": "https://www.fluxx.space",
@@ -391,7 +391,7 @@
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 8,
-      "url": "https://smart-ui-delta.vercel.app",
+      "url": "https://docs.neoprotocol.space",
       "hosting": {
         "platform": "Vercel / IPFS",
         "productionUrl": "https://docs.neoprotocol.space",
@@ -431,7 +431,7 @@
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 8,
-      "url": "https://landing-jet-seven.vercel.app/",
+      "url": "https://landing.neoprotocol.space",
       "hosting": {
         "platform": "Vercel (nodevercel/smart-ui-landing)",
         "productionUrl": "https://landing.neoprotocol.space",
@@ -447,7 +447,7 @@
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 8,
-      "url": "https://miniapp-smartfactory.vercel.app",
+      "url": "https://mobile.neoprotocol.space",
       "hosting": {
         "platform": "Vercel (nodevercel/smart-ui-mobile)",
         "productionUrl": "https://mobile.neoprotocol.space",
@@ -477,7 +477,7 @@
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 6,
-      "url": "https://wod-protocol.vercel.app",
+      "url": "https://protocol.wodx.pro",
       "hosting": {
         "platform": "Vercel",
         "productionUrl": "https://protocol.wodx.pro",
@@ -493,7 +493,7 @@
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 6,
-      "url": "https://wod-x-pro.vercel.app",
+      "url": "https://app.wodx.pro",
       "hosting": {
         "platform": "Vercel",
         "productionUrl": "https://app.wodx.pro",
