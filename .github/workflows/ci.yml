@@ -44,12 +44,11 @@ jobs:
           grep -q "setInterval(refreshGraph, LIVE_REFRESH_MS)" ecosystem-3d.html
           grep -q "router.get(\"/ecosystem/live\"" neo-routes.js
 
-      - name: Enforce ecosystem graph sync with neobot matrix
+      - name: Ecosystem Graph Integrity
+        # ecosystem-graph.json is a generated artifact (in .gitignore).
+        # CI generates it fresh from neobot source and validates format.
+        # No git diff check — the file is never committed.
         run: |
           test -f "$GITHUB_WORKSPACE/neobot-source/config/ecosystem.json"
           ECOSYSTEM_SOURCE_PATH="$GITHUB_WORKSPACE/neobot-source/config/ecosystem.json" node scripts/sync-ecosystem-graph.mjs
-          git diff --exit-code -- ecosystem-graph.json
-
-      - name: Static Ecosystem Integrity
-        run: |
           node scripts/validate-ecosystem-graph.mjs
