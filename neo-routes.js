@@ -556,7 +556,11 @@ function resolveNodeUrl(node) {
 }
 
 function hasNexusIntegration(node) {
-  return Boolean(node?.webhookUrl || node?.webhookRoutes || node?.nexusEvents);
+  // nexusEvents: [] (array vazio) NÃO conta como integração — Boolean([]) = true em JS
+  const hasEvents = Array.isArray(node?.nexusEvents)
+    ? node.nexusEvents.length > 0
+    : Boolean(node?.nexusEvents);
+  return Boolean(node?.webhookUrl || node?.webhookRoutes || hasEvents);
 }
 
 async function probeNodeStatus(url) {

@@ -4,20 +4,63 @@ import path from 'node:path';
 const repoRoot = process.cwd();
 const targetPath = path.resolve(repoRoot, 'ecosystem-graph.json');
 
-const sourceCandidates = [
+// ── Source resolution ───────────────────────────────────────────────────────
+// Priority 1: local filesystem (dev / CI via neobot checkout)
+const localCandidates = [
   process.env.ECOSYSTEM_SOURCE_PATH,
   path.resolve(repoRoot, '../neobot/config/ecosystem.json'),
   path.resolve(repoRoot, 'neobot-source/config/ecosystem.json'),
 ].filter(Boolean);
 
-const sourcePath = sourceCandidates.find((candidate) => fs.existsSync(candidate));
+const sourcePath = localCandidates.find((c) => fs.existsSync(c));
 
-if (!sourcePath) {
-  throw new Error(
-    `source ecosystem not found. tried: ${sourceCandidates.join(', ')}`,
-  );
+let sourceNodes = null;
+
+if (sourcePath) {
+  try {
+    const raw = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
+    sourceNodes = Array.isArray(raw) ? raw : null;
+    if (sourceNodes?.length) console.log(`[sync] source: local-file (${sourcePath})`);
+  } catch (e) {
+    console.warn(`[sync] Failed to read ${sourcePath}:`, e.message);
+  }
 }
 
+// Priority 2: URL fetch (Railway / remote deploy — no local neobot available)
+if (!sourceNodes?.length) {
+  const url =
+    process.env.ECOSYSTEM_SOURCE_URL ||
+    process.env.NEXUS_ECOSYSTEM_URL ||
+    'https://nexus.neoprotocol.space/api/ecosystem';
+
+  console.log(`[sync] No local source. Fetching from: ${url}`);
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(12000) });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data)) sourceNodes = data;
+      else if (Array.isArray(data?.nodes)) sourceNodes = data.nodes;
+      else if (Array.isArray(data?.ecosystem)) sourceNodes = data.ecosystem;
+      if (sourceNodes?.length) console.log(`[sync] source: url (${url})`);
+    } else {
+      console.warn(`[sync] URL returned HTTP ${res.status}`);
+    }
+  } catch (e) {
+    console.warn(`[sync] URL fetch failed: ${e.message}`);
+  }
+}
+
+// No source found — keep existing file if available (non-blocking for server startup)
+if (!sourceNodes?.length) {
+  if (fs.existsSync(targetPath)) {
+    console.warn('[sync] No source found. Keeping existing ecosystem-graph.json (stale).');
+    process.exit(0);
+  }
+  console.error('[sync] No ecosystem source available and no fallback file exists.');
+  process.exit(1);
+}
+
+// ── Transformation helpers ──────────────────────────────────────────────────
 function normalizeGroup(node) {
   const org = String(node?.org || '').toLowerCase();
   const id = String(node?.id || '').toLowerCase();
@@ -55,7 +98,11 @@ function computeNodeVal(node, group) {
 }
 
 function hasNexusIntegration(node) {
-  return Boolean(node?.webhookUrl || node?.webhookRoutes || node?.nexusEvents);
+  // nexusEvents: [] (empty array) is NOT an integration — Boolean([]) === true in JS
+  const hasEvents = Array.isArray(node?.nexusEvents)
+    ? node.nexusEvents.length > 0
+    : Boolean(node?.nexusEvents);
+  return Boolean(node?.webhookUrl || node?.webhookRoutes || hasEvents);
 }
 
 function resolveProductionUrl(node) {
@@ -85,13 +132,7 @@ function addLink(links, keySet, source, target, label) {
   links.push({ source, target, label });
 }
 
-const sourceRaw = fs.readFileSync(sourcePath, 'utf8');
-const sourceNodes = JSON.parse(sourceRaw);
-
-if (!Array.isArray(sourceNodes) || sourceNodes.length === 0) {
-  throw new Error('source ecosystem is empty');
-}
-
+// ── Build graph ─────────────────────────────────────────────────────────────
 const dedup = new Map();
 for (const rawNode of sourceNodes) {
   const id = String(rawNode?.id || '').trim();
@@ -109,7 +150,6 @@ for (const rawNode of sourceNodes) {
     val: computeNodeVal(rawNode, group),
   };
 
-  // preserve URL data so the dashboard can probe nodes without neobot
   if (url) entry.url = url;
   if (rawNode?.hosting) entry.hosting = rawNode.hosting;
   if (rawNode?.webhookUrl) entry.webhookUrl = rawNode.webhookUrl;
