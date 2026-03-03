@@ -33,10 +33,12 @@ Este projeto nao foi desenhado para estetica isolada. Ele existe para expor saud
 
 - `neo-routes.js`
   - `GET /api/neo/ecosystem`: carrega `ecosystem.json` local (quando existe) ou fallback via Nexus API
+    - regra de URL por no: `hosting.activeUrl` > `hosting.targetCustomDomain` > `hosting.productionUrl`
   - `GET /api/neo/ecosystem/live`: adiciona telemetria de conectividade por no
     - status por no: `online`, `degraded`, `offline`, `unknown`
     - sinal de integracao: `linked` ou `unlinked`
     - cache curto para reduzir carga de probe
+  - `GET /api/neo/ecosystem/payment-routes`: schema focado apenas em rotas de pagamento (flowpay e nos financeiros)
 
 ### Frontend
 

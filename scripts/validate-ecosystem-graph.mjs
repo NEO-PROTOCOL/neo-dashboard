@@ -18,9 +18,10 @@ const ALLOWED_NODE_IDS = [
   'neo-flowoff-landing',
   'neo-flowoff-pwa',
   'neo-nexus',
+  'neo-protocol-hub',
   'neo-protcl',
   'neo-tunnel',
-  'neobot-architect',
+  'neobot-orchestrator',
   'pro-ia',
   'smart-cli',
   'smart-core',
@@ -36,13 +37,15 @@ const ALLOWED_NODE_IDS = [
 ];
 
 const REQUIRED_CORE_IDS = [
-  'neobot-architect',
+  'neobot-orchestrator',
   'neo-nexus',
   'mio-system',
   'neo-dashboard',
   'flowpay',
   'smart-factory',
 ];
+
+const LEGACY_NODE_IDS = ['neobot-architect'];
 
 const FORBIDDEN_IDS = ['flowpay-core'];
 
@@ -77,7 +80,7 @@ for (const forbidden of FORBIDDEN_IDS) {
   }
 }
 
-const allowedSet = new Set(ALLOWED_NODE_IDS);
+const allowedSet = new Set([...ALLOWED_NODE_IDS, ...LEGACY_NODE_IDS]);
 for (const id of nodeIdSet) {
   if (!allowedSet.has(id)) {
     errors.push(`unexpected node id in static graph: ${id}`);
@@ -91,6 +94,12 @@ for (const id of ALLOWED_NODE_IDS) {
 }
 
 for (const coreId of REQUIRED_CORE_IDS) {
+  if (coreId === 'neobot-orchestrator') {
+    if (!nodeIdSet.has('neobot-orchestrator') && !nodeIdSet.has('neobot-architect')) {
+      errors.push('missing core node id: neobot-orchestrator (or legacy neobot-architect)');
+    }
+    continue;
+  }
   if (!nodeIdSet.has(coreId)) {
     errors.push(`missing core node id: ${coreId}`);
   }

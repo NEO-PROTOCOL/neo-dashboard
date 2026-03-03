@@ -2,8 +2,21 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const repoRoot = process.cwd();
-const sourcePath = path.resolve(repoRoot, '../neobot/config/ecosystem.json');
 const targetPath = path.resolve(repoRoot, 'ecosystem-graph.json');
+
+const sourceCandidates = [
+  process.env.ECOSYSTEM_SOURCE_PATH,
+  path.resolve(repoRoot, '../neobot/config/ecosystem.json'),
+  path.resolve(repoRoot, 'neobot-source/config/ecosystem.json'),
+].filter(Boolean);
+
+const sourcePath = sourceCandidates.find((candidate) => fs.existsSync(candidate));
+
+if (!sourcePath) {
+  throw new Error(
+    `source ecosystem not found. tried: ${sourceCandidates.join(', ')}`,
+  );
+}
 
 function normalizeGroup(node) {
   const org = String(node?.org || '').toLowerCase();
@@ -21,7 +34,7 @@ function normalizeGroup(node) {
     mix.includes('pro-ia') ||
     mix.includes('ceo escal')
   ) {
-    return 'FlowOFF Agency';
+    return 'NEO-FlowOFF';
   }
   if (org.includes('neo protocol') || mix.includes('neo')) return 'NEO Protocol';
   return node?.org || 'DApps & Tools';
@@ -37,7 +50,7 @@ function computeNodeVal(node, group) {
   if (group === 'FlowPay' || group === 'Neo Smart Factory') return 8;
   if (group === 'Fluxx DAO') return 7;
   if (group === 'WOD Game') return 6;
-  if (group === 'FlowOFF Agency') return 5;
+  if (group === 'NEO-FlowOFF') return 5;
   return 6;
 }
 
@@ -47,6 +60,7 @@ function hasNexusIntegration(node) {
 
 function resolveProductionUrl(node) {
   const candidates = [
+    node?.hosting?.activeUrl,
     node?.hosting?.targetCustomDomain,
     node?.hosting?.productionUrl,
     node?.infrastructure?.productionUrl,
@@ -100,6 +114,9 @@ for (const rawNode of sourceNodes) {
   if (rawNode?.hosting) entry.hosting = rawNode.hosting;
   if (rawNode?.webhookUrl) entry.webhookUrl = rawNode.webhookUrl;
   if (rawNode?.webhookRoutes) entry.webhookRoutes = rawNode.webhookRoutes;
+  if (rawNode?.contracts) entry.contracts = rawNode.contracts;
+  if (rawNode?.tokenCanonical) entry.tokenCanonical = rawNode.tokenCanonical;
+  if (rawNode?.canonicalRegistry) entry.canonicalRegistry = rawNode.canonicalRegistry;
 
   dedup.set(id, entry);
 }
@@ -134,11 +151,11 @@ if (nexusId) {
 }
 
 const macroLinks = [
-  ['neobot-architect', 'mio-system', 'core-identity'],
-  ['neobot-architect', 'smart-factory', 'orchestration'],
-  ['neobot-architect', 'flowpay', 'payments'],
-  ['neobot-architect', 'pro-ia', 'coordination'],
-  ['neobot-architect', 'fluxx-app', 'governance'],
+  ['neobot-orchestrator', 'mio-system', 'core-identity'],
+  ['neobot-orchestrator', 'smart-factory', 'orchestration'],
+  ['neobot-orchestrator', 'flowpay', 'payments'],
+  ['neobot-orchestrator', 'pro-ia', 'coordination'],
+  ['neobot-orchestrator', 'fluxx-app', 'governance'],
   ['flowpay', 'smart-factory', 'audit-security'],
   ['smart-core', 'smart-factory', 'internal'],
   ['smart-cli', 'smart-factory', 'internal'],

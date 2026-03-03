@@ -3,7 +3,7 @@
     {
       "id": "ceo-escalavel-miniapp",
       "name": "CEO Escalável MiniApp",
-      "group": "FlowOFF Agency",
+      "group": "NEO-FlowOFF",
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 5,
@@ -39,6 +39,30 @@
         "local": "http://localhost:4321/api/webhook/nexus",
         "internal": "http://flowpay.railway.internal/api/webhook/nexus",
         "production": "https://flowpay.cash/api/webhook/nexus"
+      },
+      "contracts": {
+        "mainnet": {
+          "FlowPay": "0xD49d3Fb2C2CBBA78a1E710660a628919eE78D82A"
+        }
+      },
+      "tokenCanonical": {
+        "asset": {
+          "name": "FlowPay",
+          "symbol": "NEOPAY",
+          "standard": "ERC-20",
+          "network": "base",
+          "chainId": 8453,
+          "contractAddress": "0xD49d3Fb2C2CBBA78a1E710660a628919eE78D82A"
+        },
+        "sourceOfTruth": {
+          "repo": "https://github.com/neo-smart-factory/smart-core",
+          "path": "deployments/flowpay-base.json",
+          "verifiedAt": "2026-03-02"
+        },
+        "runtime": {
+          "proofMethod": "recordProof(bytes32,string,bytes32,string)",
+          "rewardMethod": "mintSettlementReward(address,uint256,bytes32)"
+        }
       }
     },
     {
@@ -73,10 +97,11 @@
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 7,
-      "url": "https://www.fluxx.space",
+      "url": "https://fluxx-landing.vercel.app",
       "hosting": {
         "platform": "Vercel",
-        "productionUrl": "https://fluxx-landing.vercel.app",
+        "productionUrl": "https://www.fluxx.space",
+        "activeUrl": "https://fluxx-landing.vercel.app",
         "adminEmail": "team@fluxx.space",
         "targetCustomDomain": "www.fluxx.space"
       }
@@ -95,7 +120,7 @@
     },
     {
       "id": "mio-system",
-      "name": "MIO System (Identity)",
+      "name": "MIO System",
       "group": "NEO Protocol",
       "status": "unknown",
       "nexusConnection": "linked",
@@ -110,7 +135,7 @@
         "targetCustomDomain": "id.neoprotocol.space"
       },
       "webhookUrl": {
-        "local": "http://localhost:4000/api/webhook/nexus",
+        "local": "http://localhost:8080/api/webhook/nexus",
         "internal": "http://mio-system.railway.internal/api/webhook/nexus",
         "production": "https://id.neoprotocol.space/api/webhook/nexus"
       }
@@ -132,7 +157,7 @@
         "targetCustomDomain": "agent.neoprotocol.space"
       },
       "webhookUrl": {
-        "local": "http://localhost:8080/api/webhook/nexus",
+        "local": "http://localhost:8042/api/webhook/nexus",
         "internal": "http://neo-agent-full.railway.internal/api/webhook/nexus",
         "production": "https://agent.neoprotocol.space/api/webhook/nexus"
       }
@@ -147,17 +172,17 @@
       "url": "https://dashboard.neoprotocol.space",
       "hosting": {
         "platform": "Railway",
-        "productionUrl": "https://neo-dashboard-production-2e56.up.railway.app",
-        "railwayUrl": "https://neo-dashboard-production-2e56.up.railway.app",
-        "legacyUrl": "https://neo-dashboard-deploy.vercel.app",
+        "productionUrl": "https://dashboard.neoprotocol.space",
+        "railwayUrl": "https://hgdrbcjm.up.railway.app",
         "adminEmail": "neo@neoprotocol.space",
-        "targetCustomDomain": "dashboard.neoprotocol.space"
+        "targetCustomDomain": "dashboard.neoprotocol.space",
+        "port": 3000
       }
     },
     {
       "id": "neo-flowoff-landing",
       "name": "FlowOFF Landing",
-      "group": "FlowOFF Agency",
+      "group": "NEO-FlowOFF",
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 5,
@@ -172,7 +197,7 @@
     {
       "id": "neo-flowoff-pwa",
       "name": "FlowOFF PWA",
-      "group": "FlowOFF Agency",
+      "group": "NEO-FlowOFF",
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 5,
@@ -185,7 +210,7 @@
     },
     {
       "id": "neo-nexus",
-      "name": "NEO Nexus (Event Hub — standalone)",
+      "name": "NEO Nexus Event Hub",
       "group": "NEO Protocol",
       "status": "unknown",
       "nexusConnection": "linked",
@@ -226,6 +251,20 @@
       }
     },
     {
+      "id": "neo-protocol-hub",
+      "name": "NEO Protocol Hub",
+      "group": "NEO Protocol",
+      "status": "unknown",
+      "nexusConnection": "unlinked",
+      "val": 6,
+      "url": "https://neoprotocol.space",
+      "hosting": {
+        "platform": "GitHub Organization / Distributed",
+        "adminEmail": "neo@neoprotocol.space",
+        "targetCustomDomain": "neoprotocol.space"
+      }
+    },
+    {
       "id": "neo-tunnel",
       "name": "NΞØ Tunnel (open-tunneling)",
       "group": "NEO Protocol",
@@ -256,8 +295,8 @@
       }
     },
     {
-      "id": "neobot-architect",
-      "name": "Neobot — Node Warrior / NEO Nexus",
+      "id": "neobot-orchestrator",
+      "name": "Neobot — Node Warrior / Orchestrator",
       "group": "NEO Protocol",
       "status": "unknown",
       "nexusConnection": "linked",
@@ -265,7 +304,8 @@
       "url": "https://architect.neoprotocol.space",
       "hosting": {
         "platform": "Local / Railway (Production)",
-        "productionUrl": "http://neobot.railway.internal",
+        "productionUrl": "https://architect.neoprotocol.space",
+        "activeUrl": "http://neobot.railway.internal",
         "railwayUrl": "https://aryn3v88.up.railway.app",
         "targetCustomDomain": "architect.neoprotocol.space",
         "adminEmail": "neo@neoprotocol.space"
@@ -280,7 +320,7 @@
     {
       "id": "pro-ia",
       "name": "Pro-IA",
-      "group": "FlowOFF Agency",
+      "group": "NEO-FlowOFF",
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 5,
@@ -310,12 +350,21 @@
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 9,
-      "url": "https://smart.neoprotocol.space",
       "hosting": {
-        "platform": "Railway",
-        "productionUrl": "https://smart.neoprotocol.space",
+        "platform": "N/A (Contracts Repository)",
         "adminEmail": "neo@neoprotocol.space",
-        "targetCustomDomain": "smart.neoprotocol.space"
+        "note": "No public HTTP runtime. Contracts and deployment standards only."
+      },
+      "contracts": {
+        "mainnet": {
+          "FlowPay": "0xD49d3Fb2C2CBBA78a1E710660a628919eE78D82A",
+          "NeoSmartFactoryRouter": "0x2cE474b8F6a391a17C6aC58E447CF99d7aB14FD6"
+        }
+      },
+      "canonicalRegistry": {
+        "flowpayTokenDeployment": "deployments/flowpay-base.json",
+        "factoryRouterDeployment": "deployments/factory-router-base.json",
+        "repo": "https://github.com/neo-smart-factory/smart-core"
       }
     },
     {
@@ -323,7 +372,7 @@
       "name": "NEO Smart Factory Hub",
       "group": "Neo Smart Factory",
       "status": "unknown",
-      "nexusConnection": "linked",
+      "nexusConnection": "unlinked",
       "val": 8,
       "url": "https://factory.neoprotocol.space",
       "hosting": {
@@ -333,10 +382,6 @@
         "internalUrl": "http://smart-factory.railway.internal",
         "adminEmail": "factory@neoprotocol.space",
         "targetCustomDomain": "factory.neoprotocol.space"
-      },
-      "webhookUrl": {
-        "internal": "http://smart-factory.railway.internal/api/webhook/nexus",
-        "production": "https://factory.neoprotocol.space/api/webhook/nexus"
       }
     },
     {
@@ -346,10 +391,11 @@
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 8,
-      "url": "https://docs.neoprotocol.space",
+      "url": "https://smart-ui-delta.vercel.app",
       "hosting": {
         "platform": "Vercel / IPFS",
-        "productionUrl": "https://smart-ui-delta.vercel.app",
+        "productionUrl": "https://docs.neoprotocol.space",
+        "activeUrl": "https://smart-ui-delta.vercel.app",
         "adminEmail": "neo@neoprotocol.space",
         "targetCustomDomain": "docs.neoprotocol.space"
       }
@@ -385,10 +431,11 @@
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 8,
-      "url": "https://landing.neoprotocol.space",
+      "url": "https://landing-jet-seven.vercel.app/",
       "hosting": {
         "platform": "Vercel (nodevercel/smart-ui-landing)",
-        "productionUrl": "https://landing-jet-seven.vercel.app/",
+        "productionUrl": "https://landing.neoprotocol.space",
+        "activeUrl": "https://landing-jet-seven.vercel.app/",
         "adminEmail": "neo@neoprotocol.space",
         "targetCustomDomain": "landing.neoprotocol.space"
       }
@@ -400,10 +447,11 @@
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 8,
-      "url": "https://mobile.neoprotocol.space",
+      "url": "https://miniapp-smartfactory.vercel.app",
       "hosting": {
         "platform": "Vercel (nodevercel/smart-ui-mobile)",
-        "productionUrl": "https://miniapp-smartfactory.vercel.app",
+        "productionUrl": "https://mobile.neoprotocol.space",
+        "activeUrl": "https://miniapp-smartfactory.vercel.app",
         "adminEmail": "neo@neoprotocol.space",
         "targetCustomDomain": "mobile.neoprotocol.space"
       }
@@ -429,10 +477,11 @@
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 6,
-      "url": "https://protocol.wodx.pro",
+      "url": "https://wod-protocol.vercel.app",
       "hosting": {
         "platform": "Vercel",
-        "productionUrl": "https://wod-protocol.vercel.app",
+        "productionUrl": "https://protocol.wodx.pro",
+        "activeUrl": "https://wod-protocol.vercel.app",
         "adminEmail": "neo@neoprotocol.space",
         "targetCustomDomain": "protocol.wodx.pro"
       }
@@ -444,10 +493,11 @@
       "status": "unknown",
       "nexusConnection": "unlinked",
       "val": 6,
-      "url": "https://app.wodx.pro",
+      "url": "https://wod-x-pro.vercel.app",
       "hosting": {
         "platform": "Vercel",
-        "productionUrl": "https://wod-x-pro.vercel.app",
+        "productionUrl": "https://app.wodx.pro",
+        "activeUrl": "https://wod-x-pro.vercel.app",
         "adminEmail": "neo@neoprotocol.space",
         "targetCustomDomain": "app.wodx.pro"
       }
@@ -540,12 +590,17 @@
       "label": "group"
     },
     {
+      "source": "neo-protocol-hub",
+      "target": "neo-nexus",
+      "label": "group"
+    },
+    {
       "source": "neo-tunnel",
       "target": "neo-nexus",
       "label": "group"
     },
     {
-      "source": "neobot-architect",
+      "source": "neobot-orchestrator",
       "target": "neo-nexus",
       "label": "group"
     },
@@ -620,12 +675,17 @@
       "label": "missing-nexus"
     },
     {
+      "source": "neo-protocol-hub",
+      "target": "neo-nexus",
+      "label": "missing-nexus"
+    },
+    {
       "source": "neo-tunnel",
       "target": "neo-nexus",
       "label": "nexus"
     },
     {
-      "source": "neobot-architect",
+      "source": "neobot-orchestrator",
       "target": "neo-nexus",
       "label": "nexus"
     },
@@ -647,7 +707,7 @@
     {
       "source": "smart-factory",
       "target": "neo-nexus",
-      "label": "nexus"
+      "label": "missing-nexus"
     },
     {
       "source": "smart-factory-docs",
@@ -690,27 +750,27 @@
       "label": "missing-nexus"
     },
     {
-      "source": "neobot-architect",
+      "source": "neobot-orchestrator",
       "target": "mio-system",
       "label": "core-identity"
     },
     {
-      "source": "neobot-architect",
+      "source": "neobot-orchestrator",
       "target": "smart-factory",
       "label": "orchestration"
     },
     {
-      "source": "neobot-architect",
+      "source": "neobot-orchestrator",
       "target": "flowpay",
       "label": "payments"
     },
     {
-      "source": "neobot-architect",
+      "source": "neobot-orchestrator",
       "target": "pro-ia",
       "label": "coordination"
     },
     {
-      "source": "neobot-architect",
+      "source": "neobot-orchestrator",
       "target": "fluxx-app",
       "label": "governance"
     },

@@ -8,7 +8,7 @@ const FETCH_TIMEOUT = 5000;
 
 // Static fallback: ecosystem nodes from ecosystem.json (used when neobot is offline)
 const ECOSYSTEM_FALLBACK = [
-    { id: 'neobot-architect', name: 'Neobot — Node Warrior / NEO Nexus', role: 'Sovereign Node / Orchestrator', url: 'https://architect.neoprotocol.space' },
+    { id: 'neobot-orchestrator', name: 'Neobot — Node Warrior / Orchestrator', role: 'Sovereign Node / Orchestrator', url: 'https://architect.neoprotocol.space' },
     { id: 'neo-nexus', name: 'NEO Nexus (Event Hub)', role: 'Event Bus / Standalone Hub', url: 'https://nexus.neoprotocol.space' },
     { id: 'flowpay', name: 'FlowPay (PIX Gateway)', role: 'Payment Gateway / PIX', url: 'https://flowpay.cash' },
     { id: 'neo-agent-full', name: 'Neo Agent Full (LangGraph ReAct)', role: 'AI Sales Agent / Closer', url: 'https://agent.neoprotocol.space' },
