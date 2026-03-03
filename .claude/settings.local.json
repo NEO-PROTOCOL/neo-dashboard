@@ -2,8 +2,33 @@
   "permissions": {
     "allow": [
       "Bash(find:*)",
-      "Bash(/Users/nettomello/neomello/01-neo-protocol-org/neo-dashboard-deploy/P0-SOLUTION-START-HERE.md:*)",
-      "Bash(ls:*)"
+      "Bash(/Users/nettomello/neomello/NEO-PROTOCOL/neo-dashboard-deploy/P0-SOLUTION-START-HERE.md:*)",
+      "Bash(ls:*)",
+      "Bash(gh pr create --title \"docs: rewrite README to reflect realtime dashboard operations\" --body \"Substitui o README genérico pelo documento operacional real do NEØ Dashboard. Cobre arquitetura, rotas, variáveis de ambiente, fluxo de entrega e limites do projeto.\" --base main --head docs/readme-operational-rewrite-20260227)",
+      "Bash(gh pr merge 5 --squash)",
+      "Bash(python3 -c \":*)",
+      "Bash(node scripts/sync-ecosystem-graph.mjs)",
+      "Bash(git checkout -b fix/autonomous-ecosystem-fallback-20260227)",
+      "Bash(git add ecosystem-graph.json scripts/sync-ecosystem-graph.mjs neo-routes.js)",
+      "Bash(git commit:*)",
+      "Bash(git push origin fix/autonomous-ecosystem-fallback-20260227)",
+      "Bash(gh pr:*)",
+      "Bash(git checkout main)",
+      "Bash(git pull origin main)",
+      "Bash(git branch -D fix/autonomous-ecosystem-fallback-20260227)",
+      "Bash(git checkout -b fix/exclude-flowpay-core-from-graph-20260227)",
+      "Bash(git add neo-routes.js)",
+      "Bash(git push -u origin fix/exclude-flowpay-core-from-graph-20260227)",
+      "Bash(gh api repos/NEO-PROTOCOL/neo-dashboard/issues/7/comments --jq '.[] | {author: .user.login, body: .body}')",
+      "Bash(gh api repos/NEO-PROTOCOL/neo-dashboard/pulls/7/reviews --jq '.[] | {author: .user.login, state: .state, body: .body}')",
+      "Bash(gh api repos/NEO-PROTOCOL/neo-dashboard/pulls/7/reviews --jq '.[] | {author: .user.login, state: .state}')",
+      "Bash(gh api repos/NEO-PROTOCOL/neo-dashboard/pulls/7/comments --jq '.[] | {author: .user.login, body: .body, path: .path}')",
+      "Bash(git push)",
+      "Bash(gh api repos/NEO-PROTOCOL/neo-dashboard/pulls/7/reviews --method POST --field body=\"Codex bug addressed in commit fb2b548: added \\\\`nodes.length > 0\\\\` guard after every post-filter return across Source 1 \\(local-file\\) and all three response-shape branches of Source 2 \\(nexus-api\\). Source 3 was already correct. The cascade will now fall through correctly if a source yields zero non-excluded nodes.\" --field event=\"COMMENT\")",
+      "Bash(git checkout -b audit/neobot-architect-node-cleanup-20260227)",
+      "Bash(git add config/ecosystem.json)",
+      "Bash(git push -u origin audit/neobot-architect-node-cleanup-20260227)",
+      "Bash(git push -u origin-legacy audit/neobot-architect-node-cleanup-20260227)"
     ]
   }
 }

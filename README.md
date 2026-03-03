@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD003 MD007 MD011 MD013 MD022 MD023 MD025 MD029 MD032 MD033 MD034 -->
+
 # NEØ Dashboard
 
 Painel de comando operacional do ecossistema NEØ PROTOCOL.
@@ -143,3 +145,23 @@ Check obrigatorio atual:
 Este repositorio representa o dashboard do ecossistema NEØ PROTOCOL.
 
 Nao usar este projeto para mapear ou fundir a trilha externa `flowpay-core` dentro da stack NEØ. Essa fronteira e intencional.
+
+────────────────────────────────────────
+
+▓▓▓ NΞØ MELLØ
+────────────────────────────────────────
+Core Architect · NΞØ Protocol
+neo@neoprotocol.space
+
+"Code is law. Expand until
+silence becomes structure."
+────────────────────────────────────────
+```
+ █████ █         
+██╔═══██╗       
+██║ █ ██║  
+██ █  ██║      
+╚██████╔╝   
+█ ╚═══╝     
+
+```
