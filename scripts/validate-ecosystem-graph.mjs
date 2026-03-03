@@ -8,8 +8,7 @@ const graph = JSON.parse(raw);
 const ALLOWED_NODE_IDS = [
   'ceo-escalavel-miniapp',
   'flowpay',
-  'fluxx-app',
-  'fluxx-contracts',
+  'fluxx-backend',
   'fluxx-landing',
   'internal-ops',
   'mio-system',
@@ -45,7 +44,8 @@ const REQUIRED_CORE_IDS = [
   'smart-factory',
 ];
 
-const LEGACY_NODE_IDS = ['neobot-architect'];
+// Legacy IDs: allowed if present but NOT required (renamed/merged nodes)
+const LEGACY_NODE_IDS = ['neobot-architect', 'fluxx-app', 'fluxx-contracts'];
 
 const FORBIDDEN_IDS = ['flowpay-core'];
 
