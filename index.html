@@ -14,6 +14,14 @@
         rel="stylesheet" />
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Collapsible node groups */
+        #nodes-list details { border-bottom: 1px solid rgba(255,255,255,0.05); }
+        #nodes-list details > summary { list-style: none; cursor: pointer; }
+        #nodes-list details > summary::-webkit-details-marker { display: none; }
+        #nodes-list details > summary::before { content: '▶ '; font-size: 8px; opacity: 0.7; }
+        #nodes-list details[open] > summary::before { content: '▼ '; }
+    </style>
 </head>
 
 <body>
@@ -239,17 +247,12 @@
             }
         }
 
-        const mockNodes = [
-            { name: 'neobot-core', role: 'ORCHESTRATOR', status: 'online' },
-            { name: 'neo-nexus', role: 'EVENT HUB', status: 'online' },
-            { name: 'flowpay', role: 'FINANCE', status: 'online' },
-            { name: 'neo-smart-factory', role: 'WEB3', status: 'maintenance' }
-        ];
-
         let statsInterval = null;
         let logsInterval = null;
         let feedBootMessageShown = false;
         let feedIdleMessageShown = false;
+        let lastEventsTotal = null;
+        let lastEventsTime = null;
 
         async function init() {
             ensureApiPassword(false);
@@ -279,38 +282,67 @@
 
         async function fetchNodes() {
             try {
-                // Tenta buscar do ecossistema real via API
-                const res = await fetchWithAuth('/api/neo/ecosystem');
-                if (!res.ok) throw new Error(`eco_http_${res.status}`);
+                const res = await fetchWithAuth('/api/neo/ecosystem/live');
+                if (!res.ok) throw new Error(`eco_live_${res.status}`);
                 const d = await res.json();
 
-                let nodes = [];
-                if (d.success && Array.isArray(d.nodes)) {
-                    nodes = d.nodes.map(n => ({
-                        name: n.name || n.id,
-                        role: n.role || 'NODE',
-                        status: 'online', // Em breve: ping real
-                        url: n.hosting?.productionUrl || '#'
-                    }));
-                } else {
-                    nodes = mockNodes;
+                if (!d.success || !Array.isArray(d.nodes) || d.nodes.length === 0) {
+                    document.getElementById('nodes-list').innerHTML =
+                        `<div style="padding:12px;color:var(--warning);font-size:10px;">[WARN] ${d.message || 'Ecosystem source unavailable'}</div>`;
+                    return;
                 }
 
-                const list = document.getElementById('nodes-list');
-                list.innerHTML = nodes.map(n => `
-                <div class="node-item" style="border-left: 2px solid ${n.status === 'online' ? 'var(--success)' : 'var(--warning)'}; cursor: pointer;" onclick="window.open('${n.url}', '_blank')">
-                    <div class="node-info">
-                        <h4 style="color: ${n.status === 'online' ? '#fff' : '#aaa'}">${n.name.toUpperCase()}</h4>
-                        <p>${n.role || 'SERVICE'}</p>
-                    </div>
-                    <div class="status-dot" style="background:${n.status === 'online' ? 'var(--success)' : 'var(--warning)'}; color:${n.status === 'online' ? 'var(--success)' : 'var(--warning)'}"></div>
-                </div>
-            `).join('');
+                const nodes = d.nodes.map(n => ({
+                    name: n.name || n.id,
+                    role: n.role || 'NODE',
+                    status: n._live?.status || 'unknown',
+                    nexusLinked: Boolean(n._live?.nexusLinked),
+                    url: n._live?.url || '#'
+                }));
+
+                const GROUPS = [
+                    { key: 'online',   label: 'ONLINE',   color: 'var(--success)', open: true  },
+                    { key: 'degraded', label: 'DEGRADED', color: 'var(--warning)', open: true  },
+                    { key: 'offline',  label: 'OFFLINE',  color: '#ef4444',        open: false },
+                    { key: 'unknown',  label: 'UNKNOWN',  color: '#555',           open: false },
+                ];
+
+                function nodeItem(n, color) {
+                    const clickable = n.url && n.url !== '#';
+                    return `<div class="node-item"
+                        style="border-left:2px solid ${color};cursor:${clickable ? 'pointer' : 'default'};"
+                        ${clickable ? `onclick="window.open('${n.url}','_blank')"` : ''}>
+                        <div class="node-info">
+                            <h4 style="color:${color === 'var(--success)' ? '#fff' : '#999'}">${(n.name || '').toUpperCase()}</h4>
+                            <p>${n.role}${n.nexusLinked ? '' : ' &middot; <span style="color:#444;font-size:9px;">NO NEXUS</span>'}</p>
+                        </div>
+                        <div class="status-dot" style="background:${color};"></div>
+                    </div>`;
+                }
+
+                const html = GROUPS.map(g => {
+                    const group = nodes.filter(n =>
+                        g.key === 'unknown'
+                            ? !['online', 'degraded', 'offline'].includes(n.status)
+                            : n.status === g.key
+                    );
+                    if (group.length === 0) return '';
+                    return `<details ${g.open ? 'open' : ''}>
+                        <summary style="padding:7px 4px;font-size:10px;color:${g.color};letter-spacing:.08em;display:flex;justify-content:space-between;align-items:center;">
+                            <span>${g.label}</span>
+                            <span style="background:${g.color}22;color:${g.color};padding:1px 8px;border-radius:10px;font-size:9px;">${group.length}</span>
+                        </summary>
+                        ${group.map(n => nodeItem(n, g.color)).join('')}
+                    </details>`;
+                }).join('');
+
+                document.getElementById('nodes-list').innerHTML =
+                    html || '<div style="padding:10px;color:var(--text-dim);font-size:10px;">No nodes found</div>';
 
             } catch (e) {
-                console.error(e);
-                const list = document.getElementById('nodes-list');
-                list.innerHTML = `<div style="padding:10px; color:var(--warning); font-size:10px;">Offline nodes view (using cache)</div>` + list.innerHTML;
+                console.error('[fetchNodes]', e);
+                document.getElementById('nodes-list').innerHTML =
+                    `<div style="padding:12px;color:var(--warning);font-size:10px;">[ERR] ${e.message}</div>`;
             }
         }
 
@@ -319,9 +351,21 @@
                 const res = await fetchWithAuth('/api/nexus/metrics/summary');
                 if (res.ok) {
                     const data = await res.json();
+                    const now = Date.now();
 
-                    document.getElementById('metric-tps').innerText = data.eventsTotal || 0;
-                    document.getElementById('bar-tps').style.width = Math.min((data.eventsTotal % 100), 100) + '%';
+                    // EVENTS/SEC: taxa delta real — não total cumulativo
+                    const currentTotal = data.eventsTotal || 0;
+                    let rate = 0;
+                    if (lastEventsTotal !== null && lastEventsTime !== null) {
+                        const delta = Math.max(0, currentTotal - lastEventsTotal);
+                        const dt = (now - lastEventsTime) / 1000;
+                        rate = dt > 0 ? (delta / dt) : 0;
+                    }
+                    lastEventsTotal = currentTotal;
+                    lastEventsTime = now;
+
+                    document.getElementById('metric-tps').innerText = rate.toFixed(1);
+                    document.getElementById('bar-tps').style.width = Math.min(rate * 20, 100) + '%';
 
                     document.getElementById('metric-queue').innerText = data.retryQueueSize || 0;
                     document.getElementById('bar-queue').style.width = Math.min(data.retryQueueSize, 100) + '%';
@@ -330,14 +374,13 @@
                     document.getElementById('bar-conns').style.width = Math.min(data.wsConnections * 10, 100) + '%';
                 }
             } catch (e) {
-                // Fallback jitter para nao deixar a UI morta se Nexus estiver offline
-                const tps = Math.floor(Math.random() * 5) + 1;
-                document.getElementById('metric-tps').innerText = tps;
-                document.getElementById('bar-tps').style.width = (tps * 10) + '%';
+                // Nexus offline — mostra '--', não jitter falso
+                document.getElementById('metric-tps').innerText = '--';
+                document.getElementById('bar-tps').style.width = '0%';
             }
 
-            // CPU Jitter (Local Browser)
-            document.getElementById('sys-cpu').innerText = (8 + Math.floor(Math.random() * 8)) + '%';
+            // CPU (estimativa local do browser — explicitamente aproximada)
+            document.getElementById('sys-cpu').innerText = '~' + (8 + Math.floor(Math.random() * 8)) + '%';
         }
 
         let lastSeenTimestamp = null;
