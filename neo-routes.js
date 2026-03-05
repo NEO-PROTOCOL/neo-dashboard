@@ -556,9 +556,14 @@ function resolveNodeUrl(node) {
 }
 
 function hasNexusIntegration(node) {
-  // nexusEvents: [] (array vazio) NÃO conta como integração — Boolean([]) = true em JS
+  // nexusEvents: [] means the field was explicitly configured on the node
+  // (passive acknowledgment — e.g. frontend / docs nodes that intentionally
+  // have no nexus events).  Treat it as "acknowledged" so it does NOT trigger
+  // the "unlinked" alert.  Only nodes without the nexusEvents field at all are
+  // considered truly unconfigured.
+  const nexusEventsConfigured = node != null && 'nexusEvents' in node;
   const hasEvents = Array.isArray(node?.nexusEvents)
-    ? node.nexusEvents.length > 0
+    ? node.nexusEvents.length > 0 || nexusEventsConfigured
     : Boolean(node?.nexusEvents);
   return Boolean(node?.webhookUrl || node?.webhookRoutes || hasEvents);
 }

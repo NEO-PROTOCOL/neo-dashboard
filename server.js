@@ -58,6 +58,11 @@ console.log('[SYS] Bootstrap sequence complete.');
 if (!process.env.NEXUS_API_URL || process.env.NEXUS_API_URL.includes('neoprotocol.space')) {
     process.env.NEXUS_API_URL = 'https://neo-nexus-production.up.railway.app';
 }
+// NEXUS_ECOSYSTEM_URL: use direct Railway URL from within Railway to avoid
+// DNS resolution delays with the custom domain (nexus.neoprotocol.space).
+if (!process.env.NEXUS_ECOSYSTEM_URL || process.env.NEXUS_ECOSYSTEM_URL.includes('neoprotocol.space')) {
+    process.env.NEXUS_ECOSYSTEM_URL = 'https://neo-nexus-production.up.railway.app/api/ecosystem';
+}
 
 const execAsync = promisify(exec);
 const MONITOR_FETCH_TIMEOUT_MS = Number(process.env.MONITOR_FETCH_TIMEOUT_MS || 5000);
@@ -182,6 +187,14 @@ if (process.env.NODE_ENV === 'production' && !GATEWAY_PASSWORD) {
     process.exit(1);
 }
 
+// RFC 6598 (100.64.0.0/10) — shared address space used by Railway for internal
+// health checks and proxies. Requests from this range are not external threats.
+const isRailwayInternalIp = (ip) => {
+    const stripped = (ip || '').replace('::ffff:', '');
+    const parts = stripped.split('.').map(Number);
+    return parts.length === 4 && parts[0] === 100 && parts[1] >= 64 && parts[1] < 128;
+};
+
 const authMiddleware = (req, res, next) => {
     const providedPassword = req.headers['x-gateway-password'] || req.query.password;
 
@@ -189,7 +202,10 @@ const authMiddleware = (req, res, next) => {
         return next();
     }
 
-    console.warn(`[SECURITY] Unauthorized access attempt from ${req.ip}`);
+    // Suppress noisy security logs for Railway's internal health-check probes.
+    if (!isRailwayInternalIp(req.ip)) {
+        console.warn(`[SECURITY] Unauthorized access attempt from ${req.ip}`);
+    }
     res.status(401).json({ error: 'UNAUTHORIZED_ACCESS', message: 'Valid x-gateway-password header required' });
 };
 
