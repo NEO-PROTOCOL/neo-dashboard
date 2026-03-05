@@ -21,6 +21,11 @@
         #nodes-list details > summary::-webkit-details-marker { display: none; }
         #nodes-list details > summary::before { content: '▶ '; font-size: 8px; opacity: 0.7; }
         #nodes-list details[open] > summary::before { content: '▼ '; }
+        /* Copy button */
+        .node-copy-btn { background:none; border:none; color:#444; cursor:pointer; padding:2px 5px;
+            font-size:11px; border-radius:3px; line-height:1; flex-shrink:0; }
+        .node-copy-btn:hover { color:#aaa; background:rgba(255,255,255,0.06); }
+        .node-copy-btn.copied { color:var(--success) !important; }
     </style>
 </head>
 
@@ -309,6 +314,13 @@
 
                 function nodeItem(n, color) {
                     const clickable = n.url && n.url !== '#';
+                    const copyPayload = [
+                        n.name.toUpperCase(),
+                        `status:${n.status}`,
+                        `nexus:${n.nexusLinked ? 'linked' : 'unlinked'}`,
+                        `role:${n.role}`,
+                        clickable ? n.url : 'no-url',
+                    ].join(' | ');
                     return `<div class="node-item"
                         style="border-left:2px solid ${color};cursor:${clickable ? 'pointer' : 'default'};"
                         ${clickable ? `onclick="window.open('${n.url}','_blank')"` : ''}>
@@ -316,7 +328,11 @@
                             <h4 style="color:${color === 'var(--success)' ? '#fff' : '#999'}">${(n.name || '').toUpperCase()}</h4>
                             <p>${n.role}${n.nexusLinked ? '' : ' &middot; <span style="color:#444;font-size:9px;">NO NEXUS</span>'}</p>
                         </div>
-                        <div class="status-dot" style="background:${color};"></div>
+                        <div style="display:flex;align-items:center;gap:4px;">
+                            <button class="node-copy-btn" title="Copy node info"
+                                onclick="copyNodeInfo(event,'${copyPayload.replace(/'/g, "&#39;")}')">⎘</button>
+                            <div class="status-dot" style="background:${color};"></div>
+                        </div>
                     </div>`;
                 }
 
@@ -510,6 +526,27 @@
             await oldInit();
             updateSkillsChart();
         };
+
+        /* COPY NODE INFO */
+        function copyNodeInfo(event, text) {
+            event.stopPropagation();
+            const btn = event.currentTarget;
+            navigator.clipboard.writeText(text).then(() => {
+                btn.textContent = '✓';
+                btn.classList.add('copied');
+                setTimeout(() => { btn.textContent = '⎘'; btn.classList.remove('copied'); }, 1500);
+            }).catch(() => {
+                // fallback for browsers without clipboard API
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed'; ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select(); document.execCommand('copy');
+                document.body.removeChild(ta);
+                btn.textContent = '✓'; btn.classList.add('copied');
+                setTimeout(() => { btn.textContent = '⎘'; btn.classList.remove('copied'); }, 1500);
+            });
+        }
 
         /* BOOT */
         window.addEventListener('load', init);

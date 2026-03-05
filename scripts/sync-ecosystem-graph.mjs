@@ -5,10 +5,10 @@ const repoRoot = process.cwd();
 const targetPath = path.resolve(repoRoot, 'ecosystem-graph.json');
 
 // ── Source resolution ───────────────────────────────────────────────────────
-// Priority 1: local filesystem (dev / CI via neobot checkout)
+// Priority 1: local filesystem (dev / CI via registry checkout)
 const localCandidates = [
   process.env.ECOSYSTEM_SOURCE_PATH,
-  path.resolve(repoRoot, '../neobot/config/ecosystem.json'),
+  path.resolve(repoRoot, '../neobot-orchestrator/config/ecosystem.json'),
   path.resolve(repoRoot, 'neobot-source/config/ecosystem.json'),
 ].filter(Boolean);
 
@@ -26,7 +26,7 @@ if (sourcePath) {
   }
 }
 
-// Priority 2: URL fetch (Railway / remote deploy — no local neobot available)
+// Priority 2: URL fetch (Railway / remote deploy — no local registry available)
 if (!sourceNodes?.length) {
   const url =
     process.env.ECOSYSTEM_SOURCE_URL ||
