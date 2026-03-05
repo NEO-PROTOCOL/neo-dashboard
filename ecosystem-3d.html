@@ -184,13 +184,12 @@
         <span class="legend-arrow">▼</span>
       </div>
       <div class="legend-body" id="legend-body">
-        <div class="legend-item"><div class="dot" style="background:#ff4444"></div>NEO Protocol (Core)</div>
+        <div class="legend-item"><div class="dot" style="background:#ff4444"></div>NEO Protocol</div>
         <div class="legend-item"><div class="dot" style="background:#00ccff"></div>Neo Smart Factory</div>
         <div class="legend-item"><div class="dot" style="background:#00ffcc"></div>FlowPay</div>
-        <div class="legend-item"><div class="dot" style="background:#4488ff"></div>Fluxx Dao</div>
+        <div class="legend-item"><div class="dot" style="background:#4488ff"></div>Fluxx DAO</div>
         <div class="legend-item"><div class="dot" style="background:#ffcc00"></div>WOD Game</div>
         <div class="legend-item"><div class="dot" style="background:#ff00ff"></div>NEO-FlowOFF</div>
-        <div class="legend-item"><div class="dot" style="background:#9aa4b2"></div>DApps &amp; Tools</div>
       </div>
     </div>
 
@@ -205,10 +204,9 @@
         "NEO Protocol": "#ff4444",
         "Neo Smart Factory": "#00ccff",
         FlowPay: "#00ffcc",
-        "Fluxx Dao": "#4488ff",
+        "Fluxx DAO": "#4488ff",
         "NEO-FlowOFF": "#ff00ff",
         "WOD Game": "#ffcc00",
-        "DApps & Tools": "#9aa4b2",
       };
 
       const statusColors = {
@@ -692,9 +690,32 @@
         return "unlinked";
       }
 
+      // Blend two hex colors — t=0 → pure hex1, t=1 → pure hex2
+      function blendHex(hex1, hex2, t) {
+        const h2r = (h) => [
+          parseInt(h.slice(1, 3), 16),
+          parseInt(h.slice(3, 5), 16),
+          parseInt(h.slice(5, 7), 16),
+        ];
+        const [r1, g1, b1] = h2r(hex1);
+        const [r2, g2, b2] = h2r(hex2);
+        const r = Math.round(r1 * (1 - t) + r2 * t);
+        const g = Math.round(g1 * (1 - t) + g2 * t);
+        const b = Math.round(b1 * (1 - t) + b2 * t);
+        return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+      }
+
+      // Org color is always the base — status adds a tint so identity is never lost.
+      // online   → pure org color
+      // degraded → org + 35% orange tint
+      // offline  → org + 60% red tint (critical, but org still visible)
+      // unknown  → org + 40% dark blend (greyed out but recognisable)
       function nodeColor(node) {
-        if (node.status === "online") return colorMap[node.group] || "#9aa4b2";
-        return statusColors[node.status] || statusColors.unknown;
+        const org = colorMap[node.group] || "#9aa4b2";
+        if (node.status === "online") return org;
+        if (node.status === "degraded") return blendHex(org, "#ffb74d", 0.35);
+        if (node.status === "offline")  return blendHex(org, "#ff4d67", 0.60);
+        return blendHex(org, "#2a2a3a", 0.40); // unknown → dim org
       }
 
       function linkColor(link) {
