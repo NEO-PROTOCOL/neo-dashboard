@@ -852,11 +852,7 @@
             "[WARN] Live probe endpoint indisponivel. Exibindo snapshot.",
           );
         }
-        if (payload.source !== "local-file") {
-          alertLines.push(
-            `[WARN] Source atual nao e local-file (${payload.source}).`,
-          );
-        }
+        // source: nexus-api is the expected production source — no warning needed
         if (statusCount.offline > 0) {
           alertLines.push(`[ALERT] ${statusCount.offline} node(s) offline.`);
         }
