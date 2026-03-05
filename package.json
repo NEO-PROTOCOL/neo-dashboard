@@ -5,9 +5,9 @@
   "description": "Premium Dashboard for NΞØ BOT",
   "main": "server.js",
   "scripts": {
-    "start": "node scripts/sync-ecosystem-graph.mjs; node --import tsx server.js",
+    "start": "node --import tsx server.js",
     "dev": "nodemon --import tsx server.js",
-    "build": "echo 'No build step required for this project structure'",
+    "build": "node scripts/sync-ecosystem-graph.mjs",
     "sync:ecosystem-graph": "node scripts/sync-ecosystem-graph.mjs",
     "validate:ecosystem-graph": "node scripts/validate-ecosystem-graph.mjs"
   },
