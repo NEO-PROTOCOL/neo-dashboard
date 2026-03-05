@@ -80,7 +80,8 @@ function normalizeGroup(node) {
     return 'NEO-FlowOFF';
   }
   if (org.includes('neo protocol') || mix.includes('neo')) return 'NEO Protocol';
-  return node?.org || 'DApps & Tools';
+  // Fallback: use the raw org field — no fake "DApps & Tools" group
+  return node?.org || 'NEO Protocol';
 }
 
 function computeNodeVal(node, group) {
