@@ -1,11 +1,7 @@
-# Sovereign owner
-* @neomello
-
-# Critical runtime surfaces
-/server.js @neomello
+# Gate 1 baseline ownership (temporary until team matrix is finalized)
+/src/ @neomello
+/scripts/ @neomello
 /neo-routes.js @neomello
-/ecosystem-3d.html @neomello
-/ecosystem-graph.json @neomello
-/scripts/validate-ecosystem-graph.mjs @neomello
-/scripts/sync-ecosystem-graph.mjs @neomello
-/.github/workflows/ @neomello
+/ai-routes.js @neomello
+/automation-routes.js @neomello
+* @neomello
