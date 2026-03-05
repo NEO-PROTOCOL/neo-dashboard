@@ -595,10 +595,10 @@ async function probeNodeStatus(url) {
 }
 
 async function loadEcosystemNodes() {
-  // Source 1: neobot local filesystem (dev environment only)
+  // Source 1: registry local filesystem (dev environment only)
   const ecosystemPath = path.resolve(
     process.cwd(),
-    "../neobot/config/ecosystem.json",
+    "../neobot-orchestrator/config/ecosystem.json",
   );
   try {
     if (fs.existsSync(ecosystemPath)) {
@@ -615,7 +615,7 @@ async function loadEcosystemNodes() {
     console.warn("Failed to read ecosystem.json:", e.message);
   }
 
-  // Source 2: Nexus API (when neobot is online)
+  // Source 2: Nexus API (when local registry is unavailable)
   try {
     const r = await fetchWithTimeout(NEXUS_ECOSYSTEM_URL);
     if (r.ok) {
@@ -944,7 +944,7 @@ router.get("/ecosystem/payment-routes", async (_req, res) => {
   });
 });
 
-// GET /api/neo/ecosystem — load actual ecosystem.json from architect node
+// GET /api/neo/ecosystem — load actual ecosystem.json from orchestrator registry
 router.get("/ecosystem", async (req, res) => {
   const ecosystem = await loadEcosystemNodes();
   if (ecosystem.success) {
@@ -955,11 +955,11 @@ router.get("/ecosystem", async (req, res) => {
     });
   }
 
-  // Ensaio de fallback se estiver em produção sem acesso ao FS local do neobot e sem Nexus.
+  // Fallback quando estiver em produção sem acesso ao FS local do orchestrator e sem Nexus.
   res.json({
     success: false,
     message: "Source of truth (ecosystem.json) not accessible locally.",
-    hint: "Link to https://github.com/NEO-PROTOCOL/neobot/blob/main/config/ecosystem.json",
+    hint: "Link to ../neobot-orchestrator/config/ecosystem.json",
   });
 });
 
