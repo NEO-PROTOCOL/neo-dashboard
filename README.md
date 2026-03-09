@@ -2,12 +2,12 @@
 
 # NEØ Dashboard
 
-![CI](https://img.shields.io/github/actions/workflow/status/NEO-PROTOCOL/neo-dashboard/ci.yml?branch=main&style=flat-square&label=ci&labelColor=0d0d0d)
-![Last Commit](https://img.shields.io/github/last-commit/NEO-PROTOCOL/neo-dashboard?style=flat-square&color=00ff88&labelColor=0d0d0d)
-![License](https://img.shields.io/github/license/NEO-PROTOCOL/neo-dashboard?style=flat-square&color=00ff88&labelColor=0d0d0d)
-![Role](https://img.shields.io/badge/Role-Observability-f59e0b?style=flat-square&labelColor=0d0d0d)
-![Deploy](https://img.shields.io/badge/Deploy-Railway-0b0d0e?style=flat-square&logo=railway&logoColor=white&labelColor=0d0d0d)
-![NEØ](https://img.shields.io/badge/NEØ-Protocol-00ff88?style=flat-square&labelColor=0d0d0d)
+[![Dashboard CI](https://github.com/NEO-PROTOCOL/neo-dashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/NEO-PROTOCOL/neo-dashboard/actions/workflows/ci.yml)
+![Last Commit](https://img.shields.io/github/last-commit/NEO-PROTOCOL/neo-dashboard?style=flat-square&color=2a76ff&labelColor=0d0d0d)
+![License](https://img.shields.io/github/license/NEO-PROTOCOL/neo-dashboard?style=flat-square&color=2a76ff&labelColor=0d0d0d)
+![Role](https://img.shields.io/badge/Role-Observability-2a76ff?style=flat-square&labelColor=0d0d0d)
+![Deploy](https://img.shields.io/badge/Deploy-Railway-2a76ff?style=flat-square&logo=railway&logoColor=white&labelColor=0d0d0d)
+![NEØ](https://img.shields.io/badge/NEØ-Protocol-2a76ff?style=flat-square&labelColor=0d0d0d)
 
 Painel de comando operacional do ecossistema NEØ PROTOCOL.
 
