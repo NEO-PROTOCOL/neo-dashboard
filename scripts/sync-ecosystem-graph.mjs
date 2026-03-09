@@ -1,3 +1,20 @@
+/**
+ * ATENÇÃO: Erro de CI relacionado ao ecosystem-graph.json
+ * 
+ * O workflow de CI pode apresentar o erro:
+ *   "ecosystem-graph validation failed: unexpected node id in static graph: neo-mcp-server"
+ *   "unexpected node id in static graph: neo-mello-eth"
+ *
+ * Estes nós estão presentes no arquivo gerado, mas não constam em source/config/ecosystem.json,
+ * que é mantido e atualizado em outro repositório (NEO-PROTOCOL/neobot).
+ * 
+ * A solução definitiva deve ser alinhada e aplicada no repositório original.
+ * NÃO realize ajustes locais temporários neste projeto para mascarar o erro.
+ * O correto é alinhar com o mantenedor do arquivo fonte.
+ *
+ * Enquanto não houver ajuste externo, este erro é esperado em PRs que não alteram a estrutura do grafo.
+ */
+
 import fs from 'node:fs';
 import path from 'node:path';
 
