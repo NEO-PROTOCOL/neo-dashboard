@@ -3,6 +3,7 @@
 # NEØ Dashboard
 
 ![CI](https://img.shields.io/github/actions/workflow/status/NEO-PROTOCOL/neo-dashboard/ci.yml?branch=main&style=flat-square&label=ci&labelColor=0d0d0d)
+![Stack Analyzer](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/NEO-PROTOCOL/neo-dashboard/main/reports/readiness-badge.json&style=flat-square)
 ![Last Commit](https://img.shields.io/github/last-commit/NEO-PROTOCOL/neo-dashboard?style=flat-square&color=00ff88&labelColor=0d0d0d)
 ![License](https://img.shields.io/github/license/NEO-PROTOCOL/neo-dashboard?style=flat-square&color=00ff88&labelColor=0d0d0d)
 ![Role](https://img.shields.io/badge/Role-Observability-f59e0b?style=flat-square&labelColor=0d0d0d)
@@ -136,6 +137,38 @@ Check obrigatorio atual:
 
 - `syntax-and-guards`
 
+## Stack Analyzer (v3.1)
+
+Analise automatizada de producao-readiness do ecossistema completo.
+
+- Analyzer: `stack_analyzer.py` (source of truth em `NEO-PROTOCOL/neobot`)
+- Dashboard: [`/stack-analyzer.html`](stack-analyzer.html) — 5 tabs interativos (Overview, Findings, Nodes, Graph, Readiness)
+- Report: `stack-report.json` — gerado automaticamente via GitHub Action
+- Badge: dinamico via `reports/readiness-badge.json` (shields.io endpoint)
+
+### Metricas atuais
+
+| Metrica | Valor |
+|---------|-------|
+| Readiness Score | 62/100 |
+| Nodes | 30 (6 orgs) |
+| Findings | 24 (1 high, 12 medium, 5 low, 6 info) |
+| Grades | A:2 B:4 C:11 D:5 F:1 |
+
+### Execucao local
+
+```bash
+python stack_analyzer.py ecosystem.json stack-report.json
+```
+
+### CI/CD
+
+O workflow `stack-analyze.yml` roda automaticamente em push para `main` e via `workflow_dispatch`. Atualiza o report, re-injeta dados no dashboard HTML e commita o badge atualizado.
+
+### PR Policy
+
+Mudancas em `ecosystem.json` devem rodar o analyzer. O score nao pode cair sem justificativa no PR.
+
 ## Fluxo oficial de entrega
 
 1. branch de feature
@@ -146,6 +179,7 @@ Check obrigatorio atual:
 6. verificacao operacional em:
    - `/` (painel)
    - `/ecosystem-3d.html` (grafo vivo)
+   - `/stack-analyzer.html` (analise do ecossistema)
 
 ## Escopo e limite
 

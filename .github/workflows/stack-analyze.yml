@@ -1,0 +1,73 @@
+name: Stack Analyzer
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'stack-analyzer.html'
+      - '.github/workflows/stack-analyze.yml'
+  workflow_dispatch:
+  repository_dispatch:
+    types: [ecosystem-updated]
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout dashboard
+        uses: actions/checkout@v4
+
+      - name: Checkout neobot (ecosystem source of truth)
+        uses: actions/checkout@v4
+        with:
+          repository: NEO-PROTOCOL/neobot
+          path: neobot-source
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run Stack Analyzer v3.1
+        run: |
+          python neobot-source/config/stack_analyzer.py \
+            neobot-source/config/ecosystem.json \
+            stack-report.json
+
+      - name: Generate readiness badge
+        run: |
+          python scripts/generate-badge.py stack-report.json reports/readiness-badge.json
+
+      - name: Inject report into dashboard HTML
+        run: |
+          python -c "
+          import json
+          with open('stack-report.json') as f:
+              report = json.load(f)
+          with open('stack-analyzer.html') as f:
+              html = f.read()
+          # Replace the REPORT const line with fresh data
+          import re
+          pattern = r'const REPORT = \{.*?\};'
+          replacement = 'const REPORT = ' + json.dumps(report, ensure_ascii=False) + ';'
+          html = re.sub(pattern, replacement, html, count=1, flags=re.DOTALL)
+          with open('stack-analyzer.html', 'w') as f:
+              f.write(html)
+          print(f'Injected {len(json.dumps(report))} chars into stack-analyzer.html')
+          "
+
+      - name: Commit updated report and badge
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add stack-report.json reports/readiness-badge.json stack-analyzer.html
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore(analyzer): update stack report and readiness badge [skip ci]"
+            git push
+          fi
