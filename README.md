@@ -186,22 +186,19 @@ Este repositorio representa o dashboard do ecossistema NEØ PROTOCOL.
 
 Nao usar este projeto para mapear ou fundir a trilha externa `flowpay-core` dentro da stack NEØ. Essa fronteira e intencional.
 
-────────────────────────────────────────
-
+─
+```
 ▓▓▓ NΞØ MELLØ
-────────────────────────────────────────
+─────────────────────────────
 Core Architect · NΞØ Protocol
 neo@neoprotocol.space
-
-"Code is law. Expand until
-silence becomes structure."
-────────────────────────────────────────
 ```
- █████ █         
-██╔═══██╗       
-██║ █ ██║  
-██ █  ██║      
-╚██████╔╝   
-█ ╚═══╝     
+```
+     ▄       
+  ▄██▄░                         
+ █  █ █░    
+ █ █░ █  
+  ▀██▀  
+  ▀░
 
 ```
