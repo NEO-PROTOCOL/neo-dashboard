@@ -1,5 +1,8 @@
 name: Stack Analyzer
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   push:
     branches:
@@ -20,17 +23,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout dashboard
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Checkout neobot-orchestrator (ecosystem source of truth)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: NEO-PROTOCOL/neobot-orchestrator
           path: neobot-source
           token: ${{ secrets.NEO_GITHUB_TOKEN }}
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -63,7 +66,7 @@ jobs:
           "
 
       - name: Open analyzer update pull request
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: "chore(analyzer): update stack report and readiness badge [skip ci]"
           title: "chore(analyzer): update stack report and readiness badge"
