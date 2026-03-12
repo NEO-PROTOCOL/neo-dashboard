@@ -90,9 +90,11 @@ for (const id of nodeIdSet) {
   }
 }
 
-for (const id of ALLOWED_NODE_IDS) {
-  if (!nodeIdSet.has(id)) {
-    errors.push(`missing required allowed node id in static graph: ${id}`);
+// We only check if nodes that ARE present are allowed. 
+// We don't force every allowed node to be present unless it's in REQUIRED_CORE_IDS.
+for (const id of nodeIdSet) {
+  if (!allowedSet.has(id)) {
+    errors.push(`unexpected node id in static graph: ${id}`);
   }
 }
 

@@ -21,10 +21,10 @@ jobs:
       - name: Checkout dashboard
         uses: actions/checkout@v4
 
-      - name: Checkout neobot (ecosystem source of truth)
+      - name: Checkout neobot-orchestrator (ecosystem source of truth)
         uses: actions/checkout@v4
         with:
-          repository: NEO-PROTOCOL/neobot
+          repository: NEO-PROTOCOL/neobot-orchestrator
           path: neobot-source
 
       - name: Setup Python
