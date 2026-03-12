@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEØ Operations Runbook</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #071018;
+            --panel: rgba(9, 18, 28, 0.92);
+            --panel-hi: rgba(14, 29, 44, 0.96);
+            --border: rgba(255,255,255,0.08);
+            --text: #dce8f5;
+            --dim: #7b8ca3;
+            --accent: #9df7ff;
+            --green: #39d98a;
+            --amber: #ffb74d;
+            --red: #ff6f7d;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top right, rgba(157,247,255,0.12), transparent 30%),
+                radial-gradient(circle at left center, rgba(57,217,138,0.08), transparent 24%),
+                var(--bg);
+            color: var(--text);
+            font-family: "Space Grotesk", sans-serif;
+        }
+        .shell {
+            width: min(1100px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 28px 0 48px;
+        }
+        .hero {
+            padding: 24px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--panel-hi), var(--panel));
+            box-shadow: 0 24px 80px rgba(0,0,0,0.35);
+        }
+        .eyebrow {
+            display: inline-flex;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(157,247,255,0.2);
+            color: var(--accent);
+            font-size: 11px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+        h1 {
+            margin: 14px 0 10px;
+            font-size: clamp(32px, 5vw, 56px);
+            line-height: 0.96;
+        }
+        .sub {
+            max-width: 760px;
+            color: var(--dim);
+            font-size: 15px;
+            line-height: 1.65;
+        }
+        .nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+        .nav a {
+            display: inline-flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 150px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text);
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.03);
+        }
+        .nav strong {
+            font-size: 12px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        .nav span {
+            font-size: 11px;
+            color: var(--dim);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .card {
+            padding: 18px;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            background: rgba(8, 16, 24, 0.88);
+        }
+        .card h2 {
+            margin: 0 0 10px;
+            font-size: 18px;
+        }
+        .card p {
+            margin: 0 0 12px;
+            color: var(--dim);
+            font-size: 14px;
+            line-height: 1.55;
+        }
+        .list {
+            display: grid;
+            gap: 10px;
+        }
+        .item {
+            padding: 12px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .item strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .item p {
+            margin: 0;
+            font-size: 13px;
+        }
+        .ops-strip {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .ops-strip .item strong { color: var(--accent); }
+        code {
+            font-family: "JetBrains Mono", monospace;
+            font-size: 12px;
+            color: var(--accent);
+        }
+        .tone-green { color: var(--green); }
+        .tone-amber { color: var(--amber); }
+        .tone-red { color: var(--red); }
+        @media (max-width: 960px) {
+            .grid, .ops-strip {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <section class="hero">
+            <div class="eyebrow">Operations Runbook</div>
+            <h1>Uma interface por função.<br />Menos teatro, mais controle.</h1>
+            <p class="sub">
+                O Analyzer decide prioridade. O Control executa. A Topology contextualiza. Quando cada superfície assume sua vocação, a operação deixa de discutir telas e volta a discutir sistema.
+            </p>
+            <nav class="nav">
+                <a href="/stack-analyzer.html">
+                    <strong>Analyzer</strong>
+                    <span>Superfície principal de operação</span>
+                </a>
+                <a href="/">
+                    <strong>Control</strong>
+                    <span>Console autenticado de runtime</span>
+                </a>
+                <a href="/ecosystem-3d.html">
+                    <strong>Topology</strong>
+                    <span>Mapa visual live versus snapshot</span>
+                </a>
+            </nav>
+        </section>
+
+        <section class="ops-strip">
+            <div class="item">
+                <strong>Quando usar o Analyzer</strong>
+                <p>Antes de mudar prioridade, antes de discutir incidentes recorrentes, antes de chamar algo de “urgente” sem lastro estrutural.</p>
+            </div>
+            <div class="item">
+                <strong>Quando usar o Control</strong>
+                <p>Durante investigação operacional, leitura de logs, runtime health, filas, eventos e ações autenticadas.</p>
+            </div>
+            <div class="item">
+                <strong>Quando usar a Topology</strong>
+                <p>Para entender relações, nós desconectados, leitura visual da malha e contexto de dependência. Não use como painel primário de decisão.</p>
+            </div>
+        </section>
+
+        <section class="grid">
+            <article class="card">
+                <h2>Operador</h2>
+                <p>Objetivo: detectar prioridade operacional sem se perder em instrumentação decorativa.</p>
+                <div class="list">
+                    <div class="item">
+                        <strong>Fluxo diário</strong>
+                        <p>Abra <code>/stack-analyzer.html</code>, valide readiness, findings e nós frágeis. Só depois entre em <code>/</code> para ações live.</p>
+                    </div>
+                    <div class="item">
+                        <strong>Sinais que importam</strong>
+                        <p><span class="tone-red">High findings</span>, DNS pendente, ausência de healthcheck, conflitos de porta e serviços sem produção.</p>
+                    </div>
+                    <div class="item">
+                        <strong>Erro comum</strong>
+                        <p>Confundir animação com observabilidade. Se a tela brilha mas não explica risco, ela está te cobrando atenção sem pagar inteligência.</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="card">
+                <h2>DevOps</h2>
+                <p>Objetivo: reduzir tempo entre sintoma, hipótese e ação corretiva.</p>
+                <div class="list">
+                    <div class="item">
+                        <strong>Fluxo de incidente</strong>
+                        <p>Comece em <code>/api/monitor/health</code> autenticado, passe para <code>/</code> para logs e eventos, use <code>/ecosystem-3d.html</code> somente para contexto topológico.</p>
+                    </div>
+                    <div class="item">
+                        <strong>Leitura do grafo</strong>
+                        <p>Se o modo estiver <span class="tone-amber">Snapshot</span>, não trate alertas visuais como verdade operacional. Live é estado, snapshot é memória.</p>
+                    </div>
+                    <div class="item">
+                        <strong>Regra de ouro</strong>
+                        <p>API protegida permanece protegida. Se um dado precisa ser público, crie uma superfície pública específica. Nunca desproteja nervo porque a interface ficou preguiçosa.</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="card">
+                <h2>Arquitetura</h2>
+                <p>Objetivo: governar a malha sem misturar runway visual com governança técnica.</p>
+                <div class="list">
+                    <div class="item">
+                        <strong>Uso principal</strong>
+                        <p>Leia o Analyzer para decidir backlog estrutural, debt prioritário e pontos de fragilidade sistêmica entre organizações e nós.</p>
+                    </div>
+                    <div class="item">
+                        <strong>Perguntas corretas</strong>
+                        <p>Qual nó concentra risco? Onde falta healthcheck? Onde a topologia mascara dependência? Onde o deploy existe sem reproducibilidade?</p>
+                    </div>
+                    <div class="item">
+                        <strong>Critério</strong>
+                        <p>Se uma superfície não deixa claro se mostra <span class="tone-green">estado live</span> ou <span class="tone-amber">snapshot</span>, ela precisa ser reformada antes de ser confiada.</p>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </main>
+</body>
+</html>
