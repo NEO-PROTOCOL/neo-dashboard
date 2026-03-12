@@ -26,6 +26,7 @@ jobs:
         with:
           repository: NEO-PROTOCOL/neobot-orchestrator
           path: neobot-source
+          token: ${{ secrets.NEO_GITHUB_TOKEN }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -64,7 +65,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add stack-report.json reports/readiness-badge.json stack-analyzer.html
+          git add -f stack-report.json reports/readiness-badge.json stack-analyzer.html
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else

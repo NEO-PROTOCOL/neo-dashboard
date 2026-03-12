@@ -1,25 +1,25 @@
 {
   "meta": {
-    "generated_at": "2026-03-10T06:32:17.452545+00:00",
+    "generated_at": "2026-03-12T07:02:35.374049+00:00",
     "analyzer_version": "3.1.0",
-    "total_nodes": 30,
+    "total_nodes": 31,
     "total_orgs": 6
   },
   "ecosystem_health": {
-    "average_readiness": 62.0,
+    "average_readiness": 60.2,
     "max_possible": 100,
     "grade_distribution": {
       "A": 2,
       "B": 4,
       "C": 11,
       "D": 5,
-      "F": 1
+      "F": 2
     },
-    "total_findings": 25,
+    "total_findings": 27,
     "findings_by_severity": {
       "critical": 0,
-      "high": 1,
-      "medium": 12,
+      "high": 2,
+      "medium": 13,
       "low": 6,
       "info": 6
     }
@@ -52,10 +52,11 @@
         "avg_readiness": 65.0
       },
       "NEO Protocol": {
-        "node_count": 10,
+        "node_count": 11,
         "node_ids": [
           "neobot-orchestrator",
           "neo-protocol-hub",
+          "neo-mcp-server",
           "neo-mcp-server",
           "neo-agent-full",
           "neo-nexus",
@@ -65,8 +66,8 @@
           "neo-convert",
           "neo-tunnel"
         ],
-        "findings_count": 10,
-        "avg_readiness": 67.8
+        "findings_count": 12,
+        "avg_readiness": 63.0
       },
       "NEO-FlowOFF": {
         "node_count": 5,
@@ -138,6 +139,7 @@
     "nodes_without_production_url": [
       "neo-protocol-hub",
       "neo-mcp-server",
+      "neo-mcp-server",
       "smart-factory",
       "smart-core",
       "smart-cli",
@@ -152,12 +154,6 @@
     ]
   },
   "dependency_graph": {
-    "neobot-orchestrator": {
-      "depends_on": [
-        "neo-nexus"
-      ],
-      "depended_by": []
-    },
     "flowpay": {
       "depends_on": [
         "neo-nexus"
@@ -165,6 +161,12 @@
       "depended_by": [
         "neo-convert"
       ]
+    },
+    "neobot-orchestrator": {
+      "depends_on": [
+        "neo-nexus"
+      ],
+      "depended_by": []
     },
     "neo-convert": {
       "depends_on": [
@@ -380,9 +382,21 @@
       "id": "neo-mcp-server",
       "score": 20,
       "grade": "F"
+    },
+    {
+      "id": "neo-mcp-server",
+      "score": 20,
+      "grade": "F"
     }
   ],
   "findings": [
+    {
+      "node_id": "neo-mcp-server",
+      "category": "security",
+      "severity": "high",
+      "title": "Env vars sensiveis no ecosystem.json",
+      "detail": "Variaveis: ['PRIVATE_KEY', 'DELEGATION']. Confirme que valores nao estao em nenhum commit. Considere mover requiredEnv para schema privado."
+    },
     {
       "node_id": "neo-mcp-server",
       "category": "security",
@@ -396,6 +410,13 @@
       "severity": "medium",
       "title": "Runtime sem healthcheck configurado",
       "detail": "Role 'Orchestrator' requer /health para detectar restarts."
+    },
+    {
+      "node_id": "neo-mcp-server",
+      "category": "infra",
+      "severity": "medium",
+      "title": "Runtime sem healthcheck configurado",
+      "detail": "Role 'MCP Storage Runtime / Storacha Adapter' requer /health para detectar restarts."
     },
     {
       "node_id": "neo-mcp-server",
@@ -604,6 +625,31 @@
       "readiness_grade": "N/A",
       "readiness_breakdown": {},
       "finding_count": 0
+    },
+    {
+      "id": "neo-mcp-server",
+      "name": "NEO MCP Server (Storacha)",
+      "org": "NEO Protocol",
+      "role": "MCP Storage Runtime / Storacha Adapter",
+      "platform": "Local / MCP Runtime",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 20,
+      "readiness_grade": "F",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": false,
+        "no_critical_findings": true
+      },
+      "finding_count": 2
     },
     {
       "id": "neo-mcp-server",
