@@ -26,9 +26,10 @@ Este projeto não foi desenhado para estética isolada. Ele existe para expor sa
 
 ## Acesso Rápido
 
-- **Produção:** [dashboard.neoprotocol.space](https://dashboard.neoprotocol.space)
-- **Grafo Vivo:** [/ecosystem-3d.html](https://dashboard.neoprotocol.space/ecosystem-3d.html)
-- **Stack Analyzer:** [/stack-analyzer.html](https://dashboard.neoprotocol.space/stack-analyzer.html)
+- **Operations Analyzer (primário):** [/stack-analyzer.html](https://dashboard.neoprotocol.space/stack-analyzer.html)
+- **Control Console (autenticado):** [dashboard.neoprotocol.space](https://dashboard.neoprotocol.space)
+- **Topology View:** [/ecosystem-3d.html](https://dashboard.neoprotocol.space/ecosystem-3d.html)
+- **Runbook por papel:** [/runbook.html](https://dashboard.neoprotocol.space/runbook.html)
 
 ## Escopo e Limites
 

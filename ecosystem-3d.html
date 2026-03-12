@@ -224,6 +224,7 @@
         "beforeend",
         `
           <div id="live-hud" style="margin-top:10px;max-width:430px;background:rgba(0,0,0,.62);border:1px solid #2a3240;border-radius:8px;padding:10px 12px;pointer-events:auto;">
+            <div id="live-mode" style="display:inline-flex;align-items:center;gap:8px;padding:4px 8px;border-radius:999px;border:1px solid #2a3240;background:#0b121c;color:#d4deea;font-size:10px;letter-spacing:.12em;text-transform:uppercase;">Mode booting</div>
             <div id="live-summary" style="font-size:12px;color:#b4c0d1;">Loading live telemetry...</div>
             <div id="live-meta" style="font-size:11px;color:#748099;margin-top:5px;"></div>
             <div id="live-alerts" style="font-size:11px;color:#ffb74d;margin-top:8px;line-height:1.35;"></div>
@@ -318,6 +319,7 @@
       );
 
       const liveSummaryEl = document.getElementById("live-summary");
+      const liveModeEl = document.getElementById("live-mode");
       const liveMetaEl = document.getElementById("live-meta");
       const liveAlertsEl = document.getElementById("live-alerts");
       const filterViewEl = document.getElementById("filter-view");
@@ -390,6 +392,35 @@
           .sort()
           .join("|");
         return `${nodeIds}::${linkIds}`;
+      }
+
+      function describePayloadMode(payload) {
+        const authenticated = Boolean(payload?.authenticated);
+        if (payload?.mode === "live") {
+          return {
+            label: authenticated ? "Authenticated Live" : "Live Telemetry",
+            tone: "#39d98a",
+            detail: authenticated
+              ? "Gateway-authenticated live probe"
+              : "Live telemetry without gateway context",
+          };
+        }
+        if (payload?.mode === "snapshot") {
+          return {
+            label: authenticated ? "Authenticated Snapshot" : "Public Snapshot",
+            tone: "#ffb74d",
+            detail: authenticated
+              ? "Authenticated source loaded without live probe"
+              : "Read-only snapshot without gateway password",
+          };
+        }
+        return {
+          label: authenticated ? "Authenticated Static" : "Public Static",
+          tone: "#7b8797",
+          detail: authenticated
+            ? "Authenticated fallback file"
+            : "Public fallback file",
+        };
       }
 
       function authHeaders() {
@@ -839,6 +870,7 @@
 
       async function fetchGraphPayload() {
         const headers = authHeaders();
+        const authenticated = Boolean(getGatewayPassword());
 
         try {
           const liveRes = await fetch("/api/neo/ecosystem/live", { headers });
@@ -851,6 +883,7 @@
             ) {
               return {
                 mode: "live",
+                authenticated,
                 source: payload.source || "live-api",
                 checkedAt: payload.checkedAt,
                 summary: payload.summary || null,
@@ -876,6 +909,7 @@
             if (raw.length > 0) {
               return {
                 mode: "snapshot",
+                authenticated,
                 source: payload.source || "ecosystem-api",
                 checkedAt: new Date().toISOString(),
                 summary: null,
@@ -890,6 +924,7 @@
         const staticRes = await fetch("ecosystem-graph.json");
         return {
           mode: "static",
+          authenticated,
           source: "static-json",
           checkedAt: new Date().toISOString(),
           summary: null,
@@ -900,6 +935,7 @@
       function renderHud(payload, fullGraphData, filteredGraphData) {
         const allData = fullGraphData || { nodes: [] };
         const visibleData = filteredGraphData || allData;
+        const mode = describePayloadMode(payload);
         const statusCount = allData.nodes.reduce(
           (acc, node) => {
             const st = node.status || "unknown";
@@ -918,28 +954,38 @@
           },
         );
 
+        liveModeEl.textContent = mode.label;
+        liveModeEl.style.borderColor = `${mode.tone}55`;
+        liveModeEl.style.color = mode.tone;
+        liveModeEl.style.background = `${mode.tone}11`;
         liveSummaryEl.textContent = `Visible: ${visibleData.nodes.length}/${allData.nodes.length} | Payment: ${statusCount.payment} | Online: ${statusCount.online} | Degraded: ${statusCount.degraded} | Offline: ${statusCount.offline} | Unlinked: ${statusCount.unlinked}`;
 
-        liveMetaEl.textContent = `Source: ${payload.source} | Mode: ${payload.mode} | Checked: ${new Date(
+        liveMetaEl.textContent = `Source: ${payload.source} | Access: ${payload.authenticated ? "gateway-authenticated" : "public"} | ${mode.detail} | Checked: ${new Date(
           payload.checkedAt,
         ).toLocaleTimeString()}`;
 
         const alertLines = [];
         if (payload.mode !== "live") {
           alertLines.push(
-            "[WARN] Live probe endpoint indisponivel. Exibindo snapshot.",
+            `[INFO] ${mode.label}. Alertas operacionais ficam suprimidos fora do modo live.`,
           );
         }
-        // source: nexus-api is the expected production source — no warning needed
-        if (statusCount.offline > 0) {
+        if (!payload.authenticated && payload.mode !== "live") {
+          alertLines.push(
+            "[INFO] Gateway password ausente. Este mapa opera em leitura publica.",
+          );
+        }
+        if (payload.mode === "live" && statusCount.offline > 0) {
           alertLines.push(`[ALERT] ${statusCount.offline} node(s) offline.`);
         }
-        if (statusCount.unlinked > 0) {
+        if (payload.mode === "live" && statusCount.unlinked > 0) {
           alertLines.push(
             `[ALERT] ${statusCount.unlinked} node(s) sem link de integracao com Nexus.`,
           );
         }
-        transitionLog.forEach((line) => alertLines.push(line));
+        if (payload.mode === "live") {
+          transitionLog.forEach((line) => alertLines.push(line));
+        }
 
         liveAlertsEl.innerHTML = alertLines.length
           ? alertLines.map((line) => `<div>${line}</div>`).join("")
@@ -1284,7 +1330,7 @@
         } catch (e) {
           liveSummaryEl.textContent = "Live telemetry error";
           liveMetaEl.textContent = e?.message || "graph_refresh_failed";
-          liveAlertsEl.innerHTML = `<div>[ALERT] Graph refresh failure: ${e?.message || "unknown"}</div>`;
+          liveAlertsEl.innerHTML = `<div>[WARN] Graph refresh failure: ${e?.message || "unknown"}</div>`;
           renderFallback({ nodes: [] }, e?.message || "fetch");
         } finally {
           fetchInFlight = false;

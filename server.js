@@ -173,6 +173,15 @@ app.use((req, res, next) => {
     next();
 });
 
+// Retire legacy public surfaces before static file serving exposes them directly.
+app.get(['/neo.html', '/neo'], (_req, res) => {
+    res.redirect(302, '/stack-analyzer.html');
+});
+
+app.get(['/mobile', '/mobile.html'], (_req, res) => {
+    res.redirect(302, '/stack-analyzer.html');
+});
+
 // Serve Static Files (Public - Authentication handled client-side)
 app.use(express.static(__dirname));
 
@@ -380,10 +389,6 @@ app.post('/api/messages', async (req, res) => {
     messages.push(msg);
     stats.totalMessages++;
     res.json({ success: true, message: msg });
-});
-
-app.get('/mobile', (req, res) => {
-    res.sendFile(path.join(__dirname, 'mobile.html'));
 });
 
 // ------------------------------------------------------------------

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>NEO Stack Analyzer v3.1 — Ecosystem Dashboard</title>
+<title>NEØ Stack Analyzer // Primary Operations Surface</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -75,25 +75,84 @@ function Header() {
   return React.createElement('header', {
     style: {
       padding: '24px 32px', borderBottom: `1px solid ${T.border}`,
-      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+      gap: 24, flexWrap: 'wrap',
       background: `linear-gradient(180deg, ${T.bgCard} 0%, ${T.bg} 100%)`,
     }
   },
     React.createElement('div', null,
+      React.createElement('div', {
+        style: {
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          padding: '5px 10px', borderRadius: 999,
+          border: `1px solid ${T.accentDim}`,
+          background: '#d7ff6412', color: T.accent,
+          fontSize: '0.62rem', letterSpacing: '2px',
+          textTransform: 'uppercase', marginBottom: 12,
+        }
+      }, 'Primary Operations Surface'),
       React.createElement('h1', {
         style: { fontFamily: 'Orbitron, sans-serif', fontSize: '1.5rem', fontWeight: 900, color: T.accent, letterSpacing: '3px' }
       }, 'NE\u00D8 STACK ANALYZER'),
       React.createElement('div', {
         style: { fontSize: '0.75rem', color: T.textDim, marginTop: 4 }
-      }, `v${meta.analyzer_version} \u2502 ${meta.total_nodes} nodes \u2502 ${meta.total_orgs} orgs \u2502 ${meta.generated_at.split('T')[0]}`)
+      }, `v${meta.analyzer_version} \u2502 ${meta.total_nodes} nodes \u2502 ${meta.total_orgs} orgs \u2502 ${meta.generated_at.split('T')[0]}`),
+      React.createElement('div', {
+        style: { fontSize: '0.8rem', color: T.text, marginTop: 10, maxWidth: 760, lineHeight: 1.5 }
+      }, 'Use o Analyzer para risco estrutural e priorizacao. Controle live fica no console autenticado. Topologia fica no grafo.'),
+      React.createElement('nav', {
+        style: { display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 16 }
+      },
+        [
+          { href: '/stack-analyzer.html', label: 'Analyzer', desc: 'Primary ops' },
+          { href: '/', label: 'Control', desc: 'Runtime console' },
+          { href: '/ecosystem-3d.html', label: 'Topology', desc: 'Graph modes' },
+          { href: '/runbook.html', label: 'Runbook', desc: 'Role guide' },
+        ].map(link =>
+          React.createElement('a', {
+            key: link.href,
+            href: link.href,
+            style: {
+              display: 'inline-flex',
+              flexDirection: 'column',
+              gap: 3,
+              padding: '10px 12px',
+              minWidth: 132,
+              borderRadius: 8,
+              textDecoration: 'none',
+              border: `1px solid ${T.border}`,
+              background: '#08121a',
+            }
+          },
+            React.createElement('span', {
+              style: {
+                color: link.href === '/stack-analyzer.html' ? T.accent : T.textBright,
+                fontFamily: 'Orbitron',
+                fontSize: '0.72rem',
+                letterSpacing: '1px',
+              }
+            }, link.label),
+            React.createElement('span', {
+              style: { color: T.textDim, fontSize: '0.66rem' }
+            }, link.desc)
+          )
+        )
+      )
     ),
     React.createElement('div', {
-      style: {
-        fontFamily: 'Orbitron', fontSize: '2.2rem', fontWeight: 900,
-        color: REPORT.ecosystem_health.average_readiness >= 70 ? T.green : REPORT.ecosystem_health.average_readiness >= 50 ? T.yellow : T.red,
-        textShadow: `0 0 20px ${REPORT.ecosystem_health.average_readiness >= 70 ? T.green : T.yellow}44`,
-      }
-    }, `${REPORT.ecosystem_health.average_readiness}/100`)
+      style: { textAlign: 'right' }
+    },
+      React.createElement('div', {
+        style: {
+          fontFamily: 'Orbitron', fontSize: '2.2rem', fontWeight: 900,
+          color: REPORT.ecosystem_health.average_readiness >= 70 ? T.green : REPORT.ecosystem_health.average_readiness >= 50 ? T.yellow : T.red,
+          textShadow: `0 0 20px ${REPORT.ecosystem_health.average_readiness >= 70 ? T.green : T.yellow}44`,
+        }
+      }, `${REPORT.ecosystem_health.average_readiness}/100`),
+      React.createElement('div', {
+        style: { fontSize: '0.68rem', color: T.textDim, marginTop: 6, letterSpacing: '1px', textTransform: 'uppercase' }
+      }, 'Operational readiness baseline')
+    )
   );
 }
 
