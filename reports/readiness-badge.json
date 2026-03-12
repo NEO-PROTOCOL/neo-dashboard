@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "label": "NE\u00d8 Readiness",
+  "message": "60.2/100 \u00b7 31 nodes \u00b7 27 findings",
+  "color": "yellow",
+  "namedLogo": "data:image/svg+xml;base64,",
+  "style": "flat-square",
+  "labelColor": "0d0d0d"
+}
