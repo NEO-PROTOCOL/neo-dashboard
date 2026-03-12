@@ -26,6 +26,7 @@ jobs:
         with:
           repository: NEO-PROTOCOL/neobot-orchestrator
           path: neobot-source
+          token: ${{ secrets.NEO_GITHUB_TOKEN }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
