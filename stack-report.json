@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-03-12T07:02:35.374049+00:00",
+    "generated_at": "2026-03-12T10:38:18.646565+00:00",
     "analyzer_version": "3.1.0",
     "total_nodes": 31,
     "total_orgs": 6
@@ -154,20 +154,6 @@
     ]
   },
   "dependency_graph": {
-    "flowpay": {
-      "depends_on": [
-        "neo-nexus"
-      ],
-      "depended_by": [
-        "neo-convert"
-      ]
-    },
-    "neobot-orchestrator": {
-      "depends_on": [
-        "neo-nexus"
-      ],
-      "depended_by": []
-    },
     "neo-convert": {
       "depends_on": [
         "flowpay"
@@ -179,6 +165,20 @@
       "depended_by": [
         "flowpay",
         "neobot-orchestrator"
+      ]
+    },
+    "neobot-orchestrator": {
+      "depends_on": [
+        "neo-nexus"
+      ],
+      "depended_by": []
+    },
+    "flowpay": {
+      "depends_on": [
+        "neo-nexus"
+      ],
+      "depended_by": [
+        "neo-convert"
       ]
     }
   },
