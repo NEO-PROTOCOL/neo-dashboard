@@ -31,6 +31,10 @@ async function neobotFetch(path, options = {}) {
 // POST /api/ai/chat
 router.post('/chat', async (req, res) => {
     const { message } = req.body;
+    if (!message || typeof message !== 'string' || message.trim().length === 0) {
+        return res.status(400).json({ success: false, error: 'message is required and must be a non-empty string' });
+    }
+    const sanitizedMessage = message.slice(0, 8000);
     try {
         const r = await neobotFetch('/v1/chat/completions', {
             method: 'POST',
@@ -38,7 +42,7 @@ router.post('/chat', async (req, res) => {
                 model: 'claude-3-5-sonnet-latest',
                 messages: [
                     { role: 'system', content: 'You are the NΞØ PROTOCOL Core AI. Respond with precision, using the protocol iconography (⟠, ⦿, ✓, ✗, Ξ). Be concise and technical.' },
-                    { role: 'user', content: message }
+                    { role: 'user', content: sanitizedMessage }
                 ],
                 max_tokens: 1024
             })
@@ -53,6 +57,11 @@ router.post('/chat', async (req, res) => {
 // POST /api/ai/analyze-bug — Advanced Code Analysis (Strict Protocol)
 router.post('/analyze-bug', async (req, res) => {
     const { error, code } = req.body;
+    if (!error && !code) {
+        return res.status(400).json({ success: false, error: 'At least one of error or code is required' });
+    }
+    const sanitizedError = typeof error === 'string' ? error.slice(0, 4000) : '';
+    const sanitizedCode = typeof code === 'string' ? code.slice(0, 16000) : '';
 
     const prompt = `
 [STRICT CODE ANALYSIS REQUEST]
@@ -60,10 +69,10 @@ PROTOCOL: NΞØ-X1
 OBJECTIVE: IDENTIFY SYSTEM FAILURES AND ARCHITECTURAL DEVIATIONS.
 
 ERROR_CONTEXT:
-${error}
+${sanitizedError}
 
 CORE_FRAGMENTS:
-${code}
+${sanitizedCode}
 
 ANALYSIS_REQUIREMENTS (NO FLEXIBILITY):
 1. Identify the EXACT line of failure.

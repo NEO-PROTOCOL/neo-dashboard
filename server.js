@@ -6,6 +6,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { promisify } from 'util';
+import rateLimit from 'express-rate-limit';
 import automationRoutes from './automation-routes.js';
 import neoRoutes from './neo-routes.js';
 import nexusRoutes from './nexus-routes.js';
@@ -184,44 +185,16 @@ const telegramBot = new SimpleTelegramBot(
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// In-memory cache for the canonical stack report to avoid GitHub fetch on every request.
-const STACK_REPORT_TTL_MS = 5 * 60 * 1000; // 5 minutes
-let cachedStackReportBody = null;
-let cachedStackReportSource = null;
-let cachedStackReportFetchedAt = 0;
+// Restrict CORS to explicitly configured origins; default to same-origin only.
+const allowedOrigins = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map(o => o.trim()).filter(Boolean)
+    : [];
+app.use(cors({
+    origin: allowedOrigins.length > 0 ? allowedOrigins : false,
+    credentials: true,
+}));
 
-async function getCachedStackReport() {
-    const now = Date.now();
-
-    // Serve from cache if within TTL.
-    if (cachedStackReportBody && now - cachedStackReportFetchedAt < STACK_REPORT_TTL_MS) {
-        return {
-            source: cachedStackReportSource,
-            body: cachedStackReportBody,
-        };
-    }
-
-    try {
-        const { source, body } = await loadCanonicalStackReport();
-        cachedStackReportBody = body;
-        cachedStackReportSource = source;
-        cachedStackReportFetchedAt = now;
-        return { source, body };
-    } catch (error) {
-        // If we have a previously cached value, use it as a fallback.
-        if (cachedStackReportBody) {
-            return {
-                source: cachedStackReportSource,
-                body: cachedStackReportBody,
-            };
-        }
-        // No cached value available; propagate the error.
-        throw error;
-    }
-}
-
-app.use(cors());
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: '1mb' }));
 
 // Prevent stale HTML delivery behind edge/browser caches.
 app.use((req, res, next) => {
@@ -229,7 +202,10 @@ app.use((req, res, next) => {
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         res.setHeader('Pragma', 'no-cache');
         res.setHeader('Expires', '0');
-        res.setHeader('Content-Security-Policy', "script-src 'self' 'unsafe-eval' 'unsafe-inline' https: blob:;");
+        res.setHeader('Content-Security-Policy', "script-src 'self' 'unsafe-inline' https: blob:;");
+    }
+    if (process.env.NODE_ENV === 'production') {
+        res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     }
     next();
 });
@@ -279,8 +255,22 @@ const isRailwayInternalIp = (ip) => {
     return parts.length === 4 && parts[0] === 100 && parts[1] >= 64 && parts[1] < 128;
 };
 
+// Rate limiter: cap each IP to 200 requests per 15 minutes.
+const apiRateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 200,
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: (req) => isRailwayInternalIp(req.ip),
+    message: { error: 'TOO_MANY_REQUESTS', message: 'Rate limit exceeded. Try again later.' },
+});
+app.use('/api', apiRateLimiter);
+
 const authMiddleware = (req, res, next) => {
-    const providedPassword = req.headers['x-gateway-password'] || req.query.password;
+    // Accept the secret only from the x-gateway-password request header.
+    // Query-parameter fallback was removed to prevent token leakage in server
+    // access logs, browser history, and shared URLs.
+    const providedPassword = req.headers['x-gateway-password'];
 
     if (GATEWAY_PASSWORD && providedPassword === GATEWAY_PASSWORD) {
         return next();
@@ -407,11 +397,16 @@ app.get('/api/logs', (req, res) => res.json(serverLogs));
 // POST Logs (From Core)
 app.post('/api/logs', (req, res) => {
     const { type, message, timestamp } = req.body;
-    if (message) {
+    const VALID_LOG_TYPES = new Set(['info', 'warn', 'error', 'debug']);
+    if (message && typeof message === 'string') {
+        const sanitizedType = VALID_LOG_TYPES.has(type) ? type : 'info';
+        // Cap log messages at 2000 characters to keep the in-memory ring buffer
+        // from consuming unbounded memory on unexpectedly large payloads.
+        const sanitizedMessage = message.slice(0, 2000);
         serverLogs.unshift({
             timestamp: timestamp || new Date().toISOString(),
-            type: type || 'info',
-            message: `[CORE] ${message}`
+            type: sanitizedType,
+            message: `[CORE] ${sanitizedMessage}`
         });
         if (serverLogs.length > MAX_LOGS) serverLogs.pop();
     }
