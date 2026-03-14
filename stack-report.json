@@ -1,27 +1,26 @@
 {
   "meta": {
-    "generated_at": "2026-03-12T07:02:35.374049+00:00",
+    "generated_at": "2026-03-14T16:52:03.507579+00:00",
     "analyzer_version": "3.1.0",
-    "total_nodes": 31,
+    "total_nodes": 29,
     "total_orgs": 6
   },
   "ecosystem_health": {
-    "average_readiness": 60.2,
+    "average_readiness": 64.1,
     "max_possible": 100,
     "grade_distribution": {
       "A": 2,
       "B": 4,
-      "C": 11,
-      "D": 5,
-      "F": 2
+      "C": 12,
+      "D": 4
     },
-    "total_findings": 27,
+    "total_findings": 21,
     "findings_by_severity": {
       "critical": 0,
-      "high": 2,
-      "medium": 13,
-      "low": 6,
-      "info": 6
+      "high": 0,
+      "medium": 11,
+      "low": 5,
+      "info": 5
     }
   },
   "summary": {
@@ -52,22 +51,20 @@
         "avg_readiness": 65.0
       },
       "NEO Protocol": {
-        "node_count": 11,
+        "node_count": 9,
         "node_ids": [
           "neobot-orchestrator",
           "neo-protocol-hub",
-          "neo-mcp-server",
           "neo-mcp-server",
           "neo-agent-full",
           "neo-nexus",
           "mio-system",
           "neo-protcl",
           "neo-dashboard",
-          "neo-convert",
           "neo-tunnel"
         ],
-        "findings_count": 12,
-        "avg_readiness": 63.0
+        "findings_count": 7,
+        "avg_readiness": 74.4
       },
       "NEO-FlowOFF": {
         "node_count": 5,
@@ -78,7 +75,7 @@
           "ceo-escalavel-miniapp",
           "neo-mello-eth"
         ],
-        "findings_count": 3,
+        "findings_count": 2,
         "avg_readiness": 55.0
       },
       "Neo Smart Factory": {
@@ -139,14 +136,12 @@
     "nodes_without_production_url": [
       "neo-protocol-hub",
       "neo-mcp-server",
-      "neo-mcp-server",
       "smart-factory",
       "smart-core",
       "smart-cli",
       "smart-factory-docs",
       "internal-ops",
       "smart-nft",
-      "neo-convert",
       "neo-flowoff-pwa",
       "pro-ia",
       "wod-eth",
@@ -158,19 +153,11 @@
       "depends_on": [
         "neo-nexus"
       ],
-      "depended_by": [
-        "neo-convert"
-      ]
+      "depended_by": []
     },
     "neobot-orchestrator": {
       "depends_on": [
         "neo-nexus"
-      ],
-      "depended_by": []
-    },
-    "neo-convert": {
-      "depends_on": [
-        "flowpay"
       ],
       "depended_by": []
     },
@@ -354,9 +341,9 @@
       "grade": "C"
     },
     {
-      "id": "neo-convert",
-      "score": 45,
-      "grade": "D"
+      "id": "neo-mcp-server",
+      "score": 50,
+      "grade": "C"
     },
     {
       "id": "neo-flowoff-pwa",
@@ -377,53 +364,15 @@
       "id": "smart-nft",
       "score": 35,
       "grade": "D"
-    },
-    {
-      "id": "neo-mcp-server",
-      "score": 20,
-      "grade": "F"
-    },
-    {
-      "id": "neo-mcp-server",
-      "score": 20,
-      "grade": "F"
     }
   ],
   "findings": [
-    {
-      "node_id": "neo-mcp-server",
-      "category": "security",
-      "severity": "high",
-      "title": "Env vars sensiveis no ecosystem.json",
-      "detail": "Variaveis: ['PRIVATE_KEY', 'DELEGATION']. Confirme que valores nao estao em nenhum commit. Considere mover requiredEnv para schema privado."
-    },
-    {
-      "node_id": "neo-mcp-server",
-      "category": "security",
-      "severity": "high",
-      "title": "Env vars sensiveis no ecosystem.json",
-      "detail": "Variaveis: ['PRIVATE_KEY', 'DELEGATION']. Confirme que valores nao estao em nenhum commit. Considere mover requiredEnv para schema privado."
-    },
     {
       "node_id": "neobot-orchestrator",
       "category": "infra",
       "severity": "medium",
       "title": "Runtime sem healthcheck configurado",
       "detail": "Role 'Orchestrator' requer /health para detectar restarts."
-    },
-    {
-      "node_id": "neo-mcp-server",
-      "category": "infra",
-      "severity": "medium",
-      "title": "Runtime sem healthcheck configurado",
-      "detail": "Role 'MCP Storage Runtime / Storacha Adapter' requer /health para detectar restarts."
-    },
-    {
-      "node_id": "neo-mcp-server",
-      "category": "infra",
-      "severity": "medium",
-      "title": "Runtime sem healthcheck configurado",
-      "detail": "Role 'MCP Storage Runtime / Storacha Adapter' requer /health para detectar restarts."
     },
     {
       "node_id": "neo-agent-full",
@@ -457,15 +406,15 @@
       "node_id": "neo-flowoff-pwa",
       "category": "config",
       "severity": "medium",
-      "title": "DNS pendente: www.neoflowoff.agency",
-      "detail": "targetCustomDomain='www.neoflowoff.agency' declarado mas sem productionUrl/activeUrl. DNS pode nao estar apontado ou deploy nao concluido."
+      "title": "DNS pendente: neoflowoff.agency",
+      "detail": "targetCustomDomain='neoflowoff.agency' declarado mas sem productionUrl/activeUrl. DNS pode nao estar apontado ou deploy nao concluido."
     },
     {
       "node_id": "pro-ia",
       "category": "config",
       "severity": "medium",
-      "title": "DNS pendente: www.flowoff.agency",
-      "detail": "targetCustomDomain='www.flowoff.agency' declarado mas sem productionUrl/activeUrl. DNS pode nao estar apontado ou deploy nao concluido."
+      "title": "DNS pendente: pro.neoflowoff.agency",
+      "detail": "targetCustomDomain='pro.neoflowoff.agency' declarado mas sem productionUrl/activeUrl. DNS pode nao estar apontado ou deploy nao concluido."
     },
     {
       "node_id": "wod-eth",
@@ -524,25 +473,11 @@
       "detail": "productionUrl existe mas buildCommand/startCommand ausentes. Documente para reproducibilidade de deploys."
     },
     {
-      "node_id": "neo-flowoff-landing",
-      "category": "config",
-      "severity": "low",
-      "title": "productionUrl diverge do targetCustomDomain",
-      "detail": "productionUrl='https://lp.neoflowoff.agency' vs targetCustomDomain='www.neoflowoff.agency'. Verifique apontamento DNS."
-    },
-    {
       "node_id": "__global__",
       "category": "governance",
       "severity": "low",
       "title": "Admin emails inconsistentes na org 'Neo Smart Factory'",
       "detail": "Emails: ['factory@neoprotocol.space', 'neo@neoprotocol.space']. Padronize um unico adminEmail por org."
-    },
-    {
-      "node_id": "neo-convert",
-      "category": "security",
-      "severity": "info",
-      "title": "Autenticacao via API key estatica",
-      "detail": "auth='x-api-key (FLOWPAY_INTERNAL_API_KEY)'. Considere rotacao automatica ou MIO identity tokens."
     },
     {
       "node_id": "__global__",
@@ -637,44 +572,19 @@
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 20,
-      "readiness_grade": "F",
+      "readiness_score": 50,
+      "readiness_grade": "C",
       "readiness_breakdown": {
         "has_production_url": false,
-        "has_healthcheck": false,
+        "has_healthcheck": true,
         "has_custom_domain": false,
         "has_internal_url": false,
         "webhook_urls_complete": true,
         "nexus_events_declared": false,
-        "no_high_findings": false,
+        "no_high_findings": true,
         "no_critical_findings": true
       },
-      "finding_count": 2
-    },
-    {
-      "id": "neo-mcp-server",
-      "name": "NEO MCP Server (Storacha)",
-      "org": "NEO Protocol",
-      "role": "MCP Storage Runtime / Storacha Adapter",
-      "platform": "Local / MCP Runtime",
-      "has_production": false,
-      "has_contracts": false,
-      "nexus_events": [],
-      "blast_radius": 0,
-      "dependency_count": 0,
-      "readiness_score": 20,
-      "readiness_grade": "F",
-      "readiness_breakdown": {
-        "has_production_url": false,
-        "has_healthcheck": false,
-        "has_custom_domain": false,
-        "has_internal_url": false,
-        "webhook_urls_complete": true,
-        "nexus_events_declared": false,
-        "no_high_findings": false,
-        "no_critical_findings": true
-      },
-      "finding_count": 2
+      "finding_count": 0
     },
     {
       "id": "neo-agent-full",
@@ -995,7 +905,7 @@
         "FACTORY:MINT_FAILED",
         "NEOBOT:ACCESS_UNLOCKED"
       ],
-      "blast_radius": 1,
+      "blast_radius": 0,
       "dependency_count": 1,
       "readiness_score": 90,
       "readiness_grade": "A",
@@ -1010,31 +920,6 @@
         "no_critical_findings": true
       },
       "finding_count": 2
-    },
-    {
-      "id": "neo-convert",
-      "name": "NeoConvert (FlowPay Consumer)",
-      "org": "NEO Protocol",
-      "role": "Product App / FlowPay Consumer",
-      "platform": "Vercel",
-      "has_production": false,
-      "has_contracts": false,
-      "nexus_events": [],
-      "blast_radius": 0,
-      "dependency_count": 1,
-      "readiness_score": 45,
-      "readiness_grade": "D",
-      "readiness_breakdown": {
-        "has_production_url": false,
-        "has_healthcheck": false,
-        "has_custom_domain": true,
-        "has_internal_url": false,
-        "webhook_urls_complete": true,
-        "nexus_events_declared": false,
-        "no_high_findings": true,
-        "no_critical_findings": true
-      },
-      "finding_count": 1
     },
     {
       "id": "neo-flowoff-landing",
@@ -1059,7 +944,7 @@
         "no_high_findings": true,
         "no_critical_findings": true
       },
-      "finding_count": 1
+      "finding_count": 0
     },
     {
       "id": "neo-flowoff-pwa",
