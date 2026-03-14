@@ -556,7 +556,6 @@ function App() {
         }
         const data = await response.json();
         if (cancelled) return;
-        REPORT = data;
         setReport(data);
       } catch (err) {
         if (cancelled) return;
