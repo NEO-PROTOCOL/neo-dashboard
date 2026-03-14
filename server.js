@@ -73,11 +73,11 @@ const STACK_REPORT_FALLBACK_PATH = path.join(__dirname, 'stack-report.json');
 
 async function loadCanonicalStackReport() {
     try {
-        const response = await fetch(STACK_REPORT_SOURCE_URL, { signal: AbortSignal.timeout(MONITOR_FETCH_TIMEOUT_MS) });
-        if (response.ok) {
-            return { source: STACK_REPORT_SOURCE_URL, body: await response.json() };
+        const body = await fetchJsonWithTimeout(STACK_REPORT_SOURCE_URL, MONITOR_FETCH_TIMEOUT_MS);
+        if (body) {
+            return { source: STACK_REPORT_SOURCE_URL, body };
         }
-        console.warn(`[REPORT] Canonical stack report returned HTTP ${response.status}`);
+        console.warn('[REPORT] Canonical stack report fetch returned no body');
     } catch (error) {
         console.warn(`[REPORT] Canonical stack report fetch failed: ${error.message}`);
     }
