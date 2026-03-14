@@ -1731,6 +1731,65 @@ function ReadinessTab() {
 // ─── APP ────────────────────────────────────────────────────────────
 function App() {
   const [tab, setTab] = useState('OVERVIEW');
+  const [report, setReport] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadReport() {
+      try {
+        const response = await fetch(REPORT_URL, { cache: 'no-store' });
+        if (!response.ok) {
+          let errorMessage = `HTTP ${response.status}`;
+          try {
+            const errorBody = await response.json();
+            if (errorBody && typeof errorBody === 'object') {
+              const { error: errorCode, message } = errorBody;
+              if (typeof message === 'string' && message.trim()) {
+                errorMessage = errorCode
+                  ? `${errorCode}: ${message}`
+                  : message;
+              }
+            }
+          } catch (parseErr) {
+            // Ignore JSON parse errors and fall back to generic HTTP status
+          }
+          throw new Error(errorMessage);
+        }
+        const data = await response.json();
+        if (cancelled) return;
+        setReport(data);
+      } catch (err) {
+        if (cancelled) return;
+        setError(err.message || 'Falha ao carregar stack-report.json');
+      }
+    }
+
+    loadReport();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (error) {
+    return React.createElement('div', { style: { minHeight: '100vh', background: T.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 } },
+      React.createElement('div', { style: { maxWidth: 640, border: `1px solid ${T.red}55`, background: T.bgCard, borderRadius: 12, padding: 24 } },
+        React.createElement('div', { style: { fontFamily: 'Orbitron', fontSize: '0.75rem', color: T.red, letterSpacing: '2px', marginBottom: 12 } }, 'STACK REPORT UNAVAILABLE'),
+        React.createElement('p', { style: { fontSize: '0.85rem', lineHeight: 1.6, color: T.text } }, `Nao foi possivel carregar ${REPORT_URL}. ${error}`)
+      )
+    );
+  }
+
+  if (!report) {
+    return React.createElement('div', { style: { minHeight: '100vh', background: T.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 } },
+      React.createElement('div', { style: { textAlign: 'center' } },
+        React.createElement('div', { style: { fontFamily: 'Orbitron', fontSize: '0.75rem', color: T.accent, letterSpacing: '2px', marginBottom: 10 } }, 'SYNCING SOURCE OF TRUTH'),
+        React.createElement('div', { style: { fontSize: '0.85rem', color: T.textDim } }, 'Carregando stack-report.json canonico')
+      )
+    );
+  }
+
   const tabContent = {
     OVERVIEW: React.createElement(OverviewTab),
     FINDINGS: React.createElement(FindingsTab),
@@ -1746,7 +1805,7 @@ function App() {
     React.createElement('main', { style: { animation: 'slideUp 0.3s ease' }, key: tab }, tabContent[tab]),
     React.createElement('footer', {
       style: { padding: '16px 32px', borderTop: `1px solid ${T.border}`, textAlign: 'center', fontSize: '0.6rem', color: T.textDim }
-    }, `NE\u00D8 STACK ANALYZER v${REPORT.meta.analyzer_version} \u2502 Generated ${REPORT.meta.generated_at.split('T')[0]} \u2502 ${REPORT.meta.total_nodes} nodes analyzed`)
+    }, `NE\u00D8 STACK ANALYZER v${report.meta.analyzer_version} \u2502 Generated ${report.meta.generated_at.split('T')[0]} \u2502 ${report.meta.total_nodes} nodes analyzed`)
   );
 }
 

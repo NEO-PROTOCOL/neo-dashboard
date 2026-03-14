@@ -67,6 +67,31 @@ if (!process.env.NEXUS_ECOSYSTEM_URL || process.env.NEXUS_ECOSYSTEM_URL.includes
 
 const execAsync = promisify(exec);
 const MONITOR_FETCH_TIMEOUT_MS = Number(process.env.MONITOR_FETCH_TIMEOUT_MS || 5000);
+const STACK_REPORT_SOURCE_URL =
+    process.env.STACK_REPORT_SOURCE_URL ||
+    'https://raw.githubusercontent.com/NEO-PROTOCOL/neobot-orchestrator/main/config/stack_report.json';
+const STACK_REPORT_FALLBACK_PATH = path.join(__dirname, 'stack-report.json');
+
+async function loadCanonicalStackReport() {
+    try {
+        const body = await fetchJsonWithTimeout(STACK_REPORT_SOURCE_URL, MONITOR_FETCH_TIMEOUT_MS);
+        if (body) {
+            return { source: STACK_REPORT_SOURCE_URL, body };
+        }
+        console.warn('[REPORT] Canonical stack report fetch returned no body');
+    } catch (error) {
+        console.warn(`[REPORT] Canonical stack report fetch failed: ${error.message}`);
+    }
+
+    if (fs.existsSync(STACK_REPORT_FALLBACK_PATH)) {
+        return {
+            source: STACK_REPORT_FALLBACK_PATH,
+            body: JSON.parse(fs.readFileSync(STACK_REPORT_FALLBACK_PATH, 'utf8')),
+        };
+    }
+
+    throw new Error('No canonical stack report source available');
+}
 
 // ------------------------------------------------------------------
 // Log Capture System (In-Memory Ring Buffer)
@@ -183,6 +208,20 @@ app.use((req, res, next) => {
         res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     }
     next();
+});
+
+app.get('/stack-report.json', async (_req, res) => {
+    try {
+        const { source, body } = await getCachedStackReport();
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.setHeader('X-Stack-Report-Source', source);
+        res.json(body);
+    } catch (error) {
+        res.status(503).json({
+            error: 'STACK_REPORT_UNAVAILABLE',
+            message: error.message,
+        });
+    }
 });
 
 // Retire legacy public surfaces before static file serving exposes them directly.
