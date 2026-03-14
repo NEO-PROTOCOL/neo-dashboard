@@ -1,629 +1,1963 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>NEØ Stack Analyzer // Primary Operations Surface</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
-<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: #060E14;
-    color: #C8D6E5;
-    font-family: 'Share Tech Mono', monospace;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: #0a1a24; }
-  ::-webkit-scrollbar-thumb { background: #D7FF6444; border-radius: 3px; }
-  ::selection { background: #D7FF6433; color: #D7FF64; }
-  @keyframes scanline {
-    0% { transform: translateY(-100%); }
-    100% { transform: translateY(100vh); }
-  }
-  @keyframes pulse { 0%,100% { opacity: 0.7; } 50% { opacity: 1; } }
-  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
-  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-</style>
-</head>
-<body>
-<div id="root"></div>
-
-<script type="text/babel">
-const { useState, useMemo, useEffect, useContext } = React;
-
-// ─── REPORT DATA SOURCE ────────────────────────────────────────
-const ReportContext = React.createContext(null);
-const REPORT_URL = './stack-report.json';
-
-// ─── THEME ──────────────────────────────────────────────────────────
-const T = {
-  bg: '#060E14', bgCard: '#0B1821', bgCardHover: '#0F2130',
-  border: '#1A3040', borderActive: '#D7FF64',
-  accent: '#D7FF64', accentDim: '#D7FF6466',
-  text: '#C8D6E5', textDim: '#5C7A8A', textBright: '#FFFFFF',
-  red: '#FF4757', orange: '#FFA502', yellow: '#FECA57',
-  green: '#2ED573', cyan: '#18DCFF', purple: '#A855F7',
-};
-
-const SEV_COLOR = { critical: T.red, high: T.orange, medium: T.yellow, low: T.cyan, info: T.textDim };
-const SEV_ICON  = { critical: '\u26A0', high: '\u2622', medium: '\u26A1', low: '\u2139', info: '\u2022' };
-const GRADE_COLOR = { A: T.green, B: T.cyan, C: T.yellow, D: T.orange, F: T.red, 'N/A': T.textDim };
-
-const ORG_COLOR = {
-  'NEO Protocol': T.accent, 'Neo Smart Factory': T.cyan, 'FlowPay (NE\u00D8 Stack)': T.green,
-  'NEO-FlowOFF': T.purple, 'WOD Game': T.orange, 'Fluxx DAO': '#FF6B81',
-};
-
-// ─── SCANLINE OVERLAY ───────────────────────────────────────────────
-function Scanline() {
-  return React.createElement('div', {
-    style: {
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      pointerEvents: 'none', zIndex: 9999, opacity: 0.03,
-      background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(215,255,100,0.1) 2px, rgba(215,255,100,0.1) 4px)',
-    }
-  });
-}
-
-// ─── HEADER ─────────────────────────────────────────────────────────
-function Header() {
-  const REPORT = useContext(ReportContext);
-  const meta = REPORT.meta;
-  return React.createElement('header', {
-    style: {
-      padding: '24px 32px', borderBottom: `1px solid ${T.border}`,
-      display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-      gap: 24, flexWrap: 'wrap',
-      background: `linear-gradient(180deg, ${T.bgCard} 0%, ${T.bg} 100%)`,
-    }
-  },
-    React.createElement('div', null,
-      React.createElement('div', {
-        style: {
-          display: 'inline-flex', alignItems: 'center', gap: 8,
-          padding: '5px 10px', borderRadius: 999,
-          border: `1px solid ${T.accentDim}`,
-          background: '#d7ff6412', color: T.accent,
-          fontSize: '0.62rem', letterSpacing: '2px',
-          textTransform: 'uppercase', marginBottom: 12,
-        }
-      }, 'Primary Operations Surface'),
-      React.createElement('h1', {
-        style: { fontFamily: 'Orbitron, sans-serif', fontSize: '1.5rem', fontWeight: 900, color: T.accent, letterSpacing: '3px' }
-      }, 'NE\u00D8 STACK ANALYZER'),
-      React.createElement('div', {
-        style: { fontSize: '0.75rem', color: T.textDim, marginTop: 4 }
-      }, `v${meta.analyzer_version} \u2502 ${meta.total_nodes} nodes \u2502 ${meta.total_orgs} orgs \u2502 ${meta.generated_at.split('T')[0]}`),
-      React.createElement('div', {
-        style: { fontSize: '0.8rem', color: T.text, marginTop: 10, maxWidth: 760, lineHeight: 1.5 }
-      }, 'Use o Analyzer para risco estrutural e priorizacao. Controle live fica no console autenticado. Topologia fica no grafo.'),
-      React.createElement('nav', {
-        style: { display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 16 }
-      },
-        [
-          { href: '/stack-analyzer.html', label: 'Analyzer', desc: 'Primary ops' },
-          { href: '/', label: 'Control', desc: 'Runtime console' },
-          { href: '/ecosystem-3d.html', label: 'Topology', desc: 'Graph modes' },
-          { href: '/runbook.html', label: 'Runbook', desc: 'Role guide' },
-        ].map(link =>
-          React.createElement('a', {
-            key: link.href,
-            href: link.href,
-            style: {
-              display: 'inline-flex',
-              flexDirection: 'column',
-              gap: 3,
-              padding: '10px 12px',
-              minWidth: 132,
-              borderRadius: 8,
-              textDecoration: 'none',
-              border: `1px solid ${T.border}`,
-              background: '#08121a',
-            }
-          },
-            React.createElement('span', {
-              style: {
-                color: link.href === '/stack-analyzer.html' ? T.accent : T.textBright,
-                fontFamily: 'Orbitron',
-                fontSize: '0.72rem',
-                letterSpacing: '1px',
-              }
-            }, link.label),
-            React.createElement('span', {
-              style: { color: T.textDim, fontSize: '0.66rem' }
-            }, link.desc)
-          )
-        )
-      )
-    ),
-    React.createElement('div', {
-      style: { textAlign: 'right' }
-    },
-      React.createElement('div', {
-        style: {
-          fontFamily: 'Orbitron', fontSize: '2.2rem', fontWeight: 900,
-          color: REPORT.ecosystem_health.average_readiness >= 70 ? T.green : REPORT.ecosystem_health.average_readiness >= 50 ? T.yellow : T.red,
-          textShadow: `0 0 20px ${REPORT.ecosystem_health.average_readiness >= 70 ? T.green : T.yellow}44`,
-        }
-      }, `${REPORT.ecosystem_health.average_readiness}/100`),
-      React.createElement('div', {
-        style: { fontSize: '0.68rem', color: T.textDim, marginTop: 6, letterSpacing: '1px', textTransform: 'uppercase' }
-      }, 'Operational readiness baseline')
-    )
-  );
-}
-
-// ─── TAB BAR ────────────────────────────────────────────────────────
-const TABS = ['OVERVIEW', 'FINDINGS', 'NODES', 'GRAPH', 'READINESS'];
-function TabBar({ active, onChange }) {
-  return React.createElement('nav', {
-    style: {
-      display: 'flex', gap: 0, borderBottom: `1px solid ${T.border}`,
-      background: T.bgCard, padding: '0 32px',
-    }
-  }, TABS.map(tab =>
-    React.createElement('button', {
-      key: tab, onClick: () => onChange(tab),
-      style: {
-        fontFamily: 'Orbitron', fontSize: '0.7rem', fontWeight: 700,
-        padding: '14px 24px', border: 'none', cursor: 'pointer',
-        letterSpacing: '2px', transition: 'all 0.2s',
-        background: active === tab ? T.bg : 'transparent',
-        color: active === tab ? T.accent : T.textDim,
-        borderBottom: active === tab ? `2px solid ${T.accent}` : '2px solid transparent',
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEØ Stack Analyzer // Primary Operations Surface</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <script
+      crossorigin
+      src="https://unpkg.com/react@18/umd/react.production.min.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
       }
-    }, tab)
-  ));
-}
+      body {
+        background: #060e14;
+        color: #c8d6e5;
+        font-family: "Share Tech Mono", monospace;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #0a1a24;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #d7ff6444;
+        border-radius: 3px;
+      }
+      ::selection {
+        background: #d7ff6433;
+        color: #d7ff64;
+      }
+      @keyframes scanline {
+        0% {
+          transform: translateY(-100%);
+        }
+        100% {
+          transform: translateY(100vh);
+        }
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 0.7;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
 
-// ─── STAT BOX ───────────────────────────────────────────────────────
-function Stat({ label, value, color, sub }) {
-  return React.createElement('div', {
-    style: {
-      background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 8,
-      padding: '20px 24px', flex: '1 1 180px', minWidth: 160,
-      animation: 'slideUp 0.4s ease',
-    }
-  },
-    React.createElement('div', { style: { fontSize: '0.65rem', color: T.textDim, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: 8 } }, label),
-    React.createElement('div', { style: { fontFamily: 'Orbitron', fontSize: '1.8rem', fontWeight: 900, color: color || T.accent } }, value),
-    sub && React.createElement('div', { style: { fontSize: '0.7rem', color: T.textDim, marginTop: 4 } }, sub)
-  );
-}
+    <script type="text/babel">
+      const { useState, useMemo, useEffect, useContext } = React;
 
-// ─── OVERVIEW TAB ───────────────────────────────────────────────────
-function OverviewTab() {
-  const REPORT = useContext(ReportContext);
-  const h = REPORT.ecosystem_health;
-  const s = REPORT.summary;
-  const grades = h.grade_distribution;
-  const sevs = h.findings_by_severity;
-  const totalSev = Object.values(sevs).reduce((a, b) => a + b, 0) || 1;
+      // ─── REPORT DATA SOURCE ────────────────────────────────────────
+      const ReportContext = React.createContext(null);
+      const REPORT_URL = "./stack-report.json";
 
-  return React.createElement('div', { style: { padding: '32px', display: 'flex', flexDirection: 'column', gap: 24 } },
-    // Stats row
-    React.createElement('div', { style: { display: 'flex', gap: 16, flexWrap: 'wrap' } },
-      React.createElement(Stat, { label: 'Readiness Score', value: h.average_readiness, color: h.average_readiness >= 70 ? T.green : T.yellow }),
-      React.createElement(Stat, { label: 'Total Findings', value: h.total_findings, color: h.total_findings > 20 ? T.orange : T.cyan }),
-      React.createElement(Stat, { label: 'Nodes', value: REPORT.meta.total_nodes, color: T.accent }),
-      React.createElement(Stat, { label: 'Organizations', value: REPORT.meta.total_orgs, color: T.purple }),
-    ),
+      // ─── THEME ──────────────────────────────────────────────────────────
+      const T = {
+        bg: "#060E14",
+        bgCard: "#0B1821",
+        bgCardHover: "#0F2130",
+        border: "#1A3040",
+        borderActive: "#D7FF64",
+        accent: "#D7FF64",
+        accentDim: "#D7FF6466",
+        text: "#C8D6E5",
+        textDim: "#5C7A8A",
+        textBright: "#FFFFFF",
+        red: "#FF4757",
+        orange: "#FFA502",
+        yellow: "#FECA57",
+        green: "#2ED573",
+        cyan: "#18DCFF",
+        purple: "#A855F7",
+      };
 
-    // Severity bar
-    React.createElement('div', { style: { background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 8, padding: 20 } },
-      React.createElement('div', { style: { fontSize: '0.65rem', color: T.textDim, letterSpacing: '1px', marginBottom: 12, textTransform: 'uppercase' } }, 'Findings by Severity'),
-      React.createElement('div', { style: { display: 'flex', height: 28, borderRadius: 4, overflow: 'hidden', background: '#0a1520' } },
-        Object.entries(sevs).map(([sev, count]) =>
-          count > 0 && React.createElement('div', {
-            key: sev, title: `${sev}: ${count}`,
-            style: { width: `${(count / totalSev) * 100}%`, background: SEV_COLOR[sev], display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', color: '#000', fontWeight: 700 }
-          }, `${sev.toUpperCase()} ${count}`)
-        )
-      )
-    ),
+      const SEV_COLOR = {
+        critical: T.red,
+        high: T.orange,
+        medium: T.yellow,
+        low: T.cyan,
+        info: T.textDim,
+      };
+      const SEV_ICON = {
+        critical: "\u26A0",
+        high: "\u2622",
+        medium: "\u26A1",
+        low: "\u2139",
+        info: "\u2022",
+      };
+      const GRADE_COLOR = {
+        A: T.green,
+        B: T.cyan,
+        C: T.yellow,
+        D: T.orange,
+        F: T.red,
+        "N/A": T.textDim,
+      };
 
-    // Grade distribution
-    React.createElement('div', { style: { background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 8, padding: 20 } },
-      React.createElement('div', { style: { fontSize: '0.65rem', color: T.textDim, letterSpacing: '1px', marginBottom: 12, textTransform: 'uppercase' } }, 'Grade Distribution'),
-      React.createElement('div', { style: { display: 'flex', gap: 12, flexWrap: 'wrap' } },
-        Object.entries(grades).map(([g, c]) =>
-          React.createElement('div', {
-            key: g, style: { display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', background: `${GRADE_COLOR[g]}11`, border: `1px solid ${GRADE_COLOR[g]}33`, borderRadius: 6 }
-          },
-            React.createElement('span', { style: { fontFamily: 'Orbitron', fontSize: '1.2rem', fontWeight: 900, color: GRADE_COLOR[g] } }, g),
-            React.createElement('span', { style: { fontSize: '1.4rem', fontWeight: 700, color: T.text } }, c),
-          )
-        )
-      )
-    ),
+      const ORG_COLOR = {
+        "NEO Protocol": T.accent,
+        "Neo Smart Factory": T.cyan,
+        "FlowPay (NE\u00D8 Stack)": T.green,
+        "NEO-FlowOFF": T.purple,
+        "WOD Game": T.orange,
+        "Fluxx DAO": "#FF6B81",
+      };
 
-    // Org breakdown
-    React.createElement('div', { style: { background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 8, padding: 20 } },
-      React.createElement('div', { style: { fontSize: '0.65rem', color: T.textDim, letterSpacing: '1px', marginBottom: 16, textTransform: 'uppercase' } }, 'Organization Breakdown'),
-      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 } },
-        Object.entries(s.org_breakdown).map(([org, data]) => {
-          const orgC = ORG_COLOR[org] || T.textDim;
-          return React.createElement('div', {
-            key: org, style: { background: T.bg, border: `1px solid ${orgC}33`, borderRadius: 8, padding: 16, borderLeft: `3px solid ${orgC}` }
-          },
-            React.createElement('div', { style: { fontFamily: 'Orbitron', fontSize: '0.7rem', fontWeight: 700, color: orgC, marginBottom: 8, letterSpacing: '1px' } }, org),
-            React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' } },
-              React.createElement('span', { style: { color: T.textDim } }, `${data.node_count} nodes`),
-              React.createElement('span', { style: { color: T.textDim } }, `${data.findings_count} findings`),
-              React.createElement('span', { style: { fontWeight: 700, color: data.avg_readiness >= 70 ? T.green : data.avg_readiness >= 50 ? T.yellow : T.red } }, `${data.avg_readiness}/100`),
-            )
-          );
-        })
-      )
-    ),
-
-    // Key issues
-    React.createElement('div', { style: { display: 'flex', gap: 16, flexWrap: 'wrap' } },
-      React.createElement('div', { style: { flex: '1 1 300px', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 8, padding: 20 } },
-        React.createElement('div', { style: { fontSize: '0.65rem', color: T.textDim, letterSpacing: '1px', marginBottom: 12, textTransform: 'uppercase' } }, 'Mainnet Contracts'),
-        s.nodes_with_mainnet_contracts.map(n =>
-          React.createElement('div', { key: n, style: { padding: '4px 0', color: T.green } }, `\u25C6 ${n}`)
-        )
-      ),
-      React.createElement('div', { style: { flex: '1 1 300px', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 8, padding: 20 } },
-        React.createElement('div', { style: { fontSize: '0.65rem', color: T.textDim, letterSpacing: '1px', marginBottom: 12, textTransform: 'uppercase' } }, `No Production URL (${s.nodes_without_production_url.length})`),
-        React.createElement('div', { style: { maxHeight: 160, overflowY: 'auto' } },
-          s.nodes_without_production_url.map(n =>
-            React.createElement('div', { key: n, style: { padding: '3px 0', color: T.orange, fontSize: '0.8rem' } }, `\u2717 ${n}`)
-          )
-        )
-      )
-    )
-  );
-}
-
-// ─── FINDINGS TAB ───────────────────────────────────────────────────
-function FindingsTab() {
-  const REPORT = useContext(ReportContext);
-  const [filter, setFilter] = useState('all');
-  const [expanded, setExpanded] = useState(null);
-  const findings = REPORT.findings;
-  const filtered = filter === 'all' ? findings : findings.filter(f => f.severity === filter);
-  const sevCounts = {};
-  findings.forEach(f => { sevCounts[f.severity] = (sevCounts[f.severity] || 0) + 1; });
-
-  return React.createElement('div', { style: { padding: 32 } },
-    // Filter buttons
-    React.createElement('div', { style: { display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' } },
-      React.createElement('button', {
-        onClick: () => setFilter('all'),
-        style: { padding: '6px 16px', borderRadius: 4, border: `1px solid ${filter === 'all' ? T.accent : T.border}`, background: filter === 'all' ? `${T.accent}22` : 'transparent', color: filter === 'all' ? T.accent : T.textDim, cursor: 'pointer', fontSize: '0.75rem', fontFamily: 'Share Tech Mono' }
-      }, `ALL (${findings.length})`),
-      ...Object.entries(sevCounts).map(([sev, count]) =>
-        React.createElement('button', {
-          key: sev, onClick: () => setFilter(sev),
-          style: { padding: '6px 16px', borderRadius: 4, border: `1px solid ${filter === sev ? SEV_COLOR[sev] : T.border}`, background: filter === sev ? `${SEV_COLOR[sev]}22` : 'transparent', color: filter === sev ? SEV_COLOR[sev] : T.textDim, cursor: 'pointer', fontSize: '0.75rem', fontFamily: 'Share Tech Mono' }
-        }, `${sev.toUpperCase()} (${count})`)
-      )
-    ),
-    // Finding cards
-    React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 8 } },
-      filtered.map((f, i) => {
-        const isOpen = expanded === i;
-        return React.createElement('div', {
-          key: i, onClick: () => setExpanded(isOpen ? null : i),
+      // ─── SCANLINE OVERLAY ───────────────────────────────────────────────
+      function Scanline() {
+        return React.createElement("div", {
           style: {
-            background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 6,
-            borderLeft: `3px solid ${SEV_COLOR[f.severity]}`, padding: '14px 18px', cursor: 'pointer',
-            transition: 'background 0.2s',
-          }
-        },
-          React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } },
-            React.createElement('div', { style: { display: 'flex', gap: 10, alignItems: 'center' } },
-              React.createElement('span', { style: { fontSize: '1rem' } }, SEV_ICON[f.severity]),
-              React.createElement('span', { style: { fontSize: '0.8rem', color: SEV_COLOR[f.severity], fontWeight: 700 } }, f.severity.toUpperCase()),
-              React.createElement('span', { style: { color: T.text, fontSize: '0.8rem' } }, f.title),
-            ),
-            React.createElement('div', { style: { display: 'flex', gap: 8, alignItems: 'center' } },
-              React.createElement('span', { style: { fontSize: '0.65rem', padding: '2px 8px', background: `${T.accent}11`, border: `1px solid ${T.border}`, borderRadius: 3, color: T.textDim } }, f.category),
-              React.createElement('span', { style: { fontSize: '0.65rem', padding: '2px 8px', background: `${T.cyan}11`, border: `1px solid ${T.border}`, borderRadius: 3, color: T.cyan } }, f.node_id),
-              React.createElement('span', { style: { color: T.textDim, fontSize: '0.8rem' } }, isOpen ? '\u25B2' : '\u25BC'),
-            )
-          ),
-          isOpen && React.createElement('div', {
-            style: { marginTop: 12, padding: 12, background: T.bg, borderRadius: 4, fontSize: '0.75rem', color: T.textDim, lineHeight: 1.6, borderLeft: `2px solid ${SEV_COLOR[f.severity]}44` }
-          }, f.detail)
-        );
-      })
-    )
-  );
-}
-
-// ─── NODES TAB ──────────────────────────────────────────────────────
-function NodesTab() {
-  const REPORT = useContext(ReportContext);
-  const [search, setSearch] = useState('');
-  const [orgFilter, setOrgFilter] = useState('all');
-  const nodes = REPORT.nodes;
-  const orgs = [...new Set(nodes.map(n => n.org))];
-
-  const filtered = nodes.filter(n => {
-    if (orgFilter !== 'all' && n.org !== orgFilter) return false;
-    if (search && !n.id.toLowerCase().includes(search.toLowerCase()) && !n.name.toLowerCase().includes(search.toLowerCase())) return false;
-    return true;
-  });
-
-  return React.createElement('div', { style: { padding: 32 } },
-    React.createElement('div', { style: { display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' } },
-      React.createElement('input', {
-        placeholder: 'Search nodes...', value: search,
-        onChange: e => setSearch(e.target.value),
-        style: { padding: '8px 14px', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 4, color: T.text, fontFamily: 'Share Tech Mono', fontSize: '0.8rem', width: 220 }
-      }),
-      React.createElement('select', {
-        value: orgFilter, onChange: e => setOrgFilter(e.target.value),
-        style: { padding: '8px 14px', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 4, color: T.text, fontFamily: 'Share Tech Mono', fontSize: '0.8rem' }
-      },
-        React.createElement('option', { value: 'all' }, 'All Orgs'),
-        ...orgs.map(o => React.createElement('option', { key: o, value: o }, o))
-      ),
-      React.createElement('span', { style: { color: T.textDim, fontSize: '0.75rem' } }, `${filtered.length} nodes`)
-    ),
-    React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 12 } },
-      filtered.map(node => {
-        const gc = GRADE_COLOR[node.readiness_grade] || T.textDim;
-        const oc = ORG_COLOR[node.org] || T.textDim;
-        return React.createElement('div', {
-          key: node.id,
-          style: { background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 8, padding: 16, transition: 'border-color 0.2s', position: 'relative', overflow: 'hidden' }
-        },
-          // Grade badge
-          React.createElement('div', {
-            style: { position: 'absolute', top: 12, right: 12, fontFamily: 'Orbitron', fontSize: '1.4rem', fontWeight: 900, color: gc, opacity: 0.3 }
-          }, node.readiness_grade),
-          // Header
-          React.createElement('div', { style: { fontFamily: 'Orbitron', fontSize: '0.7rem', fontWeight: 700, color: T.accent, letterSpacing: '1px', marginBottom: 4 } }, node.id),
-          React.createElement('div', { style: { fontSize: '0.7rem', color: T.textDim, marginBottom: 8 } }, node.name),
-          // Badges
-          React.createElement('div', { style: { display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 } },
-            React.createElement('span', { style: { fontSize: '0.6rem', padding: '2px 8px', background: `${oc}15`, border: `1px solid ${oc}33`, borderRadius: 3, color: oc } }, node.org),
-            React.createElement('span', { style: { fontSize: '0.6rem', padding: '2px 8px', background: `${T.cyan}11`, border: `1px solid ${T.border}`, borderRadius: 3, color: T.cyan } }, node.role),
-            node.has_contracts && React.createElement('span', { style: { fontSize: '0.6rem', padding: '2px 8px', background: `${T.green}15`, border: `1px solid ${T.green}33`, borderRadius: 3, color: T.green } }, '\u25C6 CONTRACTS'),
-            node.has_production && React.createElement('span', { style: { fontSize: '0.6rem', padding: '2px 8px', background: `${T.accent}15`, border: `1px solid ${T.accent}33`, borderRadius: 3, color: T.accent } }, '\u2713 PROD'),
-          ),
-          // Readiness bar
-          node.readiness_score >= 0 && React.createElement('div', { style: { marginTop: 8 } },
-            React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', marginBottom: 4 } },
-              React.createElement('span', { style: { color: T.textDim } }, 'READINESS'),
-              React.createElement('span', { style: { color: gc, fontWeight: 700 } }, `${node.readiness_score}/100`),
-            ),
-            React.createElement('div', { style: { height: 6, background: '#0a1520', borderRadius: 3, overflow: 'hidden' } },
-              React.createElement('div', { style: { width: `${node.readiness_score}%`, height: '100%', background: `linear-gradient(90deg, ${gc}, ${gc}88)`, borderRadius: 3, transition: 'width 0.6s ease' } })
-            )
-          ),
-          // Stats
-          React.createElement('div', { style: { display: 'flex', gap: 16, marginTop: 10, fontSize: '0.65rem', color: T.textDim } },
-            React.createElement('span', null, `\u25C9 ${node.nexus_events.length} events`),
-            React.createElement('span', null, `\u27A1 ${node.dependency_count} deps`),
-            React.createElement('span', null, `\u{1F4A5} ${node.blast_radius} blast`),
-            node.finding_count > 0 && React.createElement('span', { style: { color: T.orange } }, `\u26A0 ${node.finding_count} findings`),
-          ),
-        );
-      })
-    )
-  );
-}
-
-// ─── GRAPH TAB ──────────────────────────────────────────────────────
-function GraphTab() {
-  const REPORT = useContext(ReportContext);
-  const graph = REPORT.dependency_graph;
-  const topo = REPORT.nexus_topology;
-
-  return React.createElement('div', { style: { padding: 32, display: 'flex', flexDirection: 'column', gap: 24 } },
-    // Dependency Graph
-    React.createElement('div', { style: { background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 8, padding: 24 } },
-      React.createElement('div', { style: { fontFamily: 'Orbitron', fontSize: '0.75rem', fontWeight: 700, color: T.accent, letterSpacing: '2px', marginBottom: 20 } }, 'DEPENDENCY GRAPH'),
-      Object.entries(graph).map(([node, edges]) =>
-        React.createElement('div', { key: node, style: { marginBottom: 16, padding: 12, background: T.bg, borderRadius: 6, border: `1px solid ${T.border}` } },
-          React.createElement('div', { style: { fontFamily: 'Orbitron', fontSize: '0.7rem', fontWeight: 700, color: T.accent, marginBottom: 8 } }, node),
-          edges.depends_on.length > 0 && React.createElement('div', { style: { fontSize: '0.75rem', marginBottom: 4 } },
-            React.createElement('span', { style: { color: T.textDim } }, '\u2190 depends on: '),
-            edges.depends_on.map((d, i) => React.createElement('span', { key: d, style: { color: T.cyan } }, i > 0 ? `, ${d}` : d))
-          ),
-          edges.depended_by.length > 0 && React.createElement('div', { style: { fontSize: '0.75rem' } },
-            React.createElement('span', { style: { color: T.textDim } }, '\u2192 depended by: '),
-            edges.depended_by.map((d, i) => React.createElement('span', { key: d, style: { color: T.orange } }, i > 0 ? `, ${d}` : d))
-          ),
-          edges.depends_on.length === 0 && edges.depended_by.length === 0 &&
-            React.createElement('span', { style: { fontSize: '0.7rem', color: T.textDim } }, 'isolated node')
-        )
-      )
-    ),
-
-    // Nexus Topology
-    React.createElement('div', { style: { background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 8, padding: 24 } },
-      React.createElement('div', { style: { fontFamily: 'Orbitron', fontSize: '0.75rem', fontWeight: 700, color: T.accent, letterSpacing: '2px', marginBottom: 6 } }, 'NEXUS EVENT TOPOLOGY'),
-      React.createElement('div', { style: { fontSize: '0.7rem', color: T.textDim, marginBottom: 16 } },
-        `${topo.total_unique_events} unique events \u2502 ${topo.wildcard_consumers.length} wildcard consumers \u2502 ${topo.phantom_events.length} phantom events`
-      ),
-      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 10 } },
-        topo.events.map(evt =>
-          React.createElement('div', {
-            key: evt.event,
-            style: { padding: 12, background: T.bg, border: `1px solid ${!evt.has_emitter ? `${T.red}44` : T.border}`, borderRadius: 6 }
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            pointerEvents: "none",
+            zIndex: 9999,
+            opacity: 0.03,
+            background:
+              "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(215,255,100,0.1) 2px, rgba(215,255,100,0.1) 4px)",
           },
-            React.createElement('div', { style: { fontFamily: 'Orbitron', fontSize: '0.65rem', fontWeight: 700, color: !evt.has_emitter ? T.red : T.accent, marginBottom: 6 } },
-              (!evt.has_emitter ? '\u{1F47B} ' : '\u25C8 ') + evt.event
-            ),
-            React.createElement('div', { style: { fontSize: '0.7rem', display: 'flex', gap: 16 } },
-              React.createElement('span', null,
-                React.createElement('span', { style: { color: T.textDim } }, 'emit: '),
-                React.createElement('span', { style: { color: evt.emitters.length ? T.green : T.red } }, evt.emitters.length ? evt.emitters.join(', ') : 'none')
-              ),
-              React.createElement('span', null,
-                React.createElement('span', { style: { color: T.textDim } }, 'consume: '),
-                React.createElement('span', { style: { color: T.cyan } }, evt.consumers.join(', '))
-              )
-            )
-          )
-        )
-      )
-    ),
-
-    // Phantom events
-    topo.phantom_events.length > 0 && React.createElement('div', { style: { background: `${T.red}08`, border: `1px solid ${T.red}33`, borderRadius: 8, padding: 20 } },
-      React.createElement('div', { style: { fontFamily: 'Orbitron', fontSize: '0.7rem', fontWeight: 700, color: T.red, letterSpacing: '2px', marginBottom: 10 } }, '\u{1F47B} PHANTOM EVENTS (consumed but never emitted)'),
-      React.createElement('div', { style: { display: 'flex', gap: 8, flexWrap: 'wrap' } },
-        topo.phantom_events.map(e =>
-          React.createElement('span', {
-            key: e, style: { padding: '4px 12px', background: `${T.red}15`, border: `1px solid ${T.red}33`, borderRadius: 4, fontSize: '0.75rem', color: T.red }
-          }, e)
-        )
-      )
-    ),
-
-    // Wildcard consumers
-    topo.wildcard_consumers.length > 0 && React.createElement('div', { style: { background: `${T.purple}08`, border: `1px solid ${T.purple}33`, borderRadius: 8, padding: 20 } },
-      React.createElement('div', { style: { fontFamily: 'Orbitron', fontSize: '0.7rem', fontWeight: 700, color: T.purple, letterSpacing: '2px', marginBottom: 10 } }, '\u2731 WILDCARD CONSUMERS'),
-      React.createElement('div', { style: { display: 'flex', gap: 8, flexWrap: 'wrap' } },
-        topo.wildcard_consumers.map(e =>
-          React.createElement('span', {
-            key: e, style: { padding: '4px 12px', background: `${T.purple}15`, border: `1px solid ${T.purple}33`, borderRadius: 4, fontSize: '0.75rem', color: T.purple }
-          }, e)
-        )
-      )
-    ),
-  );
-}
-
-// ─── READINESS TAB ──────────────────────────────────────────────────
-function ReadinessTab() {
-  const REPORT = useContext(ReportContext);
-  const lb = REPORT.readiness_leaderboard;
-  return React.createElement('div', { style: { padding: 32 } },
-    React.createElement('div', { style: { fontFamily: 'Orbitron', fontSize: '0.75rem', fontWeight: 700, color: T.accent, letterSpacing: '2px', marginBottom: 20 } }, 'PRODUCTION READINESS LEADERBOARD'),
-    React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 6 } },
-      lb.map((entry, i) => {
-        const gc = GRADE_COLOR[entry.grade] || T.textDim;
-        const node = REPORT.nodes.find(n => n.id === entry.id);
-        const breakdown = node?.readiness_breakdown || {};
-        const checks = Object.entries(breakdown);
-
-        return React.createElement('div', {
-          key: entry.id,
-          style: { background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 6, padding: '12px 18px' }
-        },
-          React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 14 } },
-            // Rank
-            React.createElement('span', { style: { fontFamily: 'Orbitron', fontSize: '0.7rem', color: T.textDim, width: 24, textAlign: 'right' } }, `#${i + 1}`),
-            // Grade
-            React.createElement('span', { style: { fontFamily: 'Orbitron', fontSize: '1.2rem', fontWeight: 900, color: gc, width: 30, textAlign: 'center' } }, entry.grade),
-            // Bar + name
-            React.createElement('div', { style: { flex: 1 } },
-              React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 4 } },
-                React.createElement('span', { style: { fontFamily: 'Orbitron', fontSize: '0.65rem', fontWeight: 700, color: T.accent, letterSpacing: '1px' } }, entry.id),
-                React.createElement('span', { style: { fontFamily: 'Orbitron', fontSize: '0.7rem', fontWeight: 700, color: gc } }, `${entry.score}/100`),
-              ),
-              React.createElement('div', { style: { height: 8, background: '#0a1520', borderRadius: 4, overflow: 'hidden' } },
-                React.createElement('div', { style: { width: `${entry.score}%`, height: '100%', background: `linear-gradient(90deg, ${gc}, ${gc}66)`, borderRadius: 4, transition: 'width 0.8s ease' } })
-              ),
-              // Breakdown checks
-              checks.length > 0 && React.createElement('div', { style: { display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' } },
-                checks.map(([key, val]) =>
-                  React.createElement('span', {
-                    key: key,
-                    style: { fontSize: '0.55rem', padding: '1px 6px', borderRadius: 3, background: val ? `${T.green}15` : `${T.red}15`, color: val ? T.green : T.red, border: `1px solid ${val ? T.green : T.red}22` }
-                  }, `${val ? '\u2713' : '\u2717'} ${key.replace(/_/g, ' ')}`)
-                )
-              )
-            ),
-          )
-        );
-      })
-    )
-  );
-}
-
-// ─── APP ────────────────────────────────────────────────────────────
-function App() {
-  const [tab, setTab] = useState('OVERVIEW');
-  const [report, setReport] = useState(null);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadReport() {
-      try {
-        const response = await fetch(REPORT_URL, { cache: 'no-store' });
-        if (!response.ok) {
-          let msg = `HTTP ${response.status}`;
-          try {
-            const errBody = await response.json();
-            if (errBody.message) msg = errBody.message;
-          } catch (_ignored) {}
-          throw new Error(msg);
-        }
-        const data = await response.json();
-        if (cancelled) return;
-        setReport(data);
-      } catch (err) {
-        if (cancelled) return;
-        setError(err.message || 'Falha ao carregar stack-report.json');
+        });
       }
-    }
 
-    loadReport();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+      // ─── HEADER ─────────────────────────────────────────────────────────
+      function Header() {
+        const REPORT = useContext(ReportContext);
+        const meta = REPORT.meta;
+        return React.createElement(
+          "header",
+          {
+            style: {
+              padding: "24px 32px",
+              borderBottom: `1px solid ${T.border}`,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              gap: 24,
+              flexWrap: "wrap",
+              background: `linear-gradient(180deg, ${T.bgCard} 0%, ${T.bg} 100%)`,
+            },
+          },
+          React.createElement(
+            "div",
+            null,
+            React.createElement(
+              "div",
+              {
+                style: {
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "5px 10px",
+                  borderRadius: 999,
+                  border: `1px solid ${T.accentDim}`,
+                  background: "#d7ff6412",
+                  color: T.accent,
+                  fontSize: "0.62rem",
+                  letterSpacing: "2px",
+                  textTransform: "uppercase",
+                  marginBottom: 12,
+                },
+              },
+              "Primary Operations Surface",
+            ),
+            React.createElement(
+              "h1",
+              {
+                style: {
+                  fontFamily: "Orbitron, sans-serif",
+                  fontSize: "1.5rem",
+                  fontWeight: 900,
+                  color: T.accent,
+                  letterSpacing: "3px",
+                },
+              },
+              "NE\u00D8 STACK ANALYZER",
+            ),
+            React.createElement(
+              "div",
+              {
+                style: { fontSize: "0.75rem", color: T.textDim, marginTop: 4 },
+              },
+              `v${meta.analyzer_version} \u2502 ${meta.total_nodes} nodes \u2502 ${meta.total_orgs} orgs \u2502 ${meta.generated_at.split("T")[0]}`,
+            ),
+            React.createElement(
+              "div",
+              {
+                style: {
+                  fontSize: "0.8rem",
+                  color: T.text,
+                  marginTop: 10,
+                  maxWidth: 760,
+                  lineHeight: 1.5,
+                },
+              },
+              "Use o Analyzer para risco estrutural e priorizacao. Controle live fica no console autenticado. Topologia fica no grafo.",
+            ),
+            React.createElement(
+              "nav",
+              {
+                style: {
+                  display: "flex",
+                  gap: 10,
+                  flexWrap: "wrap",
+                  marginTop: 16,
+                },
+              },
+              [
+                {
+                  href: "/stack-analyzer.html",
+                  label: "Analyzer",
+                  desc: "Primary ops",
+                },
+                { href: "/", label: "Control", desc: "Runtime console" },
+                {
+                  href: "/ecosystem-3d.html",
+                  label: "Topology",
+                  desc: "Graph modes",
+                },
+                { href: "/runbook.html", label: "Runbook", desc: "Role guide" },
+              ].map((link) =>
+                React.createElement(
+                  "a",
+                  {
+                    key: link.href,
+                    href: link.href,
+                    style: {
+                      display: "inline-flex",
+                      flexDirection: "column",
+                      gap: 3,
+                      padding: "10px 12px",
+                      minWidth: 132,
+                      borderRadius: 8,
+                      textDecoration: "none",
+                      border: `1px solid ${T.border}`,
+                      background: "#08121a",
+                    },
+                  },
+                  React.createElement(
+                    "span",
+                    {
+                      style: {
+                        color:
+                          link.href === "/stack-analyzer.html"
+                            ? T.accent
+                            : T.textBright,
+                        fontFamily: "Orbitron",
+                        fontSize: "0.72rem",
+                        letterSpacing: "1px",
+                      },
+                    },
+                    link.label,
+                  ),
+                  React.createElement(
+                    "span",
+                    {
+                      style: { color: T.textDim, fontSize: "0.66rem" },
+                    },
+                    link.desc,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          React.createElement(
+            "div",
+            {
+              style: { textAlign: "right" },
+            },
+            React.createElement(
+              "div",
+              {
+                style: {
+                  fontFamily: "Orbitron",
+                  fontSize: "2.2rem",
+                  fontWeight: 900,
+                  color:
+                    REPORT.ecosystem_health.average_readiness >= 70
+                      ? T.green
+                      : REPORT.ecosystem_health.average_readiness >= 50
+                        ? T.yellow
+                        : T.red,
+                  textShadow: `0 0 20px ${REPORT.ecosystem_health.average_readiness >= 70 ? T.green : T.yellow}44`,
+                },
+              },
+              `${REPORT.ecosystem_health.average_readiness}/100`,
+            ),
+            React.createElement(
+              "div",
+              {
+                style: {
+                  fontSize: "0.68rem",
+                  color: T.textDim,
+                  marginTop: 6,
+                  letterSpacing: "1px",
+                  textTransform: "uppercase",
+                },
+              },
+              "Operational readiness baseline",
+            ),
+          ),
+        );
+      }
 
-  if (error) {
-    return React.createElement('div', { style: { minHeight: '100vh', background: T.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 } },
-      React.createElement('div', { style: { maxWidth: 640, border: `1px solid ${T.red}55`, background: T.bgCard, borderRadius: 12, padding: 24 } },
-        React.createElement('div', { style: { fontFamily: 'Orbitron', fontSize: '0.75rem', color: T.red, letterSpacing: '2px', marginBottom: 12 } }, 'STACK REPORT UNAVAILABLE'),
-        React.createElement('p', { style: { fontSize: '0.85rem', lineHeight: 1.6, color: T.text } }, `Nao foi possivel carregar ${REPORT_URL}. ${error}`)
-      )
-    );
-  }
+      // ─── TAB BAR ────────────────────────────────────────────────────────
+      const TABS = ["OVERVIEW", "FINDINGS", "NODES", "GRAPH", "READINESS"];
+      function TabBar({ active, onChange }) {
+        return React.createElement(
+          "nav",
+          {
+            style: {
+              display: "flex",
+              gap: 0,
+              borderBottom: `1px solid ${T.border}`,
+              background: T.bgCard,
+              padding: "0 32px",
+            },
+          },
+          TABS.map((tab) =>
+            React.createElement(
+              "button",
+              {
+                key: tab,
+                onClick: () => onChange(tab),
+                style: {
+                  fontFamily: "Orbitron",
+                  fontSize: "0.7rem",
+                  fontWeight: 700,
+                  padding: "14px 24px",
+                  border: "none",
+                  cursor: "pointer",
+                  letterSpacing: "2px",
+                  transition: "all 0.2s",
+                  background: active === tab ? T.bg : "transparent",
+                  color: active === tab ? T.accent : T.textDim,
+                  borderBottom:
+                    active === tab
+                      ? `2px solid ${T.accent}`
+                      : "2px solid transparent",
+                },
+              },
+              tab,
+            ),
+          ),
+        );
+      }
 
-  if (!report) {
-    return React.createElement('div', { style: { minHeight: '100vh', background: T.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 } },
-      React.createElement('div', { style: { textAlign: 'center' } },
-        React.createElement('div', { style: { fontFamily: 'Orbitron', fontSize: '0.75rem', color: T.accent, letterSpacing: '2px', marginBottom: 10 } }, 'SYNCING SOURCE OF TRUTH'),
-        React.createElement('div', { style: { fontSize: '0.85rem', color: T.textDim } }, 'Carregando stack-report.json canonico')
-      )
-    );
-  }
+      // ─── STAT BOX ───────────────────────────────────────────────────────
+      function Stat({ label, value, color, sub }) {
+        return React.createElement(
+          "div",
+          {
+            style: {
+              background: T.bgCard,
+              border: `1px solid ${T.border}`,
+              borderRadius: 8,
+              padding: "20px 24px",
+              flex: "1 1 180px",
+              minWidth: 160,
+              animation: "slideUp 0.4s ease",
+            },
+          },
+          React.createElement(
+            "div",
+            {
+              style: {
+                fontSize: "0.65rem",
+                color: T.textDim,
+                letterSpacing: "1px",
+                textTransform: "uppercase",
+                marginBottom: 8,
+              },
+            },
+            label,
+          ),
+          React.createElement(
+            "div",
+            {
+              style: {
+                fontFamily: "Orbitron",
+                fontSize: "1.8rem",
+                fontWeight: 900,
+                color: color || T.accent,
+              },
+            },
+            value,
+          ),
+          sub &&
+            React.createElement(
+              "div",
+              { style: { fontSize: "0.7rem", color: T.textDim, marginTop: 4 } },
+              sub,
+            ),
+        );
+      }
 
-  const tabContent = {
-    OVERVIEW: React.createElement(OverviewTab),
-    FINDINGS: React.createElement(FindingsTab),
-    NODES: React.createElement(NodesTab),
-    GRAPH: React.createElement(GraphTab),
-    READINESS: React.createElement(ReadinessTab),
-  };
+      // ─── OVERVIEW TAB ───────────────────────────────────────────────────
+      function OverviewTab() {
+        const REPORT = useContext(ReportContext);
+        const h = REPORT.ecosystem_health;
+        const s = REPORT.summary;
+        const grades = h.grade_distribution;
+        const sevs = h.findings_by_severity;
+        const totalSev = Object.values(sevs).reduce((a, b) => a + b, 0) || 1;
 
-  return React.createElement(ReportContext.Provider, { value: report },
-    React.createElement('div', { style: { minHeight: '100vh', background: T.bg } },
-      React.createElement(Scanline),
-      React.createElement(Header),
-      React.createElement(TabBar, { active: tab, onChange: setTab }),
-      React.createElement('main', { style: { animation: 'slideUp 0.3s ease' }, key: tab }, tabContent[tab]),
-      React.createElement('footer', {
-        style: { padding: '16px 32px', borderTop: `1px solid ${T.border}`, textAlign: 'center', fontSize: '0.6rem', color: T.textDim }
-      }, `NE\u00D8 STACK ANALYZER v${report.meta.analyzer_version} \u2502 Generated ${report.meta.generated_at.split('T')[0]} \u2502 ${report.meta.total_nodes} nodes analyzed`)
-    )
-  );
-}
+        return React.createElement(
+          "div",
+          {
+            style: {
+              padding: "32px",
+              display: "flex",
+              flexDirection: "column",
+              gap: 24,
+            },
+          },
+          // Stats row
+          React.createElement(
+            "div",
+            { style: { display: "flex", gap: 16, flexWrap: "wrap" } },
+            React.createElement(Stat, {
+              label: "Readiness Score",
+              value: h.average_readiness,
+              color: h.average_readiness >= 70 ? T.green : T.yellow,
+            }),
+            React.createElement(Stat, {
+              label: "Total Findings",
+              value: h.total_findings,
+              color: h.total_findings > 20 ? T.orange : T.cyan,
+            }),
+            React.createElement(Stat, {
+              label: "Nodes",
+              value: REPORT.meta.total_nodes,
+              color: T.accent,
+            }),
+            React.createElement(Stat, {
+              label: "Organizations",
+              value: REPORT.meta.total_orgs,
+              color: T.purple,
+            }),
+          ),
 
-ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
-</script>
+          // Severity bar
+          React.createElement(
+            "div",
+            {
+              style: {
+                background: T.bgCard,
+                border: `1px solid ${T.border}`,
+                borderRadius: 8,
+                padding: 20,
+              },
+            },
+            React.createElement(
+              "div",
+              {
+                style: {
+                  fontSize: "0.65rem",
+                  color: T.textDim,
+                  letterSpacing: "1px",
+                  marginBottom: 12,
+                  textTransform: "uppercase",
+                },
+              },
+              "Findings by Severity",
+            ),
+            React.createElement(
+              "div",
+              {
+                style: {
+                  display: "flex",
+                  height: 28,
+                  borderRadius: 4,
+                  overflow: "hidden",
+                  background: "#0a1520",
+                },
+              },
+              Object.entries(sevs).map(
+                ([sev, count]) =>
+                  count > 0 &&
+                  React.createElement(
+                    "div",
+                    {
+                      key: sev,
+                      title: `${sev}: ${count}`,
+                      style: {
+                        width: `${(count / totalSev) * 100}%`,
+                        background: SEV_COLOR[sev],
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "0.65rem",
+                        color: "#000",
+                        fontWeight: 700,
+                      },
+                    },
+                    `${sev.toUpperCase()} ${count}`,
+                  ),
+              ),
+            ),
+          ),
 
-<script>
-// Inject real report data inline — replaces placeholder
-</script>
-</body>
+          // Grade distribution
+          React.createElement(
+            "div",
+            {
+              style: {
+                background: T.bgCard,
+                border: `1px solid ${T.border}`,
+                borderRadius: 8,
+                padding: 20,
+              },
+            },
+            React.createElement(
+              "div",
+              {
+                style: {
+                  fontSize: "0.65rem",
+                  color: T.textDim,
+                  letterSpacing: "1px",
+                  marginBottom: 12,
+                  textTransform: "uppercase",
+                },
+              },
+              "Grade Distribution",
+            ),
+            React.createElement(
+              "div",
+              { style: { display: "flex", gap: 12, flexWrap: "wrap" } },
+              Object.entries(grades).map(([g, c]) =>
+                React.createElement(
+                  "div",
+                  {
+                    key: g,
+                    style: {
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "8px 16px",
+                      background: `${GRADE_COLOR[g]}11`,
+                      border: `1px solid ${GRADE_COLOR[g]}33`,
+                      borderRadius: 6,
+                    },
+                  },
+                  React.createElement(
+                    "span",
+                    {
+                      style: {
+                        fontFamily: "Orbitron",
+                        fontSize: "1.2rem",
+                        fontWeight: 900,
+                        color: GRADE_COLOR[g],
+                      },
+                    },
+                    g,
+                  ),
+                  React.createElement(
+                    "span",
+                    {
+                      style: {
+                        fontSize: "1.4rem",
+                        fontWeight: 700,
+                        color: T.text,
+                      },
+                    },
+                    c,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // Org breakdown
+          React.createElement(
+            "div",
+            {
+              style: {
+                background: T.bgCard,
+                border: `1px solid ${T.border}`,
+                borderRadius: 8,
+                padding: 20,
+              },
+            },
+            React.createElement(
+              "div",
+              {
+                style: {
+                  fontSize: "0.65rem",
+                  color: T.textDim,
+                  letterSpacing: "1px",
+                  marginBottom: 16,
+                  textTransform: "uppercase",
+                },
+              },
+              "Organization Breakdown",
+            ),
+            React.createElement(
+              "div",
+              {
+                style: {
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+                  gap: 12,
+                },
+              },
+              Object.entries(s.org_breakdown).map(([org, data]) => {
+                const orgC = ORG_COLOR[org] || T.textDim;
+                return React.createElement(
+                  "div",
+                  {
+                    key: org,
+                    style: {
+                      background: T.bg,
+                      border: `1px solid ${orgC}33`,
+                      borderRadius: 8,
+                      padding: 16,
+                      borderLeft: `3px solid ${orgC}`,
+                    },
+                  },
+                  React.createElement(
+                    "div",
+                    {
+                      style: {
+                        fontFamily: "Orbitron",
+                        fontSize: "0.7rem",
+                        fontWeight: 700,
+                        color: orgC,
+                        marginBottom: 8,
+                        letterSpacing: "1px",
+                      },
+                    },
+                    org,
+                  ),
+                  React.createElement(
+                    "div",
+                    {
+                      style: {
+                        display: "flex",
+                        justifyContent: "space-between",
+                        fontSize: "0.75rem",
+                      },
+                    },
+                    React.createElement(
+                      "span",
+                      { style: { color: T.textDim } },
+                      `${data.node_count} nodes`,
+                    ),
+                    React.createElement(
+                      "span",
+                      { style: { color: T.textDim } },
+                      `${data.findings_count} findings`,
+                    ),
+                    React.createElement(
+                      "span",
+                      {
+                        style: {
+                          fontWeight: 700,
+                          color:
+                            data.avg_readiness >= 70
+                              ? T.green
+                              : data.avg_readiness >= 50
+                                ? T.yellow
+                                : T.red,
+                        },
+                      },
+                      `${data.avg_readiness}/100`,
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+
+          // Key issues
+          React.createElement(
+            "div",
+            { style: { display: "flex", gap: 16, flexWrap: "wrap" } },
+            React.createElement(
+              "div",
+              {
+                style: {
+                  flex: "1 1 300px",
+                  background: T.bgCard,
+                  border: `1px solid ${T.border}`,
+                  borderRadius: 8,
+                  padding: 20,
+                },
+              },
+              React.createElement(
+                "div",
+                {
+                  style: {
+                    fontSize: "0.65rem",
+                    color: T.textDim,
+                    letterSpacing: "1px",
+                    marginBottom: 12,
+                    textTransform: "uppercase",
+                  },
+                },
+                "Mainnet Contracts",
+              ),
+              s.nodes_with_mainnet_contracts.map((n) =>
+                React.createElement(
+                  "div",
+                  { key: n, style: { padding: "4px 0", color: T.green } },
+                  `\u25C6 ${n}`,
+                ),
+              ),
+            ),
+            React.createElement(
+              "div",
+              {
+                style: {
+                  flex: "1 1 300px",
+                  background: T.bgCard,
+                  border: `1px solid ${T.border}`,
+                  borderRadius: 8,
+                  padding: 20,
+                },
+              },
+              React.createElement(
+                "div",
+                {
+                  style: {
+                    fontSize: "0.65rem",
+                    color: T.textDim,
+                    letterSpacing: "1px",
+                    marginBottom: 12,
+                    textTransform: "uppercase",
+                  },
+                },
+                `No Production URL (${s.nodes_without_production_url.length})`,
+              ),
+              React.createElement(
+                "div",
+                { style: { maxHeight: 160, overflowY: "auto" } },
+                s.nodes_without_production_url.map((n) =>
+                  React.createElement(
+                    "div",
+                    {
+                      key: n,
+                      style: {
+                        padding: "3px 0",
+                        color: T.orange,
+                        fontSize: "0.8rem",
+                      },
+                    },
+                    `\u2717 ${n}`,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      // ─── FINDINGS TAB ───────────────────────────────────────────────────
+      function FindingsTab() {
+        const REPORT = useContext(ReportContext);
+        const [filter, setFilter] = useState("all");
+        const [expanded, setExpanded] = useState(null);
+        const findings = REPORT.findings;
+        const filtered =
+          filter === "all"
+            ? findings
+            : findings.filter((f) => f.severity === filter);
+        const sevCounts = {};
+        findings.forEach((f) => {
+          sevCounts[f.severity] = (sevCounts[f.severity] || 0) + 1;
+        });
+
+        return React.createElement(
+          "div",
+          { style: { padding: 32 } },
+          // Filter buttons
+          React.createElement(
+            "div",
+            {
+              style: {
+                display: "flex",
+                gap: 8,
+                marginBottom: 20,
+                flexWrap: "wrap",
+              },
+            },
+            React.createElement(
+              "button",
+              {
+                onClick: () => setFilter("all"),
+                style: {
+                  padding: "6px 16px",
+                  borderRadius: 4,
+                  border: `1px solid ${filter === "all" ? T.accent : T.border}`,
+                  background:
+                    filter === "all" ? `${T.accent}22` : "transparent",
+                  color: filter === "all" ? T.accent : T.textDim,
+                  cursor: "pointer",
+                  fontSize: "0.75rem",
+                  fontFamily: "Share Tech Mono",
+                },
+              },
+              `ALL (${findings.length})`,
+            ),
+            ...Object.entries(sevCounts).map(([sev, count]) =>
+              React.createElement(
+                "button",
+                {
+                  key: sev,
+                  onClick: () => setFilter(sev),
+                  style: {
+                    padding: "6px 16px",
+                    borderRadius: 4,
+                    border: `1px solid ${filter === sev ? SEV_COLOR[sev] : T.border}`,
+                    background:
+                      filter === sev ? `${SEV_COLOR[sev]}22` : "transparent",
+                    color: filter === sev ? SEV_COLOR[sev] : T.textDim,
+                    cursor: "pointer",
+                    fontSize: "0.75rem",
+                    fontFamily: "Share Tech Mono",
+                  },
+                },
+                `${sev.toUpperCase()} (${count})`,
+              ),
+            ),
+          ),
+          // Finding cards
+          React.createElement(
+            "div",
+            { style: { display: "flex", flexDirection: "column", gap: 8 } },
+            filtered.map((f, i) => {
+              const isOpen = expanded === i;
+              return React.createElement(
+                "div",
+                {
+                  key: i,
+                  onClick: () => setExpanded(isOpen ? null : i),
+                  style: {
+                    background: T.bgCard,
+                    border: `1px solid ${T.border}`,
+                    borderRadius: 6,
+                    borderLeft: `3px solid ${SEV_COLOR[f.severity]}`,
+                    padding: "14px 18px",
+                    cursor: "pointer",
+                    transition: "background 0.2s",
+                  },
+                },
+                React.createElement(
+                  "div",
+                  {
+                    style: {
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    },
+                  },
+                  React.createElement(
+                    "div",
+                    {
+                      style: { display: "flex", gap: 10, alignItems: "center" },
+                    },
+                    React.createElement(
+                      "span",
+                      { style: { fontSize: "1rem" } },
+                      SEV_ICON[f.severity],
+                    ),
+                    React.createElement(
+                      "span",
+                      {
+                        style: {
+                          fontSize: "0.8rem",
+                          color: SEV_COLOR[f.severity],
+                          fontWeight: 700,
+                        },
+                      },
+                      f.severity.toUpperCase(),
+                    ),
+                    React.createElement(
+                      "span",
+                      { style: { color: T.text, fontSize: "0.8rem" } },
+                      f.title,
+                    ),
+                  ),
+                  React.createElement(
+                    "div",
+                    {
+                      style: { display: "flex", gap: 8, alignItems: "center" },
+                    },
+                    React.createElement(
+                      "span",
+                      {
+                        style: {
+                          fontSize: "0.65rem",
+                          padding: "2px 8px",
+                          background: `${T.accent}11`,
+                          border: `1px solid ${T.border}`,
+                          borderRadius: 3,
+                          color: T.textDim,
+                        },
+                      },
+                      f.category,
+                    ),
+                    React.createElement(
+                      "span",
+                      {
+                        style: {
+                          fontSize: "0.65rem",
+                          padding: "2px 8px",
+                          background: `${T.cyan}11`,
+                          border: `1px solid ${T.border}`,
+                          borderRadius: 3,
+                          color: T.cyan,
+                        },
+                      },
+                      f.node_id,
+                    ),
+                    React.createElement(
+                      "span",
+                      { style: { color: T.textDim, fontSize: "0.8rem" } },
+                      isOpen ? "\u25B2" : "\u25BC",
+                    ),
+                  ),
+                ),
+                isOpen &&
+                  React.createElement(
+                    "div",
+                    {
+                      style: {
+                        marginTop: 12,
+                        padding: 12,
+                        background: T.bg,
+                        borderRadius: 4,
+                        fontSize: "0.75rem",
+                        color: T.textDim,
+                        lineHeight: 1.6,
+                        borderLeft: `2px solid ${SEV_COLOR[f.severity]}44`,
+                      },
+                    },
+                    f.detail,
+                  ),
+              );
+            }),
+          ),
+        );
+      }
+
+      // ─── NODES TAB ──────────────────────────────────────────────────────
+      function NodesTab() {
+        const REPORT = useContext(ReportContext);
+        const [search, setSearch] = useState("");
+        const [orgFilter, setOrgFilter] = useState("all");
+        const nodes = REPORT.nodes;
+        const orgs = [...new Set(nodes.map((n) => n.org))];
+
+        const filtered = nodes.filter((n) => {
+          if (orgFilter !== "all" && n.org !== orgFilter) return false;
+          if (
+            search &&
+            !n.id.toLowerCase().includes(search.toLowerCase()) &&
+            !n.name.toLowerCase().includes(search.toLowerCase())
+          )
+            return false;
+          return true;
+        });
+
+        return React.createElement(
+          "div",
+          { style: { padding: 32 } },
+          React.createElement(
+            "div",
+            {
+              style: {
+                display: "flex",
+                gap: 12,
+                marginBottom: 20,
+                flexWrap: "wrap",
+                alignItems: "center",
+              },
+            },
+            React.createElement("input", {
+              placeholder: "Search nodes...",
+              value: search,
+              onChange: (e) => setSearch(e.target.value),
+              style: {
+                padding: "8px 14px",
+                background: T.bgCard,
+                border: `1px solid ${T.border}`,
+                borderRadius: 4,
+                color: T.text,
+                fontFamily: "Share Tech Mono",
+                fontSize: "0.8rem",
+                width: 220,
+              },
+            }),
+            React.createElement(
+              "select",
+              {
+                value: orgFilter,
+                onChange: (e) => setOrgFilter(e.target.value),
+                style: {
+                  padding: "8px 14px",
+                  background: T.bgCard,
+                  border: `1px solid ${T.border}`,
+                  borderRadius: 4,
+                  color: T.text,
+                  fontFamily: "Share Tech Mono",
+                  fontSize: "0.8rem",
+                },
+              },
+              React.createElement("option", { value: "all" }, "All Orgs"),
+              ...orgs.map((o) =>
+                React.createElement("option", { key: o, value: o }, o),
+              ),
+            ),
+            React.createElement(
+              "span",
+              { style: { color: T.textDim, fontSize: "0.75rem" } },
+              `${filtered.length} nodes`,
+            ),
+          ),
+          React.createElement(
+            "div",
+            {
+              style: {
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
+                gap: 12,
+              },
+            },
+            filtered.map((node) => {
+              const gc = GRADE_COLOR[node.readiness_grade] || T.textDim;
+              const oc = ORG_COLOR[node.org] || T.textDim;
+              return React.createElement(
+                "div",
+                {
+                  key: node.id,
+                  style: {
+                    background: T.bgCard,
+                    border: `1px solid ${T.border}`,
+                    borderRadius: 8,
+                    padding: 16,
+                    transition: "border-color 0.2s",
+                    position: "relative",
+                    overflow: "hidden",
+                  },
+                },
+                // Grade badge
+                React.createElement(
+                  "div",
+                  {
+                    style: {
+                      position: "absolute",
+                      top: 12,
+                      right: 12,
+                      fontFamily: "Orbitron",
+                      fontSize: "1.4rem",
+                      fontWeight: 900,
+                      color: gc,
+                      opacity: 0.3,
+                    },
+                  },
+                  node.readiness_grade,
+                ),
+                // Header
+                React.createElement(
+                  "div",
+                  {
+                    style: {
+                      fontFamily: "Orbitron",
+                      fontSize: "0.7rem",
+                      fontWeight: 700,
+                      color: T.accent,
+                      letterSpacing: "1px",
+                      marginBottom: 4,
+                    },
+                  },
+                  node.id,
+                ),
+                React.createElement(
+                  "div",
+                  {
+                    style: {
+                      fontSize: "0.7rem",
+                      color: T.textDim,
+                      marginBottom: 8,
+                    },
+                  },
+                  node.name,
+                ),
+                // Badges
+                React.createElement(
+                  "div",
+                  {
+                    style: {
+                      display: "flex",
+                      gap: 6,
+                      flexWrap: "wrap",
+                      marginBottom: 10,
+                    },
+                  },
+                  React.createElement(
+                    "span",
+                    {
+                      style: {
+                        fontSize: "0.6rem",
+                        padding: "2px 8px",
+                        background: `${oc}15`,
+                        border: `1px solid ${oc}33`,
+                        borderRadius: 3,
+                        color: oc,
+                      },
+                    },
+                    node.org,
+                  ),
+                  React.createElement(
+                    "span",
+                    {
+                      style: {
+                        fontSize: "0.6rem",
+                        padding: "2px 8px",
+                        background: `${T.cyan}11`,
+                        border: `1px solid ${T.border}`,
+                        borderRadius: 3,
+                        color: T.cyan,
+                      },
+                    },
+                    node.role,
+                  ),
+                  node.has_contracts &&
+                    React.createElement(
+                      "span",
+                      {
+                        style: {
+                          fontSize: "0.6rem",
+                          padding: "2px 8px",
+                          background: `${T.green}15`,
+                          border: `1px solid ${T.green}33`,
+                          borderRadius: 3,
+                          color: T.green,
+                        },
+                      },
+                      "\u25C6 CONTRACTS",
+                    ),
+                  node.has_production &&
+                    React.createElement(
+                      "span",
+                      {
+                        style: {
+                          fontSize: "0.6rem",
+                          padding: "2px 8px",
+                          background: `${T.accent}15`,
+                          border: `1px solid ${T.accent}33`,
+                          borderRadius: 3,
+                          color: T.accent,
+                        },
+                      },
+                      "\u2713 PROD",
+                    ),
+                ),
+                // Readiness bar
+                node.readiness_score >= 0 &&
+                  React.createElement(
+                    "div",
+                    { style: { marginTop: 8 } },
+                    React.createElement(
+                      "div",
+                      {
+                        style: {
+                          display: "flex",
+                          justifyContent: "space-between",
+                          fontSize: "0.65rem",
+                          marginBottom: 4,
+                        },
+                      },
+                      React.createElement(
+                        "span",
+                        { style: { color: T.textDim } },
+                        "READINESS",
+                      ),
+                      React.createElement(
+                        "span",
+                        { style: { color: gc, fontWeight: 700 } },
+                        `${node.readiness_score}/100`,
+                      ),
+                    ),
+                    React.createElement(
+                      "div",
+                      {
+                        style: {
+                          height: 6,
+                          background: "#0a1520",
+                          borderRadius: 3,
+                          overflow: "hidden",
+                        },
+                      },
+                      React.createElement("div", {
+                        style: {
+                          width: `${node.readiness_score}%`,
+                          height: "100%",
+                          background: `linear-gradient(90deg, ${gc}, ${gc}88)`,
+                          borderRadius: 3,
+                          transition: "width 0.6s ease",
+                        },
+                      }),
+                    ),
+                  ),
+                // Stats
+                React.createElement(
+                  "div",
+                  {
+                    style: {
+                      display: "flex",
+                      gap: 16,
+                      marginTop: 10,
+                      fontSize: "0.65rem",
+                      color: T.textDim,
+                    },
+                  },
+                  React.createElement(
+                    "span",
+                    null,
+                    `\u25C9 ${node.nexus_events.length} events`,
+                  ),
+                  React.createElement(
+                    "span",
+                    null,
+                    `\u27A1 ${node.dependency_count} deps`,
+                  ),
+                  React.createElement(
+                    "span",
+                    null,
+                    `\u{1F4A5} ${node.blast_radius} blast`,
+                  ),
+                  node.finding_count > 0 &&
+                    React.createElement(
+                      "span",
+                      { style: { color: T.orange } },
+                      `\u26A0 ${node.finding_count} findings`,
+                    ),
+                ),
+              );
+            }),
+          ),
+        );
+      }
+
+      // ─── GRAPH TAB ──────────────────────────────────────────────────────
+      function GraphTab() {
+        const REPORT = useContext(ReportContext);
+        const graph = REPORT.dependency_graph;
+        const topo = REPORT.nexus_topology;
+
+        return React.createElement(
+          "div",
+          {
+            style: {
+              padding: 32,
+              display: "flex",
+              flexDirection: "column",
+              gap: 24,
+            },
+          },
+          // Dependency Graph
+          React.createElement(
+            "div",
+            {
+              style: {
+                background: T.bgCard,
+                border: `1px solid ${T.border}`,
+                borderRadius: 8,
+                padding: 24,
+              },
+            },
+            React.createElement(
+              "div",
+              {
+                style: {
+                  fontFamily: "Orbitron",
+                  fontSize: "0.75rem",
+                  fontWeight: 700,
+                  color: T.accent,
+                  letterSpacing: "2px",
+                  marginBottom: 20,
+                },
+              },
+              "DEPENDENCY GRAPH",
+            ),
+            Object.entries(graph).map(([node, edges]) =>
+              React.createElement(
+                "div",
+                {
+                  key: node,
+                  style: {
+                    marginBottom: 16,
+                    padding: 12,
+                    background: T.bg,
+                    borderRadius: 6,
+                    border: `1px solid ${T.border}`,
+                  },
+                },
+                React.createElement(
+                  "div",
+                  {
+                    style: {
+                      fontFamily: "Orbitron",
+                      fontSize: "0.7rem",
+                      fontWeight: 700,
+                      color: T.accent,
+                      marginBottom: 8,
+                    },
+                  },
+                  node,
+                ),
+                edges.depends_on.length > 0 &&
+                  React.createElement(
+                    "div",
+                    { style: { fontSize: "0.75rem", marginBottom: 4 } },
+                    React.createElement(
+                      "span",
+                      { style: { color: T.textDim } },
+                      "\u2190 depends on: ",
+                    ),
+                    edges.depends_on.map((d, i) =>
+                      React.createElement(
+                        "span",
+                        { key: d, style: { color: T.cyan } },
+                        i > 0 ? `, ${d}` : d,
+                      ),
+                    ),
+                  ),
+                edges.depended_by.length > 0 &&
+                  React.createElement(
+                    "div",
+                    { style: { fontSize: "0.75rem" } },
+                    React.createElement(
+                      "span",
+                      { style: { color: T.textDim } },
+                      "\u2192 depended by: ",
+                    ),
+                    edges.depended_by.map((d, i) =>
+                      React.createElement(
+                        "span",
+                        { key: d, style: { color: T.orange } },
+                        i > 0 ? `, ${d}` : d,
+                      ),
+                    ),
+                  ),
+                edges.depends_on.length === 0 &&
+                  edges.depended_by.length === 0 &&
+                  React.createElement(
+                    "span",
+                    { style: { fontSize: "0.7rem", color: T.textDim } },
+                    "isolated node",
+                  ),
+              ),
+            ),
+          ),
+
+          // Nexus Topology
+          React.createElement(
+            "div",
+            {
+              style: {
+                background: T.bgCard,
+                border: `1px solid ${T.border}`,
+                borderRadius: 8,
+                padding: 24,
+              },
+            },
+            React.createElement(
+              "div",
+              {
+                style: {
+                  fontFamily: "Orbitron",
+                  fontSize: "0.75rem",
+                  fontWeight: 700,
+                  color: T.accent,
+                  letterSpacing: "2px",
+                  marginBottom: 6,
+                },
+              },
+              "NEXUS EVENT TOPOLOGY",
+            ),
+            React.createElement(
+              "div",
+              {
+                style: {
+                  fontSize: "0.7rem",
+                  color: T.textDim,
+                  marginBottom: 16,
+                },
+              },
+              `${topo.total_unique_events} unique events \u2502 ${topo.wildcard_consumers.length} wildcard consumers \u2502 ${topo.phantom_events.length} phantom events`,
+            ),
+            React.createElement(
+              "div",
+              {
+                style: {
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
+                  gap: 10,
+                },
+              },
+              topo.events.map((evt) =>
+                React.createElement(
+                  "div",
+                  {
+                    key: evt.event,
+                    style: {
+                      padding: 12,
+                      background: T.bg,
+                      border: `1px solid ${!evt.has_emitter ? `${T.red}44` : T.border}`,
+                      borderRadius: 6,
+                    },
+                  },
+                  React.createElement(
+                    "div",
+                    {
+                      style: {
+                        fontFamily: "Orbitron",
+                        fontSize: "0.65rem",
+                        fontWeight: 700,
+                        color: !evt.has_emitter ? T.red : T.accent,
+                        marginBottom: 6,
+                      },
+                    },
+                    (!evt.has_emitter ? "\u{1F47B} " : "\u25C8 ") + evt.event,
+                  ),
+                  React.createElement(
+                    "div",
+                    { style: { fontSize: "0.7rem", display: "flex", gap: 16 } },
+                    React.createElement(
+                      "span",
+                      null,
+                      React.createElement(
+                        "span",
+                        { style: { color: T.textDim } },
+                        "emit: ",
+                      ),
+                      React.createElement(
+                        "span",
+                        {
+                          style: {
+                            color: evt.emitters.length ? T.green : T.red,
+                          },
+                        },
+                        evt.emitters.length ? evt.emitters.join(", ") : "none",
+                      ),
+                    ),
+                    React.createElement(
+                      "span",
+                      null,
+                      React.createElement(
+                        "span",
+                        { style: { color: T.textDim } },
+                        "consume: ",
+                      ),
+                      React.createElement(
+                        "span",
+                        { style: { color: T.cyan } },
+                        evt.consumers.join(", "),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // Phantom events
+          topo.phantom_events.length > 0 &&
+            React.createElement(
+              "div",
+              {
+                style: {
+                  background: `${T.red}08`,
+                  border: `1px solid ${T.red}33`,
+                  borderRadius: 8,
+                  padding: 20,
+                },
+              },
+              React.createElement(
+                "div",
+                {
+                  style: {
+                    fontFamily: "Orbitron",
+                    fontSize: "0.7rem",
+                    fontWeight: 700,
+                    color: T.red,
+                    letterSpacing: "2px",
+                    marginBottom: 10,
+                  },
+                },
+                "\u{1F47B} PHANTOM EVENTS (consumed but never emitted)",
+              ),
+              React.createElement(
+                "div",
+                { style: { display: "flex", gap: 8, flexWrap: "wrap" } },
+                topo.phantom_events.map((e) =>
+                  React.createElement(
+                    "span",
+                    {
+                      key: e,
+                      style: {
+                        padding: "4px 12px",
+                        background: `${T.red}15`,
+                        border: `1px solid ${T.red}33`,
+                        borderRadius: 4,
+                        fontSize: "0.75rem",
+                        color: T.red,
+                      },
+                    },
+                    e,
+                  ),
+                ),
+              ),
+            ),
+
+          // Wildcard consumers
+          topo.wildcard_consumers.length > 0 &&
+            React.createElement(
+              "div",
+              {
+                style: {
+                  background: `${T.purple}08`,
+                  border: `1px solid ${T.purple}33`,
+                  borderRadius: 8,
+                  padding: 20,
+                },
+              },
+              React.createElement(
+                "div",
+                {
+                  style: {
+                    fontFamily: "Orbitron",
+                    fontSize: "0.7rem",
+                    fontWeight: 700,
+                    color: T.purple,
+                    letterSpacing: "2px",
+                    marginBottom: 10,
+                  },
+                },
+                "\u2731 WILDCARD CONSUMERS",
+              ),
+              React.createElement(
+                "div",
+                { style: { display: "flex", gap: 8, flexWrap: "wrap" } },
+                topo.wildcard_consumers.map((e) =>
+                  React.createElement(
+                    "span",
+                    {
+                      key: e,
+                      style: {
+                        padding: "4px 12px",
+                        background: `${T.purple}15`,
+                        border: `1px solid ${T.purple}33`,
+                        borderRadius: 4,
+                        fontSize: "0.75rem",
+                        color: T.purple,
+                      },
+                    },
+                    e,
+                  ),
+                ),
+              ),
+            ),
+        );
+      }
+
+      // ─── READINESS TAB ──────────────────────────────────────────────────
+      function ReadinessTab() {
+        const REPORT = useContext(ReportContext);
+        const lb = REPORT.readiness_leaderboard;
+        return React.createElement(
+          "div",
+          { style: { padding: 32 } },
+          React.createElement(
+            "div",
+            {
+              style: {
+                fontFamily: "Orbitron",
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                color: T.accent,
+                letterSpacing: "2px",
+                marginBottom: 20,
+              },
+            },
+            "PRODUCTION READINESS LEADERBOARD",
+          ),
+          React.createElement(
+            "div",
+            { style: { display: "flex", flexDirection: "column", gap: 6 } },
+            lb.map((entry, i) => {
+              const gc = GRADE_COLOR[entry.grade] || T.textDim;
+              const node = REPORT.nodes.find((n) => n.id === entry.id);
+              const breakdown = node?.readiness_breakdown || {};
+              const checks = Object.entries(breakdown);
+
+              return React.createElement(
+                "div",
+                {
+                  key: entry.id,
+                  style: {
+                    background: T.bgCard,
+                    border: `1px solid ${T.border}`,
+                    borderRadius: 6,
+                    padding: "12px 18px",
+                  },
+                },
+                React.createElement(
+                  "div",
+                  { style: { display: "flex", alignItems: "center", gap: 14 } },
+                  // Rank
+                  React.createElement(
+                    "span",
+                    {
+                      style: {
+                        fontFamily: "Orbitron",
+                        fontSize: "0.7rem",
+                        color: T.textDim,
+                        width: 24,
+                        textAlign: "right",
+                      },
+                    },
+                    `#${i + 1}`,
+                  ),
+                  // Grade
+                  React.createElement(
+                    "span",
+                    {
+                      style: {
+                        fontFamily: "Orbitron",
+                        fontSize: "1.2rem",
+                        fontWeight: 900,
+                        color: gc,
+                        width: 30,
+                        textAlign: "center",
+                      },
+                    },
+                    entry.grade,
+                  ),
+                  // Bar + name
+                  React.createElement(
+                    "div",
+                    { style: { flex: 1 } },
+                    React.createElement(
+                      "div",
+                      {
+                        style: {
+                          display: "flex",
+                          justifyContent: "space-between",
+                          marginBottom: 4,
+                        },
+                      },
+                      React.createElement(
+                        "span",
+                        {
+                          style: {
+                            fontFamily: "Orbitron",
+                            fontSize: "0.65rem",
+                            fontWeight: 700,
+                            color: T.accent,
+                            letterSpacing: "1px",
+                          },
+                        },
+                        entry.id,
+                      ),
+                      React.createElement(
+                        "span",
+                        {
+                          style: {
+                            fontFamily: "Orbitron",
+                            fontSize: "0.7rem",
+                            fontWeight: 700,
+                            color: gc,
+                          },
+                        },
+                        `${entry.score}/100`,
+                      ),
+                    ),
+                    React.createElement(
+                      "div",
+                      {
+                        style: {
+                          height: 8,
+                          background: "#0a1520",
+                          borderRadius: 4,
+                          overflow: "hidden",
+                        },
+                      },
+                      React.createElement("div", {
+                        style: {
+                          width: `${entry.score}%`,
+                          height: "100%",
+                          background: `linear-gradient(90deg, ${gc}, ${gc}66)`,
+                          borderRadius: 4,
+                          transition: "width 0.8s ease",
+                        },
+                      }),
+                    ),
+                    // Breakdown checks
+                    checks.length > 0 &&
+                      React.createElement(
+                        "div",
+                        {
+                          style: {
+                            display: "flex",
+                            gap: 6,
+                            marginTop: 6,
+                            flexWrap: "wrap",
+                          },
+                        },
+                        checks.map(([key, val]) =>
+                          React.createElement(
+                            "span",
+                            {
+                              key: key,
+                              style: {
+                                fontSize: "0.55rem",
+                                padding: "1px 6px",
+                                borderRadius: 3,
+                                background: val ? `${T.green}15` : `${T.red}15`,
+                                color: val ? T.green : T.red,
+                                border: `1px solid ${val ? T.green : T.red}22`,
+                              },
+                            },
+                            `${val ? "\u2713" : "\u2717"} ${key.replace(/_/g, " ")}`,
+                          ),
+                        ),
+                      ),
+                  ),
+                ),
+              );
+            }),
+          ),
+        );
+      }
+
+      // ─── APP ────────────────────────────────────────────────────────────
+      function App() {
+        const [tab, setTab] = useState("OVERVIEW");
+        const [report, setReport] = useState(null);
+        const [error, setError] = useState(null);
+
+        useEffect(() => {
+          let cancelled = false;
+
+          async function loadReport() {
+            try {
+              const response = await fetch(REPORT_URL, { cache: "no-store" });
+              if (!response.ok) {
+                let errorMessage = `HTTP ${response.status}`;
+                try {
+                  const errorBody = await response.json();
+                  if (errorBody && typeof errorBody === "object") {
+                    const { error: errorCode, message } = errorBody;
+                    if (typeof message === "string" && message.trim()) {
+                      errorMessage = errorCode
+                        ? `${errorCode}: ${message}`
+                        : message;
+                    }
+                  }
+                } catch (_ignored) {
+                  // Ignore JSON parse failures and keep the HTTP status fallback.
+                }
+                throw new Error(errorMessage);
+              }
+              const data = await response.json();
+              if (cancelled) return;
+              setReport(data);
+            } catch (err) {
+              if (cancelled) return;
+              setError(err.message || "Falha ao carregar stack-report.json");
+            }
+          }
+
+          loadReport();
+          return () => {
+            cancelled = true;
+          };
+        }, []);
+
+        if (error) {
+          return React.createElement(
+            "div",
+            {
+              style: {
+                minHeight: "100vh",
+                background: T.bg,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 24,
+              },
+            },
+            React.createElement(
+              "div",
+              {
+                style: {
+                  maxWidth: 640,
+                  border: `1px solid ${T.red}55`,
+                  background: T.bgCard,
+                  borderRadius: 12,
+                  padding: 24,
+                },
+              },
+              React.createElement(
+                "div",
+                {
+                  style: {
+                    fontFamily: "Orbitron",
+                    fontSize: "0.75rem",
+                    color: T.red,
+                    letterSpacing: "2px",
+                    marginBottom: 12,
+                  },
+                },
+                "STACK REPORT UNAVAILABLE",
+              ),
+              React.createElement(
+                "p",
+                {
+                  style: {
+                    fontSize: "0.85rem",
+                    lineHeight: 1.6,
+                    color: T.text,
+                  },
+                },
+                `Nao foi possivel carregar ${REPORT_URL}. ${error}`,
+              ),
+            ),
+          );
+        }
+
+        if (!report) {
+          return React.createElement(
+            "div",
+            {
+              style: {
+                minHeight: "100vh",
+                background: T.bg,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 24,
+              },
+            },
+            React.createElement(
+              "div",
+              { style: { textAlign: "center" } },
+              React.createElement(
+                "div",
+                {
+                  style: {
+                    fontFamily: "Orbitron",
+                    fontSize: "0.75rem",
+                    color: T.accent,
+                    letterSpacing: "2px",
+                    marginBottom: 10,
+                  },
+                },
+                "SYNCING SOURCE OF TRUTH",
+              ),
+              React.createElement(
+                "div",
+                { style: { fontSize: "0.85rem", color: T.textDim } },
+                "Carregando stack-report.json canonico",
+              ),
+            ),
+          );
+        }
+
+        const tabContent = {
+          OVERVIEW: React.createElement(OverviewTab),
+          FINDINGS: React.createElement(FindingsTab),
+          NODES: React.createElement(NodesTab),
+          GRAPH: React.createElement(GraphTab),
+          READINESS: React.createElement(ReadinessTab),
+        };
+
+        return React.createElement(
+          ReportContext.Provider,
+          { value: report },
+          React.createElement(
+            "div",
+            { style: { minHeight: "100vh", background: T.bg } },
+            React.createElement(Scanline),
+            React.createElement(Header),
+            React.createElement(TabBar, { active: tab, onChange: setTab }),
+            React.createElement(
+              "main",
+              { style: { animation: "slideUp 0.3s ease" }, key: tab },
+              tabContent[tab],
+            ),
+            React.createElement(
+              "footer",
+              {
+                style: {
+                  padding: "16px 32px",
+                  borderTop: `1px solid ${T.border}`,
+                  textAlign: "center",
+                  fontSize: "0.6rem",
+                  color: T.textDim,
+                },
+              },
+              `NE\u00D8 STACK ANALYZER v${report.meta.analyzer_version} \u2502 Generated ${report.meta.generated_at.split("T")[0]} \u2502 ${report.meta.total_nodes} nodes analyzed`,
+            ),
+          ),
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById("root")).render(
+        React.createElement(App),
+      );
+    </script>
+
+    <script>
+      // Inject real report data inline — replaces placeholder
+    </script>
+  </body>
 </html>
