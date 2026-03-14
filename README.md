@@ -16,7 +16,16 @@ Owner oficial: **NEØ MELLØ**.
 Este projeto não foi desenhado para estética isolada. Ele existe para expor saúde da malha, detectar desconexão entre nós e reduzir tempo de resposta operacional.
 
 > [!NOTE]
-> Para detalhes técnicos de configuração, variáveis de ambiente e execução local, consulte o arquivo [SETUP.md](./SETUP.md).
+> Para detalhes técnicos de configuração, variáveis de ambiente e execução local, consulte [docs/SETUP.md](./docs/SETUP.md).
+
+## Estrutura
+
+- `server.js`: ponto de entrada do runtime Express.
+- `src/routes/`: rotas e integrações de backend por domínio.
+- `src/lib/`: utilitários de runtime compartilhados.
+- `public/`: superfícies públicas servidas pelo dashboard.
+- `docs/`: documentação viva.
+- `archive/`: legado preservado fora do caminho crítico.
 
 ## Propósito
 
@@ -42,6 +51,7 @@ Não usar este projeto para mapear ou fundir a trilha externa `flowpay-core` den
 ### Governança
 
 O desenvolvimento segue o fluxo de entrega oficial:
+
 1. Branch de feature -> Pull Request.
 2. Validação automática pelo CI (Dashboard CI).
 3. Aprovação obrigatória (Code Owner).
@@ -55,11 +65,12 @@ O desenvolvimento segue o fluxo de entrega oficial:
 Core Architect · NΞØ Protocol
 neo@neoprotocol.space
 ```
+
 ```
-     ▄       
-  ▄██▄░                         
-  █  █ █░    
-  █ █░ █  
-   ▀██▀  
+     ▄
+  ▄██▄░
+  █  █ █░
+  █ █░ █
+   ▀██▀
    ▀░
 ```
