@@ -184,6 +184,42 @@ const telegramBot = new SimpleTelegramBot(
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// In-memory cache for the canonical stack report to avoid GitHub fetch on every request.
+const STACK_REPORT_TTL_MS = 5 * 60 * 1000; // 5 minutes
+let cachedStackReportBody = null;
+let cachedStackReportSource = null;
+let cachedStackReportFetchedAt = 0;
+
+async function getCachedStackReport() {
+    const now = Date.now();
+
+    // Serve from cache if within TTL.
+    if (cachedStackReportBody && now - cachedStackReportFetchedAt < STACK_REPORT_TTL_MS) {
+        return {
+            source: cachedStackReportSource,
+            body: cachedStackReportBody,
+        };
+    }
+
+    try {
+        const { source, body } = await loadCanonicalStackReport();
+        cachedStackReportBody = body;
+        cachedStackReportSource = source;
+        cachedStackReportFetchedAt = now;
+        return { source, body };
+    } catch (error) {
+        // If we have a previously cached value, use it as a fallback.
+        if (cachedStackReportBody) {
+            return {
+                source: cachedStackReportSource,
+                body: cachedStackReportBody,
+            };
+        }
+        // No cached value available; propagate the error.
+        throw error;
+    }
+}
+
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
@@ -200,7 +236,7 @@ app.use((req, res, next) => {
 
 app.get('/stack-report.json', async (_req, res) => {
     try {
-        const { source, body } = await loadCanonicalStackReport();
+        const { source, body } = await getCachedStackReport();
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         res.setHeader('X-Stack-Report-Source', source);
         res.json(body);
