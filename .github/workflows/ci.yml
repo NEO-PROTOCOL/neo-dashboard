@@ -16,11 +16,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Checkout source of truth (NEO-PROTOCOL/neobot)
+      - name: Checkout source of truth (NEO-PROTOCOL/neobot-orchestrator)
         id: checkout-neobot
         uses: actions/checkout@v4
         with:
-          repository: NEO-PROTOCOL/neobot
+          repository: NEO-PROTOCOL/neobot-orchestrator
           path: neobot-source
 
       - name: Setup Node
@@ -43,6 +43,12 @@ jobs:
           grep -q "\/api\/neo\/ecosystem\/live" ecosystem-3d.html
           grep -q "setInterval(refreshGraph, LIVE_REFRESH_MS)" ecosystem-3d.html
           grep -q "router.get(\"/ecosystem/live\"" neo-routes.js
+
+      - name: Analyzer Source Guardrails
+        run: |
+          ! grep -q "const REPORT = {" stack-analyzer.html
+          grep -q "const REPORT_URL = '/stack-report.json'" stack-analyzer.html
+          grep -q "app.get('/stack-report.json'" server.js
 
       - name: Ecosystem Graph Integrity
         # ecosystem-graph.json is a generated artifact (in .gitignore).

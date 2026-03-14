@@ -66,6 +66,31 @@ if (!process.env.NEXUS_ECOSYSTEM_URL || process.env.NEXUS_ECOSYSTEM_URL.includes
 
 const execAsync = promisify(exec);
 const MONITOR_FETCH_TIMEOUT_MS = Number(process.env.MONITOR_FETCH_TIMEOUT_MS || 5000);
+const STACK_REPORT_SOURCE_URL =
+    process.env.STACK_REPORT_SOURCE_URL ||
+    'https://raw.githubusercontent.com/NEO-PROTOCOL/neobot-orchestrator/main/config/stack_report.json';
+const STACK_REPORT_FALLBACK_PATH = path.join(__dirname, 'stack-report.json');
+
+async function loadCanonicalStackReport() {
+    try {
+        const response = await fetch(STACK_REPORT_SOURCE_URL, { signal: AbortSignal.timeout(MONITOR_FETCH_TIMEOUT_MS) });
+        if (response.ok) {
+            return { source: STACK_REPORT_SOURCE_URL, body: await response.json() };
+        }
+        console.warn(`[REPORT] Canonical stack report returned HTTP ${response.status}`);
+    } catch (error) {
+        console.warn(`[REPORT] Canonical stack report fetch failed: ${error.message}`);
+    }
+
+    if (fs.existsSync(STACK_REPORT_FALLBACK_PATH)) {
+        return {
+            source: STACK_REPORT_FALLBACK_PATH,
+            body: JSON.parse(fs.readFileSync(STACK_REPORT_FALLBACK_PATH, 'utf8')),
+        };
+    }
+
+    throw new Error('No canonical stack report source available');
+}
 
 // ------------------------------------------------------------------
 // Log Capture System (In-Memory Ring Buffer)
@@ -171,6 +196,20 @@ app.use((req, res, next) => {
         res.setHeader('Content-Security-Policy', "script-src 'self' 'unsafe-eval' 'unsafe-inline' https: blob:;");
     }
     next();
+});
+
+app.get('/stack-report.json', async (_req, res) => {
+    try {
+        const { source, body } = await loadCanonicalStackReport();
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.setHeader('X-Stack-Report-Source', source);
+        res.json(body);
+    } catch (error) {
+        res.status(503).json({
+            error: 'STACK_REPORT_UNAVAILABLE',
+            message: error.message,
+        });
+    }
 });
 
 // Retire legacy public surfaces before static file serving exposes them directly.
