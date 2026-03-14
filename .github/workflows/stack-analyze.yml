@@ -8,8 +8,8 @@ on:
     branches:
       - main
     paths:
-      - 'stack-analyzer.html'
-      - '.github/workflows/stack-analyze.yml'
+      - "stack-analyzer.html"
+      - ".github/workflows/stack-analyze.yml"
   workflow_dispatch:
   repository_dispatch:
     types: [ecosystem-updated]
@@ -17,6 +17,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  metadata: read
 
 jobs:
   analyze:
@@ -35,7 +36,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Run Stack Analyzer v3.1
         run: |
@@ -50,7 +51,7 @@ jobs:
       - name: Guard analyzer template mode
         run: |
           ! grep -q "const REPORT = {" stack-analyzer.html
-          grep -q "const REPORT_URL = '/stack-report.json'" stack-analyzer.html
+          grep -q 'const REPORT_URL = "./stack-report.json"' stack-analyzer.html
 
       - name: Open analyzer update pull request
         uses: peter-evans/create-pull-request@v8

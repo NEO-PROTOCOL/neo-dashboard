@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  metadata: read
 
 jobs:
   syntax-and-guards:
@@ -47,7 +48,7 @@ jobs:
       - name: Analyzer Source Guardrails
         run: |
           ! grep -q "const REPORT = {" stack-analyzer.html
-          grep -q "const REPORT_URL = '/stack-report.json'" stack-analyzer.html
+          grep -q 'const REPORT_URL = "./stack-report.json"' stack-analyzer.html
           grep -q "app.get('/stack-report.json'" server.js
 
       - name: Ecosystem Graph Integrity
