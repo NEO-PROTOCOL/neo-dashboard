@@ -34,11 +34,11 @@
 <div id="root"></div>
 
 <script type="text/babel">
-const { useState, useMemo, useEffect } = React;
+const { useState, useMemo, useEffect, useContext } = React;
 
 // ─── REPORT DATA SOURCE ────────────────────────────────────────
-let REPORT = null;
-const REPORT_URL = '/stack-report.json';
+const ReportContext = React.createContext(null);
+const REPORT_URL = './stack-report.json';
 
 // ─── THEME ──────────────────────────────────────────────────────────
 const T = {
@@ -72,6 +72,7 @@ function Scanline() {
 
 // ─── HEADER ─────────────────────────────────────────────────────────
 function Header() {
+  const REPORT = useContext(ReportContext);
   const meta = REPORT.meta;
   return React.createElement('header', {
     style: {
@@ -197,6 +198,7 @@ function Stat({ label, value, color, sub }) {
 
 // ─── OVERVIEW TAB ───────────────────────────────────────────────────
 function OverviewTab() {
+  const REPORT = useContext(ReportContext);
   const h = REPORT.ecosystem_health;
   const s = REPORT.summary;
   const grades = h.grade_distribution;
@@ -282,6 +284,7 @@ function OverviewTab() {
 
 // ─── FINDINGS TAB ───────────────────────────────────────────────────
 function FindingsTab() {
+  const REPORT = useContext(ReportContext);
   const [filter, setFilter] = useState('all');
   const [expanded, setExpanded] = useState(null);
   const findings = REPORT.findings;
@@ -338,6 +341,7 @@ function FindingsTab() {
 
 // ─── NODES TAB ──────────────────────────────────────────────────────
 function NodesTab() {
+  const REPORT = useContext(ReportContext);
   const [search, setSearch] = useState('');
   const [orgFilter, setOrgFilter] = useState('all');
   const nodes = REPORT.nodes;
@@ -412,6 +416,7 @@ function NodesTab() {
 
 // ─── GRAPH TAB ──────────────────────────────────────────────────────
 function GraphTab() {
+  const REPORT = useContext(ReportContext);
   const graph = REPORT.dependency_graph;
   const topo = REPORT.nexus_topology;
 
@@ -494,6 +499,7 @@ function GraphTab() {
 
 // ─── READINESS TAB ──────────────────────────────────────────────────
 function ReadinessTab() {
+  const REPORT = useContext(ReportContext);
   const lb = REPORT.readiness_leaderboard;
   return React.createElement('div', { style: { padding: 32 } },
     React.createElement('div', { style: { fontFamily: 'Orbitron', fontSize: '0.75rem', fontWeight: 700, color: T.accent, letterSpacing: '2px', marginBottom: 20 } }, 'PRODUCTION READINESS LEADERBOARD'),
@@ -552,11 +558,15 @@ function App() {
       try {
         const response = await fetch(REPORT_URL, { cache: 'no-store' });
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
+          let msg = `HTTP ${response.status}`;
+          try {
+            const errBody = await response.json();
+            if (errBody.message) msg = errBody.message;
+          } catch (_ignored) {}
+          throw new Error(msg);
         }
         const data = await response.json();
         if (cancelled) return;
-        REPORT = data;
         setReport(data);
       } catch (err) {
         if (cancelled) return;
@@ -596,14 +606,16 @@ function App() {
     READINESS: React.createElement(ReadinessTab),
   };
 
-  return React.createElement('div', { style: { minHeight: '100vh', background: T.bg } },
-    React.createElement(Scanline),
-    React.createElement(Header),
-    React.createElement(TabBar, { active: tab, onChange: setTab }),
-    React.createElement('main', { style: { animation: 'slideUp 0.3s ease' }, key: tab }, tabContent[tab]),
-    React.createElement('footer', {
-      style: { padding: '16px 32px', borderTop: `1px solid ${T.border}`, textAlign: 'center', fontSize: '0.6rem', color: T.textDim }
-    }, `NE\u00D8 STACK ANALYZER v${report.meta.analyzer_version} \u2502 Generated ${report.meta.generated_at.split('T')[0]} \u2502 ${report.meta.total_nodes} nodes analyzed`)
+  return React.createElement(ReportContext.Provider, { value: report },
+    React.createElement('div', { style: { minHeight: '100vh', background: T.bg } },
+      React.createElement(Scanline),
+      React.createElement(Header),
+      React.createElement(TabBar, { active: tab, onChange: setTab }),
+      React.createElement('main', { style: { animation: 'slideUp 0.3s ease' }, key: tab }, tabContent[tab]),
+      React.createElement('footer', {
+        style: { padding: '16px 32px', borderTop: `1px solid ${T.border}`, textAlign: 'center', fontSize: '0.6rem', color: T.textDim }
+      }, `NE\u00D8 STACK ANALYZER v${report.meta.analyzer_version} \u2502 Generated ${report.meta.generated_at.split('T')[0]} \u2502 ${report.meta.total_nodes} nodes analyzed`)
+    )
   );
 }
 

@@ -70,21 +70,34 @@ const STACK_REPORT_SOURCE_URL =
     process.env.STACK_REPORT_SOURCE_URL ||
     'https://raw.githubusercontent.com/NEO-PROTOCOL/neobot-orchestrator/main/config/stack_report.json';
 const STACK_REPORT_FALLBACK_PATH = path.join(__dirname, 'stack-report.json');
+const STACK_REPORT_CACHE_TTL_MS = Number(process.env.STACK_REPORT_CACHE_TTL_MS || 5 * 60 * 1000);
+let stackReportCache = null; // { source, body, fetchedAt }
 
 async function loadCanonicalStackReport() {
+    const now = Date.now();
+    if (stackReportCache && (now - stackReportCache.fetchedAt) < STACK_REPORT_CACHE_TTL_MS) {
+        return { source: stackReportCache.source, body: stackReportCache.body };
+    }
+
     try {
-        const response = await fetch(STACK_REPORT_SOURCE_URL, { signal: AbortSignal.timeout(MONITOR_FETCH_TIMEOUT_MS) });
-        if (response.ok) {
-            return { source: STACK_REPORT_SOURCE_URL, body: await response.json() };
+        const result = await fetchJsonWithTimeout(STACK_REPORT_SOURCE_URL, MONITOR_FETCH_TIMEOUT_MS);
+        if (result.ok && result.body) {
+            stackReportCache = { source: 'canonical', body: result.body, fetchedAt: now };
+            return { source: 'canonical', body: result.body };
         }
-        console.warn(`[REPORT] Canonical stack report returned HTTP ${response.status}`);
+        console.warn(`[REPORT] Canonical stack report returned HTTP ${result.status}`);
     } catch (error) {
         console.warn(`[REPORT] Canonical stack report fetch failed: ${error.message}`);
     }
 
+    if (stackReportCache) {
+        console.warn('[REPORT] Serving stale cached report due to fetch failure');
+        return { source: stackReportCache.source, body: stackReportCache.body };
+    }
+
     if (fs.existsSync(STACK_REPORT_FALLBACK_PATH)) {
         return {
-            source: STACK_REPORT_FALLBACK_PATH,
+            source: 'fallback',
             body: JSON.parse(fs.readFileSync(STACK_REPORT_FALLBACK_PATH, 'utf8')),
         };
     }
