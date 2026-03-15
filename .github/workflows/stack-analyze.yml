@@ -8,7 +8,7 @@ on:
     branches:
       - main
     paths:
-      - "stack-analyzer.html"
+      - "public/stack-analyzer.html"
       - ".github/workflows/stack-analyze.yml"
   workflow_dispatch:
   repository_dispatch:
@@ -50,8 +50,8 @@ jobs:
 
       - name: Guard analyzer template mode
         run: |
-          ! grep -q "const REPORT = {" stack-analyzer.html
-          grep -q 'const REPORT_URL = "./stack-report.json"' stack-analyzer.html
+          ! grep -q "const REPORT = {" public/stack-analyzer.html
+          grep -q 'const REPORT_URL = "./stack-report.json"' public/stack-analyzer.html
 
       - name: Open analyzer update pull request
         uses: peter-evans/create-pull-request@v8

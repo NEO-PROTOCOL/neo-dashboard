@@ -6,13 +6,14 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import { promisify } from "util";
-import automationRoutes from "./automation-routes.js";
-import neoRoutes from "./neo-routes.js";
-import nexusRoutes from "./nexus-routes.js";
-import aiRoutes from "./ai-routes.js";
+import automationRoutes from "./src/routes/automation-routes.js";
+import neoRoutes from "./src/routes/neo-routes.js";
+import nexusRoutes from "./src/routes/nexus-routes.js";
+import aiRoutes from "./src/routes/ai-routes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const PUBLIC_DIR = path.join(__dirname, "public");
 
 function manualLoadEnv(path) {
   try {
@@ -283,8 +284,8 @@ app.get(["/mobile", "/mobile.html"], (_req, res) => {
   res.redirect(302, "/stack-analyzer.html");
 });
 
-// Serve Static Files (Public - Authentication handled client-side)
-app.use(express.static(__dirname));
+// Serve static assets from a dedicated public surface.
+app.use(express.static(PUBLIC_DIR));
 
 // ------------------------------------------------------------------
 // Security Middleware (NΞØ Auth)
@@ -322,12 +323,10 @@ const authMiddleware = (req, res, next) => {
   if (!isRailwayInternalIp(req.ip)) {
     console.warn(`[SECURITY] Unauthorized access attempt from ${req.ip}`);
   }
-  res
-    .status(401)
-    .json({
-      error: "UNAUTHORIZED_ACCESS",
-      message: "Valid x-gateway-password header required",
-    });
+  res.status(401).json({
+    error: "UNAUTHORIZED_ACCESS",
+    message: "Valid x-gateway-password header required",
+  });
 };
 
 // Apply auth to API routes
@@ -618,7 +617,7 @@ app.post("/api/monitor/test-alert", async (req, res) => {
 // Frontend Route
 // ------------------------------------------------------------------
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile(path.join(PUBLIC_DIR, "index.html"));
 });
 
 // ------------------------------------------------------------------
