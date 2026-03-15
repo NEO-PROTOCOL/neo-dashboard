@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "label": "NE\u00d8 Readiness",
-  "message": "64.1/100 \u00b7 29 nodes \u00b7 21 findings",
-  "color": "yellow",
+  "label": "NEØ Readiness",
+  "message": "65.5/100 · 29 nodes · 21 findings",
+  "color": "green",
   "namedLogo": "data:image/svg+xml;base64,",
   "style": "flat-square",
   "labelColor": "0d0d0d"

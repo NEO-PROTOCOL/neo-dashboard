@@ -1,17 +1,17 @@
 {
   "meta": {
-    "generated_at": "2026-03-14T16:52:03.507579+00:00",
+    "generated_at": "2026-03-15T01:09:06.000000+00:00",
     "analyzer_version": "3.1.0",
     "total_nodes": 29,
     "total_orgs": 6
   },
   "ecosystem_health": {
-    "average_readiness": 64.1,
+    "average_readiness": 65.5,
     "max_possible": 100,
     "grade_distribution": {
       "A": 2,
-      "B": 4,
-      "C": 12,
+      "B": 5,
+      "C": 11,
       "D": 4
     },
     "total_findings": 21,
@@ -64,7 +64,7 @@
           "neo-tunnel"
         ],
         "findings_count": 7,
-        "avg_readiness": 74.4
+        "avg_readiness": 78.1
       },
       "NEO-FlowOFF": {
         "node_count": 5,
@@ -135,7 +135,6 @@
     ],
     "nodes_without_production_url": [
       "neo-protocol-hub",
-      "neo-mcp-server",
       "smart-factory",
       "smart-core",
       "smart-cli",
@@ -276,6 +275,11 @@
       "grade": "B"
     },
     {
+      "id": "neo-mcp-server",
+      "score": 80,
+      "grade": "B"
+    },
+    {
       "id": "neo-agent-full",
       "score": 75,
       "grade": "B"
@@ -338,11 +342,6 @@
     {
       "id": "ceo-escalavel-miniapp",
       "score": 55,
-      "grade": "C"
-    },
-    {
-      "id": "neo-mcp-server",
-      "score": 50,
       "grade": "C"
     },
     {
@@ -567,18 +566,18 @@
       "org": "NEO Protocol",
       "role": "MCP Storage Runtime / Storacha Adapter",
       "platform": "Local / MCP Runtime",
-      "has_production": false,
+      "has_production": true,
       "has_contracts": false,
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 50,
-      "readiness_grade": "C",
+      "readiness_score": 80,
+      "readiness_grade": "B",
       "readiness_breakdown": {
-        "has_production_url": false,
+        "has_production_url": true,
         "has_healthcheck": true,
         "has_custom_domain": false,
-        "has_internal_url": false,
+        "has_internal_url": true,
         "webhook_urls_complete": true,
         "nexus_events_declared": false,
         "no_high_findings": true,
