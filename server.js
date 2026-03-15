@@ -80,9 +80,15 @@ const STACK_REPORT_SOURCE_URL =
   process.env.STACK_REPORT_SOURCE_URL ||
   "https://raw.githubusercontent.com/NEO-PROTOCOL/neobot-orchestrator/main/config/stack_report.json";
 const STACK_REPORT_FALLBACK_PATH = path.join(__dirname, "stack-report.json");
-const STACK_REPORT_CACHE_TTL_MS = Number(
-  process.env.STACK_REPORT_CACHE_TTL_MS || 5 * 60 * 1000,
+const DEFAULT_STACK_REPORT_CACHE_TTL_MS = 5 * 60 * 1000;
+const parsedStackReportCacheTtlMs = Number(
+  process.env.STACK_REPORT_CACHE_TTL_MS ?? DEFAULT_STACK_REPORT_CACHE_TTL_MS,
 );
+const STACK_REPORT_CACHE_TTL_MS =
+  Number.isFinite(parsedStackReportCacheTtlMs) &&
+  parsedStackReportCacheTtlMs >= 0
+    ? parsedStackReportCacheTtlMs
+    : DEFAULT_STACK_REPORT_CACHE_TTL_MS;
 let stackReportCache = null; // { source, body, fetchedAt }
 
 async function getCachedStackReport() {
@@ -107,9 +113,15 @@ async function getCachedStackReport() {
       };
       return { source: "canonical", body: result.body };
     }
-    console.warn(
-      `[REPORT] Canonical stack report returned HTTP ${result.status}`,
-    );
+    if (result.ok && !result.body) {
+      console.warn(
+        "[REPORT] Canonical stack report returned HTTP 200 with empty or invalid JSON body",
+      );
+    } else {
+      console.warn(
+        `[REPORT] Canonical stack report returned HTTP ${result.status}`,
+      );
+    }
   } catch (error) {
     console.warn(
       `[REPORT] Canonical stack report fetch failed: ${error.message}`,
