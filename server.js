@@ -71,7 +71,12 @@ const STACK_REPORT_SOURCE_URL =
     process.env.STACK_REPORT_SOURCE_URL ||
     'https://raw.githubusercontent.com/NEO-PROTOCOL/neobot-orchestrator/main/config/stack_report.json';
 const STACK_REPORT_FALLBACK_PATH = path.join(__dirname, 'stack-report.json');
-const STACK_REPORT_CACHE_TTL_MS = Number(process.env.STACK_REPORT_CACHE_TTL_MS || 5 * 60 * 1000);
+const DEFAULT_STACK_REPORT_CACHE_TTL_MS = 5 * 60 * 1000;
+const envStackReportCacheTtlMs = Number(process.env.STACK_REPORT_CACHE_TTL_MS);
+const STACK_REPORT_CACHE_TTL_MS =
+    Number.isFinite(envStackReportCacheTtlMs) && envStackReportCacheTtlMs >= 0
+        ? envStackReportCacheTtlMs
+        : DEFAULT_STACK_REPORT_CACHE_TTL_MS;
 let stackReportCache = null; // { source, body, fetchedAt }
 
 async function getCachedStackReport() {
