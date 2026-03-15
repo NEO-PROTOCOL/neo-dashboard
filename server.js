@@ -91,7 +91,12 @@ async function getCachedStackReport() {
             stackReportCache = { source: 'canonical', body: result.body, fetchedAt: now };
             return { source: 'canonical', body: result.body };
         }
-        console.warn(`[REPORT] Canonical stack report returned HTTP ${result.status}`);
+
+        if (result.ok && !result.body) {
+            console.warn(`[REPORT] Canonical stack report returned HTTP ${result.status} with empty or invalid JSON body`);
+        } else {
+            console.warn(`[REPORT] Canonical stack report returned HTTP ${result.status}`);
+        }
     } catch (error) {
         console.warn(`[REPORT] Canonical stack report fetch failed: ${error.message}`);
     }
