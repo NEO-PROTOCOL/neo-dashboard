@@ -504,6 +504,48 @@ const SKILLS_FALLBACK = [
     category: "communication",
     description: "Start voice calls via the OpenClaw voice-call plugin",
   },
+  {
+    id: "neo-nexus",
+    name: "NEO Nexus Event Hub",
+    version: "1.0.0",
+    category: "integration",
+    description: "Central nervous system event bus for the NEO Protocol ecosystem. Decoupled communication and resilient orchestration.",
+  },
+  {
+    id: "neo-agent-full",
+    name: "NEO Agent Full",
+    version: "2.5",
+    category: "ai",
+    description: "Autonomous cloud engine with continuous context and WhatsApp/Telegram integration. Built on Moltbot foundation with NEO extensions.",
+  },
+  {
+    id: "neo-id",
+    name: "NEO ID (Namespace-as-a-Service)",
+    version: "1.0.0",
+    category: "identity",
+    description: "ENSv2 based namespace infrastructure for brands, communities, and agents. Coordinated identity and delegation.",
+  },
+  {
+    id: "mio-system",
+    name: "MIO Identity System",
+    version: "2.0.0",
+    category: "identity",
+    description: "Web3 identity management and autonomous operation layer for the NEO Protocol stack.",
+  },
+  {
+    id: "neo-mcp-server",
+    name: "NEO MCP Server",
+    version: "2.0.0",
+    category: "integration",
+    description: "Cognitive API for NEO Protocol ecosystem. Storage, topology awareness, and service resolution via Model Context Protocol.",
+  },
+  {
+    id: "neo-tunnel",
+    name: "NEO Tunnel",
+    version: "1.0.0",
+    category: "devops",
+    description: "Sovereign tunnel for local development. Replaces ngrok without leaving the NEO ecosystem. Webhooks and callbacks.",
+  },
 ];
 
 function fetchWithTimeout(url, options = {}, timeoutMs = FETCH_TIMEOUT) {

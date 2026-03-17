@@ -1,17 +1,7 @@
 # Ξ NΞØ PROTOCOL // Dashboard Makefile
 # Control Center for Mission Control Deployment
 
-.PHONY: help install dev start prod kill-port setup-ipfs doctor clean-env health clean build
-
-build:
-	@echo "🏗 Building project..."
-	@npm run build
-	@echo "✓ Build complete."
-
-clean:
-	@echo "🧹 Cleaning project..."
-	@rm -rf node_modules package-lock.json
-	@echo "✓ Cleaned. Run 'make install' to restore."
+.PHONY: help install dev start kill-port setup-ipfs doctor clean-env health clean build test sync-ecosystem-graph validate-ecosystem-graph tunnel-neo-agent tunnel-flowpay tunnel-nexus tunnel-neobot tunnel-status
 
 # Default Port
 PORT ?= 3000
@@ -20,15 +10,19 @@ help:
 	@echo "Ξ  NΞØ DASHBOARD COMMANDS"
 	@echo "-------------------------"
 	@echo "  make install      - Install dependencies safely"
+	@echo "  make build        - Refresh the ecosystem graph artifact"
+	@echo "  make test         - Run the Node test suite"
 	@echo "  make dev          - Start development mode (with auto-kill on port 3000)"
 	@echo "  make start        - Start the production server"
+	@echo "  make sync-ecosystem-graph     - Sync graph data into the dashboard artifact"
+	@echo "  make validate-ecosystem-graph - Validate graph consistency before publish"
 	@echo "  make kill-port    - Kill any process running on port $(PORT)"
 	@echo "  make setup-ipfs   - Configure IPFS CORS and API Port (5001)"
 	@echo "  make doctor       - Run system diagnostics"
 	@echo "  make clean-env    - Re-create neo-config.env from .env"
 	@echo "  make health       - Check if server is responding"
 	@echo ""
-	@echo "  $(GREEN)Tunnel Operations (NΞØ Tunnel)$(RESET)"
+	@echo "  Tunnel Operations (NΞØ Tunnel)"
 	@echo "    tunnel-neo-agent   Start tunnel for WhatsApp/TG Agent (8042)"
 	@echo "    tunnel-flowpay     Start tunnel for FlowPay Gateway (4321)"
 	@echo "    tunnel-nexus       Start tunnel for Protocol Nexus (3000)"
@@ -39,6 +33,28 @@ help:
 install:
 	@echo "⦿ Installing dependencies..."
 	@npm install
+
+build:
+	@echo "🏗 Building project..."
+	@npm run build
+	@echo "✓ Build complete."
+
+test:
+	@echo "🧪 Running test suite..."
+	@npm test
+
+sync-ecosystem-graph:
+	@echo "🕸 Syncing ecosystem graph..."
+	@npm run sync:ecosystem-graph
+
+validate-ecosystem-graph:
+	@echo "🔎 Validating ecosystem graph..."
+	@npm run validate:ecosystem-graph
+
+clean:
+	@echo "🧹 Cleaning project..."
+	@rm -rf node_modules
+	@echo "✓ Cleaned. Lockfile preserved. Run 'make install' to restore."
 
 kill-port:
 	@echo "🔫 Killing process on port $(PORT)..."
@@ -73,21 +89,21 @@ clean-env:
 
 health:
 	@echo "◬ Checking Mission Control Health..."
-	@curl -fsS --max-time 5 http://localhost:$(PORT)/api/health || echo "✗ Server status: UNREACHABLE"
+	@curl -fsS --max-time 5 http://localhost:$(PORT)/health || echo "✗ Server status: UNREACHABLE"
 
 # --- TUNNEL OPERATIONS -------------------------------------------------------
 
-tunnel-neo-agent: ## Start tunnel for neo-agent
+tunnel-neo-agent:
 	@cd ../neo-tunnel && $(MAKE) client-neo-agent
 
-tunnel-flowpay: ## Start tunnel for flowpay
+tunnel-flowpay:
 	@cd ../neo-tunnel && $(MAKE) client-flowpay
 
-tunnel-nexus: ## Start tunnel for nexus
+tunnel-nexus:
 	@cd ../neo-tunnel && $(MAKE) client-nexus
 
-tunnel-neobot: ## Start tunnel for neobot
+tunnel-neobot:
 	@cd ../neo-tunnel && $(MAKE) client-neobot
 
-tunnel-status: ## Check tunnel server status
+tunnel-status:
 	@cd ../neo-tunnel && $(MAKE) status
