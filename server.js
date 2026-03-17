@@ -10,6 +10,7 @@ import automationRoutes from "./src/routes/automation-routes.js";
 import neoRoutes from "./src/routes/neo-routes.js";
 import nexusRoutes from "./src/routes/nexus-routes.js";
 import aiRoutes from "./src/routes/ai-routes.js";
+import ecosystemHealthRoutes from "./src/routes/ecosystem-health-routes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -348,6 +349,7 @@ app.use("/api", authMiddleware);
 app.use("/api/automations", automationRoutes);
 app.use("/api/neo", neoRoutes);
 app.use("/api/nexus", nexusRoutes);
+app.use("/api/ecosystem", ecosystemHealthRoutes);
 app.use("/api/ai", aiRoutes);
 
 // Storage (Legacy In-Memory)
