@@ -338,7 +338,7 @@ const authMiddleware = (req, res, next) => {
   }
   res.status(401).json({
     error: "UNAUTHORIZED_ACCESS",
-    message: "Valid x-gateway-password header required",
+    message: "Valid x-gateway-password header or password query parameter required",
   });
 };
 

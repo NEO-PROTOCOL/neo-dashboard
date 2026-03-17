@@ -1,5 +1,6 @@
 import express from "express";
 import fs from "node:fs";
+import fsPromises from "node:fs/promises";
 import path from "node:path";
 
 const router = express.Router();
@@ -8,6 +9,10 @@ const FETCH_TIMEOUT = 5000;
 const NODE_PROBE_TIMEOUT = Number(
   process.env.ECOSYSTEM_NODE_PROBE_TIMEOUT_MS || 2500,
 );
+const ECOSYSTEM_CACHE_TTL = 60000; // 1 minute cache
+
+let ecosystemCache = null;
+let ecosystemCacheTime = 0;
 
 // Project progress metadata based on recent development
 // Updated: 2026-03-17
@@ -67,13 +72,6 @@ const PROJECT_PROGRESS = {
     lastUpdate: "2026-03-17",
     highlights: ["Observability dashboard", "Stack analyzer", "3D ecosystem view"],
     milestone: "Operational dashboard",
-  },
-  "neo-nexus": {
-    version: "v1.0",
-    status: "active",
-    lastUpdate: "2026-03-17",
-    highlights: ["Event bus", "Reactor pattern", "SQLite persistence"],
-    milestone: "Core nervous system",
   },
   "neo-protocol-contracts": {
     version: "Multichain Ready",
@@ -138,23 +136,39 @@ async function probeNodeStatus(url) {
 }
 
 async function loadEcosystemNodes() {
+  const now = Date.now();
+
+  // Return cached result if still valid
+  if (
+    ecosystemCache &&
+    ecosystemCache.success &&
+    now - ecosystemCacheTime < ECOSYSTEM_CACHE_TTL
+  ) {
+    return ecosystemCache;
+  }
+
   const ecosystemPath = path.resolve(
     process.cwd(),
     "../neobot-orchestrator/config/ecosystem.json",
   );
+
   try {
-    if (fs.existsSync(ecosystemPath)) {
-      const raw = fs.readFileSync(ecosystemPath, "utf8");
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return { success: true, nodes: parsed, source: "local-file" };
-      }
+    const raw = await fsPromises.readFile(ecosystemPath, "utf8");
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      const result = { success: true, nodes: parsed, source: "local-file" };
+      ecosystemCache = result;
+      ecosystemCacheTime = now;
+      return result;
     }
   } catch (e) {
     console.warn("Failed to read ecosystem.json:", e.message);
   }
 
-  return { success: false, nodes: [], source: "unavailable" };
+  const result = { success: false, nodes: [], source: "unavailable" };
+  ecosystemCache = result;
+  ecosystemCacheTime = now;
+  return result;
 }
 
 function resolveNodeUrl(node) {
