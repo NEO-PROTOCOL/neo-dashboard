@@ -147,22 +147,46 @@ async function loadEcosystemNodes() {
     return ecosystemCache;
   }
 
-  const ecosystemPath = path.resolve(
-    process.cwd(),
-    "../neobot-orchestrator/config/ecosystem.json",
-  );
+  // Try local file first with multiple path variations
+  const localPaths = [
+    process.env.ECOSYSTEM_JSON_PATH,
+    path.resolve(process.cwd(), "../neobot-orchestrator/config/ecosystem.json"),
+    path.resolve(process.cwd(), "../../neobot-orchestrator/config/ecosystem.json"),
+    path.resolve("/app/neobot-orchestrator/config/ecosystem.json"),
+  ].filter(Boolean);
 
+  for (const ecosystemPath of localPaths) {
+    try {
+      const raw = await fsPromises.readFile(ecosystemPath, "utf8");
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const result = { success: true, nodes: parsed, source: "local-file" };
+        ecosystemCache = result;
+        ecosystemCacheTime = now;
+        return result;
+      }
+    } catch (_e) {
+      // Try next path
+    }
+  }
+
+  // Fallback: try to fetch from GitHub
   try {
-    const raw = await fsPromises.readFile(ecosystemPath, "utf8");
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      const result = { success: true, nodes: parsed, source: "local-file" };
-      ecosystemCache = result;
-      ecosystemCacheTime = now;
-      return result;
+    const remoteUrl =
+      "https://raw.githubusercontent.com/NEO-PROTOCOL/neobot-orchestrator/main/config/ecosystem.json";
+    const response = await fetchWithTimeout(remoteUrl, { method: "GET" }, 10000);
+    if (response.ok) {
+      const raw = await response.text();
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const result = { success: true, nodes: parsed, source: "github" };
+        ecosystemCache = result;
+        ecosystemCacheTime = now;
+        return result;
+      }
     }
   } catch (e) {
-    console.warn("Failed to read ecosystem.json:", e.message);
+    console.warn("Failed to fetch ecosystem.json from GitHub:", e.message);
   }
 
   const result = { success: false, nodes: [], source: "unavailable" };
