@@ -10,6 +10,7 @@ import automationRoutes from "./src/routes/automation-routes.js";
 import neoRoutes from "./src/routes/neo-routes.js";
 import nexusRoutes from "./src/routes/nexus-routes.js";
 import aiRoutes from "./src/routes/ai-routes.js";
+import ecosystemHealthRoutes from "./src/routes/ecosystem-health-routes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -80,9 +81,15 @@ const STACK_REPORT_SOURCE_URL =
   process.env.STACK_REPORT_SOURCE_URL ||
   "https://raw.githubusercontent.com/NEO-PROTOCOL/neobot-orchestrator/main/config/stack_report.json";
 const STACK_REPORT_FALLBACK_PATH = path.join(__dirname, "stack-report.json");
-const STACK_REPORT_CACHE_TTL_MS = Number(
-  process.env.STACK_REPORT_CACHE_TTL_MS || 5 * 60 * 1000,
+const DEFAULT_STACK_REPORT_CACHE_TTL_MS = 5 * 60 * 1000;
+const parsedStackReportCacheTtlMs = Number(
+  process.env.STACK_REPORT_CACHE_TTL_MS ?? DEFAULT_STACK_REPORT_CACHE_TTL_MS,
 );
+const STACK_REPORT_CACHE_TTL_MS =
+  Number.isFinite(parsedStackReportCacheTtlMs) &&
+  parsedStackReportCacheTtlMs >= 0
+    ? parsedStackReportCacheTtlMs
+    : DEFAULT_STACK_REPORT_CACHE_TTL_MS;
 let stackReportCache = null; // { source, body, fetchedAt }
 
 async function getCachedStackReport() {
@@ -107,9 +114,15 @@ async function getCachedStackReport() {
       };
       return { source: "canonical", body: result.body };
     }
-    console.warn(
-      `[REPORT] Canonical stack report returned HTTP ${result.status}`,
-    );
+    if (result.ok && !result.body) {
+      console.warn(
+        "[REPORT] Canonical stack report returned HTTP 200 with empty or invalid JSON body",
+      );
+    } else {
+      console.warn(
+        `[REPORT] Canonical stack report returned HTTP ${result.status}`,
+      );
+    }
   } catch (error) {
     console.warn(
       `[REPORT] Canonical stack report fetch failed: ${error.message}`,
@@ -325,7 +338,7 @@ const authMiddleware = (req, res, next) => {
   }
   res.status(401).json({
     error: "UNAUTHORIZED_ACCESS",
-    message: "Valid x-gateway-password header required",
+    message: "Valid x-gateway-password header or password query parameter required",
   });
 };
 
@@ -336,6 +349,7 @@ app.use("/api", authMiddleware);
 app.use("/api/automations", automationRoutes);
 app.use("/api/neo", neoRoutes);
 app.use("/api/nexus", nexusRoutes);
+app.use("/api/ecosystem", ecosystemHealthRoutes);
 app.use("/api/ai", aiRoutes);
 
 // Storage (Legacy In-Memory)
