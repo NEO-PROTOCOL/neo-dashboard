@@ -28,7 +28,15 @@
       "Bash(git checkout -b audit/neobot-architect-node-cleanup-20260227)",
       "Bash(git add config/ecosystem.json)",
       "Bash(git push -u origin audit/neobot-architect-node-cleanup-20260227)",
-      "Bash(git push -u origin-legacy audit/neobot-architect-node-cleanup-20260227)"
+      "Bash(git push -u origin-legacy audit/neobot-architect-node-cleanup-20260227)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(git fetch:*)",
+      "Bash(git cherry-pick:*)",
+      "Bash(git reset:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(git rm:*)"
     ]
   }
 }

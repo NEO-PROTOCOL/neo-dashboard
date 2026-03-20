@@ -22,6 +22,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: NEO-PROTOCOL/neobot-orchestrator
+          token: ${{ secrets.NEO_GITHUB_TOKEN }}
           path: neobot-source
 
       - name: Setup Node
@@ -32,23 +33,23 @@ jobs:
       - name: JavaScript Syntax Check
         run: |
           node --check server.js
-          node --check neo-routes.js
-          node --check nexus-routes.js
-          node --check nexus-routes-v2.js
-          node --check automation-routes.js
-          node --check ai-routes.js
-          node --check report-routes.js
+          node --check src/routes/neo-routes.js
+          node --check src/routes/nexus-routes.js
+          node --check src/routes/nexus-routes-v2.js
+          node --check src/routes/automation-routes.js
+          node --check src/routes/ai-routes.js
+          node --check src/routes/report-routes.js
 
       - name: Realtime Graph Guardrails
         run: |
-          grep -q "\/api\/neo\/ecosystem\/live" ecosystem-3d.html
-          grep -q "setInterval(refreshGraph, LIVE_REFRESH_MS)" ecosystem-3d.html
-          grep -q "router.get(\"/ecosystem/live\"" neo-routes.js
+          grep -q "\/api\/neo\/ecosystem\/live" public/ecosystem-3d.html
+          grep -q "setInterval(refreshGraph, LIVE_REFRESH_MS)" public/ecosystem-3d.html
+          grep -q "router.get(\"/ecosystem/live\"" src/routes/neo-routes.js
 
       - name: Analyzer Source Guardrails
         run: |
-          ! grep -q "const REPORT = {" stack-analyzer.html
-          grep -q 'const REPORT_URL = "./stack-report.json"' stack-analyzer.html
+          ! grep -q "const REPORT = {" public/stack-analyzer.html
+          grep -q 'const REPORT_URL = "./stack-report.json"' public/stack-analyzer.html
           grep -q "app.get('/stack-report.json'" server.js
 
       - name: Ecosystem Graph Integrity

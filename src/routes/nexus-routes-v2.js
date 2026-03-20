@@ -32,6 +32,26 @@ const retryConfig = {
   retryOn: [408, 429, 500, 502, 503, 504],
 };
 
+// Allowed headers to forward to upstream Nexus service
+const ALLOWED_HEADERS = new Set([
+  "content-type",
+  "content-length",
+  "accept",
+  "accept-encoding",
+  "user-agent",
+  "cache-control",
+]);
+
+function filterHeaders(incomingHeaders) {
+  const filtered = {};
+  for (const [key, value] of Object.entries(incomingHeaders)) {
+    if (ALLOWED_HEADERS.has(key.toLowerCase())) {
+      filtered[key] = value;
+    }
+  }
+  return filtered;
+}
+
 // ──────────────────────────────────────────────────────────────
 // Metrics Collector
 // ──────────────────────────────────────────────────────────────
@@ -105,7 +125,7 @@ async function proxyNexusRequest(nexusPath, method = "GET", req, res) {
         fetchWithRetry(fullUrl, {
           method,
           retryConfig,
-          headers: req.headers,
+          headers: filterHeaders(req.headers),
         }),
       { url: fullUrl },
     );
