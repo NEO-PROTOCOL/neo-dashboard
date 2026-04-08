@@ -356,7 +356,10 @@
               gap: 0,
               borderBottom: `1px solid ${T.border}`,
               background: T.bgCard,
-              padding: "0 32px",
+              padding: "0 clamp(8px, 3vw, 32px)",
+              overflowX: "auto",
+              WebkitOverflowScrolling: "touch",
+              scrollbarWidth: "thin",
             },
           },
           TABS.map((tab) =>
@@ -367,15 +370,17 @@
                 onClick: () => onChange(tab),
                 style: {
                   fontFamily: "Orbitron",
-                  fontSize: "0.7rem",
+                  fontSize: "clamp(0.62rem, 2.4vw, 0.7rem)",
                   fontWeight: 700,
-                  padding: "14px 24px",
+                  padding: "14px clamp(12px, 3vw, 24px)",
                   border: "none",
                   cursor: "pointer",
-                  letterSpacing: "2px",
+                  letterSpacing: "clamp(1px, 0.5vw, 2px)",
                   transition: "all 0.2s",
                   background: active === tab ? T.bg : "transparent",
                   color: active === tab ? T.accent : T.textDim,
+                  whiteSpace: "nowrap",
+                  flex: "0 0 auto",
                   borderBottom:
                     active === tab
                       ? `2px solid ${T.accent}`
