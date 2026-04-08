@@ -1,27 +1,25 @@
 {
   "meta": {
-    "generated_at": "2026-03-14T21:36:25.226623+00:00",
+    "generated_at": "2026-04-07T23:29:52.421577+00:00",
     "analyzer_version": "3.1.0",
-    "total_nodes": 30,
+    "total_nodes": 29,
     "total_orgs": 6
   },
   "ecosystem_health": {
-    "average_readiness": 60.9,
+    "average_readiness": 80.5,
     "max_possible": 100,
     "grade_distribution": {
-      "A": 2,
-      "B": 4,
-      "C": 11,
-      "D": 4,
-      "F": 2
+      "A": 5,
+      "B": 16,
+      "C": 1
     },
-    "total_findings": 25,
+    "total_findings": 8,
     "findings_by_severity": {
       "critical": 0,
-      "high": 2,
-      "medium": 13,
-      "low": 5,
-      "info": 5
+      "high": 0,
+      "medium": 5,
+      "low": 1,
+      "info": 2
     }
   },
   "summary": {
@@ -39,7 +37,7 @@
         "node_ids": [
           "flowpay"
         ],
-        "findings_count": 2,
+        "findings_count": 1,
         "avg_readiness": 90.0
       },
       "Fluxx DAO": {
@@ -49,14 +47,13 @@
           "fluxx-backend"
         ],
         "findings_count": 0,
-        "avg_readiness": 65.0
+        "avg_readiness": 80.0
       },
       "NEO Protocol": {
-        "node_count": 10,
+        "node_count": 9,
         "node_ids": [
           "neobot-orchestrator",
           "neo-protocol-hub",
-          "neo-mcp-server",
           "neo-mcp-server",
           "neo-agent-full",
           "neo-nexus",
@@ -65,8 +62,8 @@
           "neo-dashboard",
           "neo-tunnel"
         ],
-        "findings_count": 11,
-        "avg_readiness": 65.0
+        "findings_count": 1,
+        "avg_readiness": 83.8
       },
       "NEO-FlowOFF": {
         "node_count": 5,
@@ -77,8 +74,8 @@
           "ceo-escalavel-miniapp",
           "neo-mello-eth"
         ],
-        "findings_count": 2,
-        "avg_readiness": 55.0
+        "findings_count": 0,
+        "avg_readiness": 78.0
       },
       "Neo Smart Factory": {
         "node_count": 9,
@@ -94,7 +91,7 @@
           "smart-nft"
         ],
         "findings_count": 0,
-        "avg_readiness": 52.5
+        "avg_readiness": 75.0
       },
       "WOD Game": {
         "node_count": 3,
@@ -103,8 +100,8 @@
           "wod-eth",
           "wod-protocol"
         ],
-        "findings_count": 1,
-        "avg_readiness": 58.3
+        "findings_count": 0,
+        "avg_readiness": 80.0
       }
     },
     "platforms": [
@@ -129,7 +126,9 @@
       "Vercel (nodevercel/smart-ui-mobile)",
       "Vercel / IPFS"
     ],
-    "single_points_of_failure": [],
+    "single_points_of_failure": [
+      "neo-nexus"
+    ],
     "dependency_cycles": [],
     "nodes_with_mainnet_contracts": [
       "smart-core",
@@ -138,27 +137,15 @@
     "nodes_without_production_url": [
       "neo-protocol-hub",
       "neo-mcp-server",
-      "neo-mcp-server",
       "smart-factory",
       "smart-core",
       "smart-cli",
       "smart-factory-docs",
       "internal-ops",
-      "smart-nft",
-      "neo-flowoff-pwa",
-      "pro-ia",
-      "wod-eth",
       "fluxx-backend"
     ]
   },
   "dependency_graph": {
-    "neo-nexus": {
-      "depends_on": [],
-      "depended_by": [
-        "flowpay",
-        "neobot-orchestrator"
-      ]
-    },
     "neobot-orchestrator": {
       "depends_on": [
         "neo-nexus"
@@ -170,6 +157,20 @@
         "neo-nexus"
       ],
       "depended_by": []
+    },
+    "smart-core": {
+      "depends_on": [
+        "neo-nexus"
+      ],
+      "depended_by": []
+    },
+    "neo-nexus": {
+      "depends_on": [],
+      "depended_by": [
+        "flowpay",
+        "neobot-orchestrator",
+        "smart-core"
+      ]
     }
   },
   "nexus_topology": {
@@ -187,20 +188,26 @@
       },
       {
         "event": "FACTORY:MINT_CONFIRMED",
-        "emitters": [],
+        "emitters": [
+          "smart-core"
+        ],
         "consumers": [
+          "smart-core",
           "flowpay"
         ],
-        "has_emitter": false,
+        "has_emitter": true,
         "has_consumer": true
       },
       {
         "event": "FACTORY:MINT_FAILED",
-        "emitters": [],
+        "emitters": [
+          "smart-core"
+        ],
         "consumers": [
+          "smart-core",
           "flowpay"
         ],
-        "has_emitter": false,
+        "has_emitter": true,
         "has_consumer": true
       },
       {
@@ -216,11 +223,14 @@
       },
       {
         "event": "NEOBOT:ACCESS_UNLOCKED",
-        "emitters": [],
+        "emitters": [
+          "neobot-orchestrator"
+        ],
         "consumers": [
+          "neobot-orchestrator",
           "flowpay"
         ],
-        "has_emitter": false,
+        "has_emitter": true,
         "has_consumer": true
       },
       {
@@ -251,16 +261,27 @@
     ],
     "total_unique_events": 7,
     "orphan_events": [],
-    "phantom_events": [
-      "FACTORY:MINT_CONFIRMED",
-      "FACTORY:MINT_FAILED",
-      "NEOBOT:ACCESS_UNLOCKED"
-    ]
+    "phantom_events": []
   },
   "readiness_leaderboard": [
     {
+      "id": "neobot-orchestrator",
+      "score": 100,
+      "grade": "A"
+    },
+    {
       "id": "neo-nexus",
       "score": 100,
+      "grade": "A"
+    },
+    {
+      "id": "neo-agent-full",
+      "score": 90,
+      "grade": "A"
+    },
+    {
+      "id": "mio-system",
+      "score": 90,
       "grade": "A"
     },
     {
@@ -269,8 +290,63 @@
       "grade": "A"
     },
     {
-      "id": "neobot-orchestrator",
-      "score": 85,
+      "id": "neo-protcl",
+      "score": 80,
+      "grade": "B"
+    },
+    {
+      "id": "neo-dashboard",
+      "score": 80,
+      "grade": "B"
+    },
+    {
+      "id": "smart-ui",
+      "score": 80,
+      "grade": "B"
+    },
+    {
+      "id": "smart-nft",
+      "score": 80,
+      "grade": "B"
+    },
+    {
+      "id": "neo-flowoff-landing",
+      "score": 80,
+      "grade": "B"
+    },
+    {
+      "id": "neo-flowoff-pwa",
+      "score": 80,
+      "grade": "B"
+    },
+    {
+      "id": "pro-ia",
+      "score": 80,
+      "grade": "B"
+    },
+    {
+      "id": "neo-mello-eth",
+      "score": 80,
+      "grade": "B"
+    },
+    {
+      "id": "wod-x-pro",
+      "score": 80,
+      "grade": "B"
+    },
+    {
+      "id": "wod-eth",
+      "score": 80,
+      "grade": "B"
+    },
+    {
+      "id": "wod-protocol",
+      "score": 80,
+      "grade": "B"
+    },
+    {
+      "id": "fluxx-landing",
+      "score": 80,
       "grade": "B"
     },
     {
@@ -279,150 +355,33 @@
       "grade": "B"
     },
     {
-      "id": "neo-agent-full",
-      "score": 75,
-      "grade": "B"
-    },
-    {
-      "id": "mio-system",
-      "score": 75,
-      "grade": "B"
-    },
-    {
-      "id": "neo-protcl",
-      "score": 65,
-      "grade": "C"
-    },
-    {
-      "id": "neo-dashboard",
-      "score": 65,
-      "grade": "C"
-    },
-    {
-      "id": "smart-ui",
-      "score": 65,
-      "grade": "C"
-    },
-    {
-      "id": "neo-flowoff-landing",
-      "score": 65,
-      "grade": "C"
-    },
-    {
-      "id": "neo-mello-eth",
-      "score": 65,
-      "grade": "C"
-    },
-    {
-      "id": "wod-x-pro",
-      "score": 65,
-      "grade": "C"
-    },
-    {
-      "id": "wod-protocol",
-      "score": 65,
-      "grade": "C"
-    },
-    {
-      "id": "fluxx-landing",
-      "score": 65,
-      "grade": "C"
-    },
-    {
       "id": "smart-ui-landing",
-      "score": 55,
-      "grade": "C"
+      "score": 70,
+      "grade": "B"
     },
     {
       "id": "smart-ui-mobile",
-      "score": 55,
-      "grade": "C"
+      "score": 70,
+      "grade": "B"
     },
     {
       "id": "ceo-escalavel-miniapp",
-      "score": 55,
+      "score": 70,
+      "grade": "B"
+    },
+    {
+      "id": "neo-mcp-server",
+      "score": 50,
       "grade": "C"
-    },
-    {
-      "id": "neo-flowoff-pwa",
-      "score": 45,
-      "grade": "D"
-    },
-    {
-      "id": "pro-ia",
-      "score": 45,
-      "grade": "D"
-    },
-    {
-      "id": "wod-eth",
-      "score": 45,
-      "grade": "D"
-    },
-    {
-      "id": "smart-nft",
-      "score": 35,
-      "grade": "D"
-    },
-    {
-      "id": "neo-mcp-server",
-      "score": 20,
-      "grade": "F"
-    },
-    {
-      "id": "neo-mcp-server",
-      "score": 20,
-      "grade": "F"
     }
   ],
   "findings": [
     {
-      "node_id": "neo-mcp-server",
-      "category": "security",
-      "severity": "high",
-      "title": "Env vars sensiveis no ecosystem.json",
-      "detail": "Variaveis: ['PRIVATE_KEY', 'DELEGATION']. Confirme que valores nao estao em nenhum commit. Considere mover requiredEnv para schema privado."
-    },
-    {
-      "node_id": "neo-mcp-server",
-      "category": "security",
-      "severity": "high",
-      "title": "Env vars sensiveis no ecosystem.json",
-      "detail": "Variaveis: ['PRIVATE_KEY', 'DELEGATION']. Confirme que valores nao estao em nenhum commit. Considere mover requiredEnv para schema privado."
-    },
-    {
-      "node_id": "neobot-orchestrator",
+      "node_id": "neo-nexus",
       "category": "infra",
       "severity": "medium",
-      "title": "Runtime sem healthcheck configurado",
-      "detail": "Role 'Orchestrator' requer /health para detectar restarts."
-    },
-    {
-      "node_id": "neo-mcp-server",
-      "category": "infra",
-      "severity": "medium",
-      "title": "Runtime sem healthcheck configurado",
-      "detail": "Role 'MCP Storage Runtime / Storacha Adapter' requer /health para detectar restarts."
-    },
-    {
-      "node_id": "neo-mcp-server",
-      "category": "infra",
-      "severity": "medium",
-      "title": "Runtime sem healthcheck configurado",
-      "detail": "Role 'MCP Storage Runtime / Storacha Adapter' requer /health para detectar restarts."
-    },
-    {
-      "node_id": "neo-agent-full",
-      "category": "infra",
-      "severity": "medium",
-      "title": "Runtime sem healthcheck configurado",
-      "detail": "Role 'Agent Node / Autonomous Service' requer /health para detectar restarts."
-    },
-    {
-      "node_id": "mio-system",
-      "category": "infra",
-      "severity": "medium",
-      "title": "Runtime sem healthcheck configurado",
-      "detail": "Role 'Identity Layer' requer /health para detectar restarts."
+      "title": "Alto blast radius — 3 dependentes",
+      "detail": "Nos dependentes: ['flowpay', 'neobot-orchestrator', 'smart-core']."
     },
     {
       "node_id": "flowpay",
@@ -432,88 +391,32 @@
       "detail": "Enderecos: {'FlowPay': '0xD49d3Fb2C2CBBA78a1E710660a628919eE78D82A'}. Adicione canonicalRegistry com path do deployment JSON para rastreabilidade."
     },
     {
-      "node_id": "flowpay",
-      "category": "topology",
-      "severity": "medium",
-      "title": "webhookUrl.internal nao usa railway.internal",
-      "detail": "Valor: 'https://api.flowpay.cash/api/webhook'. Comunicacao interna Railway deve usar .railway.internal para evitar egress."
-    },
-    {
-      "node_id": "neo-flowoff-pwa",
-      "category": "config",
-      "severity": "medium",
-      "title": "DNS pendente: neoflowoff.agency",
-      "detail": "targetCustomDomain='neoflowoff.agency' declarado mas sem productionUrl/activeUrl. DNS pode nao estar apontado ou deploy nao concluido."
-    },
-    {
-      "node_id": "pro-ia",
-      "category": "config",
-      "severity": "medium",
-      "title": "DNS pendente: pro.neoflowoff.agency",
-      "detail": "targetCustomDomain='pro.neoflowoff.agency' declarado mas sem productionUrl/activeUrl. DNS pode nao estar apontado ou deploy nao concluido."
-    },
-    {
-      "node_id": "wod-eth",
-      "category": "config",
-      "severity": "medium",
-      "title": "DNS pendente: api.wodx.pro",
-      "detail": "targetCustomDomain='api.wodx.pro' declarado mas sem productionUrl/activeUrl. DNS pode nao estar apontado ou deploy nao concluido."
-    },
-    {
       "node_id": "__global__",
       "category": "infra",
       "severity": "medium",
       "title": "Conflito de porta local :3000",
-      "detail": "Nos compartilhando porta 3000: ['neo-nexus', 'neo-dashboard', 'neo-tunnel:nexus']. Multiplos servicos nao podem rodar simultaneamente nesta porta."
+      "detail": "Nos compartilhando porta 3000: ['neo-nexus', 'neo-tunnel:nexus']. Multiplos servicos nao podem rodar simultaneamente nesta porta."
     },
     {
       "node_id": "__global__",
       "category": "infra",
       "severity": "medium",
-      "title": "Conflito de porta local :8042",
-      "detail": "Nos compartilhando porta 8042: ['neo-agent-full', 'neo-tunnel:neo-agent']. Multiplos servicos nao podem rodar simultaneamente nesta porta."
+      "title": "Conflito de porta local :8043",
+      "detail": "Nos compartilhando porta 8043: ['neo-agent-full', 'neo-tunnel:neo-agent']. Multiplos servicos nao podem rodar simultaneamente nesta porta."
     },
     {
       "node_id": "__global__",
       "category": "infra",
       "severity": "medium",
-      "title": "Conflito de porta local :19000",
-      "detail": "Nos compartilhando porta 19000: ['neobot-orchestrator', 'neo-tunnel:neobot']. Multiplos servicos nao podem rodar simultaneamente nesta porta."
-    },
-    {
-      "node_id": "neobot-orchestrator",
-      "category": "infra",
-      "severity": "low",
-      "title": "Railway node sem build/start commands documentados",
-      "detail": "productionUrl existe mas buildCommand/startCommand ausentes. Documente para reproducibilidade de deploys."
-    },
-    {
-      "node_id": "neo-agent-full",
-      "category": "infra",
-      "severity": "low",
-      "title": "Railway node sem build/start commands documentados",
-      "detail": "productionUrl existe mas buildCommand/startCommand ausentes. Documente para reproducibilidade de deploys."
-    },
-    {
-      "node_id": "mio-system",
-      "category": "infra",
-      "severity": "low",
-      "title": "Railway node sem build/start commands documentados",
-      "detail": "productionUrl existe mas buildCommand/startCommand ausentes. Documente para reproducibilidade de deploys."
-    },
-    {
-      "node_id": "neo-dashboard",
-      "category": "infra",
-      "severity": "low",
-      "title": "Railway node sem build/start commands documentados",
-      "detail": "productionUrl existe mas buildCommand/startCommand ausentes. Documente para reproducibilidade de deploys."
+      "title": "Conflito de porta local :19001",
+      "detail": "Nos compartilhando porta 19001: ['neobot-orchestrator', 'neo-tunnel:orchestrator']. Multiplos servicos nao podem rodar simultaneamente nesta porta."
     },
     {
       "node_id": "__global__",
       "category": "governance",
       "severity": "low",
-      "title": "Admin emails inconsistentes na org 'Neo Smart Factory'",
-      "detail": "Emails: ['factory@neoprotocol.space', 'neo@neoprotocol.space']. Padronize um unico adminEmail por org."
+      "title": "Admin emails inconsistentes na org 'NEO-FlowOFF'",
+      "detail": "Emails: ['factory@neoprotocol.space', 'flowoff.mkt@gmail.com']. Padronize um unico adminEmail por org."
     },
     {
       "node_id": "__global__",
@@ -527,28 +430,7 @@
       "category": "ops",
       "severity": "info",
       "title": "Wildcard consumer(s): ['neo-nexus']",
-      "detail": "Absorve todos os eventos emitidos: ['BUILD_STATUS', 'FLOWPAY:PAYMENT_RECEIVED', 'NEXUS_START', 'TASK_COMPLETED']. Garanta que reactors estejam mapeando cada evento."
-    },
-    {
-      "node_id": "flowpay",
-      "category": "ops",
-      "severity": "info",
-      "title": "Evento consumido 'FACTORY:MINT_CONFIRMED' sem emissor declarado",
-      "detail": "Pode ser evento externo (Woovi, WhatsApp API, webhook). Documente a origem com 'externalEventSources'."
-    },
-    {
-      "node_id": "flowpay",
-      "category": "ops",
-      "severity": "info",
-      "title": "Evento consumido 'FACTORY:MINT_FAILED' sem emissor declarado",
-      "detail": "Pode ser evento externo (Woovi, WhatsApp API, webhook). Documente a origem com 'externalEventSources'."
-    },
-    {
-      "node_id": "flowpay",
-      "category": "ops",
-      "severity": "info",
-      "title": "Evento consumido 'NEOBOT:ACCESS_UNLOCKED' sem emissor declarado",
-      "detail": "Pode ser evento externo (Woovi, WhatsApp API, webhook). Documente a origem com 'externalEventSources'."
+      "detail": "Absorve todos os eventos emitidos: ['BUILD_STATUS', 'FACTORY:MINT_CONFIRMED', 'FACTORY:MINT_FAILED', 'FLOWPAY:PAYMENT_RECEIVED', 'NEOBOT:ACCESS_UNLOCKED', 'NEXUS_START', 'TASK_COMPLETED']. Garanta que reactors estejam mapeando cada evento."
     }
   ],
   "nodes": [
@@ -563,15 +445,16 @@
       "nexus_events": [
         "TASK_COMPLETED",
         "BUILD_STATUS",
-        "NEXUS_START"
+        "NEXUS_START",
+        "NEOBOT:ACCESS_UNLOCKED"
       ],
       "blast_radius": 0,
       "dependency_count": 1,
-      "readiness_score": 85,
-      "readiness_grade": "B",
+      "readiness_score": 100,
+      "readiness_grade": "A",
       "readiness_breakdown": {
         "has_production_url": true,
-        "has_healthcheck": false,
+        "has_healthcheck": true,
         "has_custom_domain": true,
         "has_internal_url": true,
         "webhook_urls_complete": true,
@@ -579,7 +462,7 @@
         "no_high_findings": true,
         "no_critical_findings": true
       },
-      "finding_count": 2
+      "finding_count": 0
     },
     {
       "id": "neo-protocol-hub",
@@ -608,44 +491,19 @@
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 20,
-      "readiness_grade": "F",
+      "readiness_score": 50,
+      "readiness_grade": "C",
       "readiness_breakdown": {
         "has_production_url": false,
-        "has_healthcheck": false,
+        "has_healthcheck": true,
         "has_custom_domain": false,
         "has_internal_url": false,
         "webhook_urls_complete": true,
         "nexus_events_declared": false,
-        "no_high_findings": false,
+        "no_high_findings": true,
         "no_critical_findings": true
       },
-      "finding_count": 2
-    },
-    {
-      "id": "neo-mcp-server",
-      "name": "NEO MCP Server (Storacha)",
-      "org": "NEO Protocol",
-      "role": "MCP Storage Runtime / Storacha Adapter",
-      "platform": "Local / MCP Runtime",
-      "has_production": false,
-      "has_contracts": false,
-      "nexus_events": [],
-      "blast_radius": 0,
-      "dependency_count": 0,
-      "readiness_score": 20,
-      "readiness_grade": "F",
-      "readiness_breakdown": {
-        "has_production_url": false,
-        "has_healthcheck": false,
-        "has_custom_domain": false,
-        "has_internal_url": false,
-        "webhook_urls_complete": true,
-        "nexus_events_declared": false,
-        "no_high_findings": false,
-        "no_critical_findings": true
-      },
-      "finding_count": 2
+      "finding_count": 0
     },
     {
       "id": "neo-agent-full",
@@ -658,11 +516,11 @@
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 75,
-      "readiness_grade": "B",
+      "readiness_score": 90,
+      "readiness_grade": "A",
       "readiness_breakdown": {
         "has_production_url": true,
-        "has_healthcheck": false,
+        "has_healthcheck": true,
         "has_custom_domain": true,
         "has_internal_url": true,
         "webhook_urls_complete": true,
@@ -670,7 +528,7 @@
         "no_high_findings": true,
         "no_critical_findings": true
       },
-      "finding_count": 2
+      "finding_count": 0
     },
     {
       "id": "neo-nexus",
@@ -681,7 +539,7 @@
       "has_production": true,
       "has_contracts": false,
       "nexus_events": [],
-      "blast_radius": 2,
+      "blast_radius": 3,
       "dependency_count": 0,
       "readiness_score": 100,
       "readiness_grade": "A",
@@ -695,7 +553,7 @@
         "no_high_findings": true,
         "no_critical_findings": true
       },
-      "finding_count": 0
+      "finding_count": 1
     },
     {
       "id": "mio-system",
@@ -708,11 +566,11 @@
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 75,
-      "readiness_grade": "B",
+      "readiness_score": 90,
+      "readiness_grade": "A",
       "readiness_breakdown": {
         "has_production_url": true,
-        "has_healthcheck": false,
+        "has_healthcheck": true,
         "has_custom_domain": true,
         "has_internal_url": true,
         "webhook_urls_complete": true,
@@ -720,7 +578,7 @@
         "no_high_findings": true,
         "no_critical_findings": true
       },
-      "finding_count": 2
+      "finding_count": 0
     },
     {
       "id": "neo-protcl",
@@ -733,11 +591,11 @@
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 65,
-      "readiness_grade": "C",
+      "readiness_score": 80,
+      "readiness_grade": "B",
       "readiness_breakdown": {
         "has_production_url": true,
-        "has_healthcheck": false,
+        "has_healthcheck": true,
         "has_custom_domain": true,
         "has_internal_url": false,
         "webhook_urls_complete": true,
@@ -758,11 +616,11 @@
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 65,
-      "readiness_grade": "C",
+      "readiness_score": 80,
+      "readiness_grade": "B",
       "readiness_breakdown": {
         "has_production_url": true,
-        "has_healthcheck": false,
+        "has_healthcheck": true,
         "has_custom_domain": true,
         "has_internal_url": false,
         "webhook_urls_complete": true,
@@ -770,7 +628,7 @@
         "no_high_findings": true,
         "no_critical_findings": true
       },
-      "finding_count": 1
+      "finding_count": 0
     },
     {
       "id": "smart-factory",
@@ -796,9 +654,12 @@
       "platform": "N/A (Contracts Repository)",
       "has_production": false,
       "has_contracts": true,
-      "nexus_events": [],
+      "nexus_events": [
+        "FACTORY:MINT_CONFIRMED",
+        "FACTORY:MINT_FAILED"
+      ],
       "blast_radius": 0,
-      "dependency_count": 0,
+      "dependency_count": 1,
       "readiness_score": -1,
       "readiness_grade": "N/A",
       "readiness_breakdown": {},
@@ -831,11 +692,11 @@
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 65,
-      "readiness_grade": "C",
+      "readiness_score": 80,
+      "readiness_grade": "B",
       "readiness_breakdown": {
         "has_production_url": true,
-        "has_healthcheck": false,
+        "has_healthcheck": true,
         "has_custom_domain": true,
         "has_internal_url": false,
         "webhook_urls_complete": true,
@@ -856,11 +717,11 @@
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 55,
-      "readiness_grade": "C",
+      "readiness_score": 70,
+      "readiness_grade": "B",
       "readiness_breakdown": {
         "has_production_url": true,
-        "has_healthcheck": false,
+        "has_healthcheck": true,
         "has_custom_domain": false,
         "has_internal_url": false,
         "webhook_urls_complete": true,
@@ -913,11 +774,11 @@
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 55,
-      "readiness_grade": "C",
+      "readiness_score": 70,
+      "readiness_grade": "B",
       "readiness_breakdown": {
         "has_production_url": true,
-        "has_healthcheck": false,
+        "has_healthcheck": true,
         "has_custom_domain": false,
         "has_internal_url": false,
         "webhook_urls_complete": true,
@@ -931,19 +792,19 @@
       "id": "smart-nft",
       "name": "Smart NFT",
       "org": "Neo Smart Factory",
-      "role": "NFT Management",
+      "role": "Smart Factory / NFT Engine",
       "platform": "IPFS / Web3",
-      "has_production": false,
+      "has_production": true,
       "has_contracts": false,
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 35,
-      "readiness_grade": "D",
+      "readiness_score": 80,
+      "readiness_grade": "B",
       "readiness_breakdown": {
-        "has_production_url": false,
-        "has_healthcheck": false,
-        "has_custom_domain": false,
+        "has_production_url": true,
+        "has_healthcheck": true,
+        "has_custom_domain": true,
         "has_internal_url": false,
         "webhook_urls_complete": true,
         "nexus_events_declared": false,
@@ -980,7 +841,7 @@
         "no_high_findings": true,
         "no_critical_findings": true
       },
-      "finding_count": 2
+      "finding_count": 1
     },
     {
       "id": "neo-flowoff-landing",
@@ -993,11 +854,11 @@
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 65,
-      "readiness_grade": "C",
+      "readiness_score": 80,
+      "readiness_grade": "B",
       "readiness_breakdown": {
         "has_production_url": true,
-        "has_healthcheck": false,
+        "has_healthcheck": true,
         "has_custom_domain": true,
         "has_internal_url": false,
         "webhook_urls_complete": true,
@@ -1013,16 +874,16 @@
       "org": "NEO-FlowOFF",
       "role": "DApp / PWA",
       "platform": "Vercel",
-      "has_production": false,
+      "has_production": true,
       "has_contracts": false,
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 45,
-      "readiness_grade": "D",
+      "readiness_score": 80,
+      "readiness_grade": "B",
       "readiness_breakdown": {
-        "has_production_url": false,
-        "has_healthcheck": false,
+        "has_production_url": true,
+        "has_healthcheck": true,
         "has_custom_domain": true,
         "has_internal_url": false,
         "webhook_urls_complete": true,
@@ -1030,7 +891,7 @@
         "no_high_findings": true,
         "no_critical_findings": true
       },
-      "finding_count": 1
+      "finding_count": 0
     },
     {
       "id": "pro-ia",
@@ -1038,16 +899,16 @@
       "org": "NEO-FlowOFF",
       "role": "Education / Tools",
       "platform": "Vercel",
-      "has_production": false,
+      "has_production": true,
       "has_contracts": false,
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 45,
-      "readiness_grade": "D",
+      "readiness_score": 80,
+      "readiness_grade": "B",
       "readiness_breakdown": {
-        "has_production_url": false,
-        "has_healthcheck": false,
+        "has_production_url": true,
+        "has_healthcheck": true,
         "has_custom_domain": true,
         "has_internal_url": false,
         "webhook_urls_complete": true,
@@ -1055,7 +916,7 @@
         "no_high_findings": true,
         "no_critical_findings": true
       },
-      "finding_count": 1
+      "finding_count": 0
     },
     {
       "id": "ceo-escalavel-miniapp",
@@ -1068,11 +929,11 @@
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 55,
-      "readiness_grade": "C",
+      "readiness_score": 70,
+      "readiness_grade": "B",
       "readiness_breakdown": {
         "has_production_url": true,
-        "has_healthcheck": false,
+        "has_healthcheck": true,
         "has_custom_domain": false,
         "has_internal_url": false,
         "webhook_urls_complete": true,
@@ -1093,11 +954,11 @@
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 65,
-      "readiness_grade": "C",
+      "readiness_score": 80,
+      "readiness_grade": "B",
       "readiness_breakdown": {
         "has_production_url": true,
-        "has_healthcheck": false,
+        "has_healthcheck": true,
         "has_custom_domain": true,
         "has_internal_url": false,
         "webhook_urls_complete": true,
@@ -1118,11 +979,11 @@
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 65,
-      "readiness_grade": "C",
+      "readiness_score": 80,
+      "readiness_grade": "B",
       "readiness_breakdown": {
         "has_production_url": true,
-        "has_healthcheck": false,
+        "has_healthcheck": true,
         "has_custom_domain": true,
         "has_internal_url": false,
         "webhook_urls_complete": true,
@@ -1138,16 +999,16 @@
       "org": "WOD Game",
       "role": "Protocol Layer",
       "platform": "Railway / Base",
-      "has_production": false,
+      "has_production": true,
       "has_contracts": false,
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 45,
-      "readiness_grade": "D",
+      "readiness_score": 80,
+      "readiness_grade": "B",
       "readiness_breakdown": {
-        "has_production_url": false,
-        "has_healthcheck": false,
+        "has_production_url": true,
+        "has_healthcheck": true,
         "has_custom_domain": true,
         "has_internal_url": false,
         "webhook_urls_complete": true,
@@ -1155,7 +1016,7 @@
         "no_high_findings": true,
         "no_critical_findings": true
       },
-      "finding_count": 1
+      "finding_count": 0
     },
     {
       "id": "wod-protocol",
@@ -1168,11 +1029,11 @@
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 65,
-      "readiness_grade": "C",
+      "readiness_score": 80,
+      "readiness_grade": "B",
       "readiness_breakdown": {
         "has_production_url": true,
-        "has_healthcheck": false,
+        "has_healthcheck": true,
         "has_custom_domain": true,
         "has_internal_url": false,
         "webhook_urls_complete": true,
@@ -1193,11 +1054,11 @@
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 65,
-      "readiness_grade": "C",
+      "readiness_score": 80,
+      "readiness_grade": "B",
       "readiness_breakdown": {
         "has_production_url": true,
-        "has_healthcheck": false,
+        "has_healthcheck": true,
         "has_custom_domain": true,
         "has_internal_url": false,
         "webhook_urls_complete": true,
