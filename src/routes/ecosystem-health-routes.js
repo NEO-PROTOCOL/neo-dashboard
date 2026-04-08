@@ -150,8 +150,11 @@ async function loadEcosystemNodes() {
   // Try local file first with multiple path variations
   const localPaths = [
     process.env.ECOSYSTEM_JSON_PATH,
+    path.resolve(process.cwd(), "../neobot-orchestration/config/ecosystem.json"),
     path.resolve(process.cwd(), "../neobot-orchestrator/config/ecosystem.json"),
+    path.resolve(process.cwd(), "../../neobot-orchestration/config/ecosystem.json"),
     path.resolve(process.cwd(), "../../neobot-orchestrator/config/ecosystem.json"),
+    path.resolve("/app/neobot-orchestration/config/ecosystem.json"),
     path.resolve("/app/neobot-orchestrator/config/ecosystem.json"),
   ].filter(Boolean);
 
@@ -170,12 +173,18 @@ async function loadEcosystemNodes() {
     }
   }
 
-  // Fallback: try to fetch from GitHub
-  try {
-    const remoteUrl =
-      "https://raw.githubusercontent.com/NEO-PROTOCOL/neobot-orchestrator/main/config/ecosystem.json";
-    const response = await fetchWithTimeout(remoteUrl, { method: "GET" }, 10000);
-    if (response.ok) {
+  // Fallback: try to fetch from GitHub (supports repository rename variants)
+  const remoteUrls = [
+    process.env.ECOSYSTEM_SOURCE_URL,
+    "https://raw.githubusercontent.com/NEO-PROTOCOL/neobot-orchestration/main/config/ecosystem.json",
+    "https://raw.githubusercontent.com/NEO-PROTOCOL/neobot-orchestrator/main/config/ecosystem.json",
+  ].filter(Boolean);
+
+  for (const remoteUrl of remoteUrls) {
+    try {
+      const response = await fetchWithTimeout(remoteUrl, { method: "GET" }, 10000);
+      if (!response.ok) continue;
+
       const raw = await response.text();
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
@@ -184,9 +193,27 @@ async function loadEcosystemNodes() {
         ecosystemCacheTime = now;
         return result;
       }
+    } catch (_e) {
+      // Try next URL
     }
-  } catch (e) {
-    console.warn("Failed to fetch ecosystem.json from GitHub:", e.message);
+  }
+
+  // Last fallback: bundled graph artifact from this repository
+  try {
+    const graphPath = path.resolve(process.cwd(), "ecosystem-graph.json");
+    if (fs.existsSync(graphPath)) {
+      const raw = await fsPromises.readFile(graphPath, "utf8");
+      const parsed = JSON.parse(raw);
+      const nodes = Array.isArray(parsed?.nodes) ? parsed.nodes : [];
+      if (nodes.length > 0) {
+        const result = { success: true, nodes, source: "graph-file" };
+        ecosystemCache = result;
+        ecosystemCacheTime = now;
+        return result;
+      }
+    }
+  } catch (_e) {
+    // Keep unavailable fallback below
   }
 
   const result = { success: false, nodes: [], source: "unavailable" };
