@@ -92,7 +92,30 @@
 
       // ─── REPORT DATA SOURCE ────────────────────────────────────────
       const ReportContext = React.createContext(null);
-      const REPORT_URL = "./stack-report.json";
+      const REPORT_URL = "./api/stack-report.json";
+      const API_PASS_KEY = "neo_gateway_password";
+
+      function getStoredPassword() {
+        return localStorage.getItem(API_PASS_KEY) || "";
+      }
+
+      function ensureApiPassword(force = false) {
+        let pass = getStoredPassword();
+        if (!pass || force) {
+          pass = (
+            window.prompt(
+              "Digite a Gateway Password para habilitar sinais em tempo real:",
+            ) || ""
+          ).trim();
+          if (pass) localStorage.setItem(API_PASS_KEY, pass);
+        }
+        return pass;
+      }
+
+      function getAuth() {
+        const p = getStoredPassword();
+        return p ? { "x-gateway-password": p } : {};
+      }
 
       // ─── THEME ──────────────────────────────────────────────────────────
       const T = {
@@ -1792,10 +1815,18 @@
         useEffect(() => {
           let cancelled = false;
 
-          async function loadReport() {
+          async function loadReport(retryOn401 = true) {
             try {
-              const response = await fetch(REPORT_URL, { cache: "no-store" });
+              const response = await fetch("/api/stack-report.json", {
+                headers: getAuth(),
+              });
+
               if (!response.ok) {
+                if (response.status === 401 && retryOn401) {
+                  const pass = ensureApiPassword(true);
+                  if (pass) return loadReport(false);
+                }
+
                 let errorMessage = `HTTP ${response.status}`;
                 try {
                   const errorBody = await response.json();

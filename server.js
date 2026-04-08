@@ -6,6 +6,7 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import { promisify } from "util";
+import rateLimit from "express-rate-limit";
 import automationRoutes from "./src/routes/automation-routes.js";
 import neoRoutes from "./src/routes/neo-routes.js";
 import nexusRoutes from "./src/routes/nexus-routes.js";
@@ -82,9 +83,11 @@ const STACK_REPORT_SOURCE_URL =
   "https://raw.githubusercontent.com/NEO-PROTOCOL/neobot-orchestrator/main/config/stack_report.json";
 const STACK_REPORT_FALLBACK_PATH = path.join(__dirname, "stack-report.json");
 const DEFAULT_STACK_REPORT_CACHE_TTL_MS = 5 * 60 * 1000;
-const parsedStackReportCacheTtlMs = Number(
-  process.env.STACK_REPORT_CACHE_TTL_MS ?? DEFAULT_STACK_REPORT_CACHE_TTL_MS,
-);
+const rawStackReportTtl = process.env.STACK_REPORT_CACHE_TTL_MS;
+const parsedStackReportCacheTtlMs =
+  rawStackReportTtl && rawStackReportTtl.trim().length > 0
+    ? Number(rawStackReportTtl)
+    : DEFAULT_STACK_REPORT_CACHE_TTL_MS;
 const STACK_REPORT_CACHE_TTL_MS =
   Number.isFinite(parsedStackReportCacheTtlMs) &&
   parsedStackReportCacheTtlMs >= 0
@@ -271,7 +274,18 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get("/stack-report.json", async (_req, res) => {
+const reportRateLimit = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 30, // Limit each IP to 30 requests per window
+  message: {
+    error: "RATE_LIMIT_EXCEEDED",
+    message: "Too many requests for stack report, please wait a moment.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.get("/api/stack-report.json", reportRateLimit, async (_req, res) => {
   try {
     const { source, body } = await getCachedStackReport();
     res.setHeader(
@@ -286,6 +300,11 @@ app.get("/stack-report.json", async (_req, res) => {
       message: error.message,
     });
   }
+});
+
+// Legacy path redirect for existing frontend references (will be updated next)
+app.get("/stack-report.json", (_req, res) => {
+  res.redirect(307, "/api/stack-report.json");
 });
 
 // Retire legacy public surfaces before static file serving exposes them directly.
