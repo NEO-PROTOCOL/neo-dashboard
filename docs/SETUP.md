@@ -30,19 +30,24 @@ Acesso local: `http://localhost:3000`
 ## Arquitetura
 
 ### Backend (Node.js/Express)
+
 - `server.js`: Servidor principal e roteamento.
-- `neo-routes.js`: Gerenciamento do ecossistema e telemetria.
-- `nexus-routes-v2.js`: Integração com Nexus Event Hub.
-- `ai-routes.js`: Interface administrativa assistida.
+- `src/routes/neo-routes.js`: Gerenciamento do ecossistema e telemetria.
+- `src/routes/nexus-routes.js`: Integração atual com Nexus Event Hub.
+- `src/routes/ai-routes.js`: Interface administrativa assistida.
+- `src/lib/connection-manager.js`: Retry e pooling para integrações externas.
 
 ### Frontend (Vanilla HTML/JS)
-- `index.html`: Painel operacional.
-- `ecosystem-3d.html`: Visualização em tempo real do grafo.
-- `stack-analyzer.html`: Dashboard de readiness v3.1.
+
+- `public/index.html`: Painel operacional.
+- `public/ecosystem-3d.html`: Visualização em tempo real do grafo.
+- `public/stack-analyzer.html`: Dashboard de readiness v3.1.
+- `archive/legacy-ui/`: superfícies antigas mantidas apenas para referência.
 
 ## Stack Analyzer (v3.1)
 
 Analise automatizada de produção-readiness.
+
 - **Analyzer Source:** `stack_analyzer.py` (Localizado em `NEO-PROTOCOL/neobot-orchestrator/config/stack_analyzer.py`)
 - **CI/CD:** O workflow `stack-analyze.yml` roda em push para `main` e via dispatch.
 - **Execução local:** `python scripts/stack_analyzer.py ecosystem.json stack-report.json`
