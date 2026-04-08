@@ -190,7 +190,7 @@ Circuit will retry in 60s
 ### Phase 1: Code Integration (30 min)
 1. Ler: `server-update-instructions.md`
 2. Atualizar 4 linhas em `server.js`
-3. Testar localmente: `npm run dev`
+3. Testar localmente: `pnpm run dev`
 4. Verificar logs para `[MONITOR]` inicializado
 
 ### Phase 2: Railway Scaling (10 min)

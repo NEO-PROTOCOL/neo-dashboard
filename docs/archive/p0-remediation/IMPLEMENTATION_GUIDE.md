@@ -53,12 +53,12 @@
 
 - [ ] **Passo 1.4** - Instalar dependências necessárias
   ```bash
-  npm install  # Já devem estar instaladas
+  pnpm install  # Já devem estar instaladas
   ```
 
 - [ ] **Passo 1.5** - Testar localmente
   ```bash
-  npm run dev
+  pnpm run dev
   # Deve iniciar sem erros
   # Verificar logs: [MONITOR] System monitoring started
   ```

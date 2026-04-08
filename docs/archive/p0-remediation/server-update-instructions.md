@@ -117,7 +117,7 @@ Depois de fazer as alterações, executar:
 node --check server.js
 
 # 2. Teste local
-npm run dev
+pnpm run dev
 
 # 3. Verificar que apareça no console:
 # [MONITOR] System monitoring started - Checks every 60 seconds

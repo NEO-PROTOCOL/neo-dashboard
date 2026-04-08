@@ -695,7 +695,7 @@ async function loadEcosystemNodes() {
   }
 
   // Source 3: ecosystem-graph.json bundled in the repo (autonomous fallback)
-  // This file is enriched with production URLs via `npm run sync:ecosystem-graph`
+  // This file is enriched with production URLs via `pnpm run sync:ecosystem-graph`
   // and allows the dashboard to probe node health without depending on neobot.
   const graphPath = path.resolve(process.cwd(), "ecosystem-graph.json");
   try {

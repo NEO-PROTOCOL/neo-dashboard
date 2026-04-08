@@ -1,10 +1,11 @@
 # Ξ NΞØ PROTOCOL // Dashboard Makefile
 # Control Center for Mission Control Deployment
 
-.PHONY: help install dev start kill-port setup-ipfs doctor clean-env health clean build test sync-ecosystem-graph validate-ecosystem-graph tunnel-neo-agent tunnel-flowpay tunnel-nexus tunnel-neobot tunnel-status
+.PHONY: help install dev start kill-port setup-ipfs doctor clean-env health clean build test sync-ecosystem-graph validate-ecosystem-graph tunnel-neo-agent tunnel-flowpay tunnel-nexus tunnel-neobot tunnel-neobot-orchestration tunnel-status
 
 # Default Port
 PORT ?= 3000
+TUNNEL_SERVICE_NEOBOT ?= neobot-orchestration
 
 help:
 	@echo "Ξ  NΞØ DASHBOARD COMMANDS"
@@ -26,30 +27,31 @@ help:
 	@echo "    tunnel-neo-agent   Start tunnel for WhatsApp/TG Agent (8042)"
 	@echo "    tunnel-flowpay     Start tunnel for FlowPay Gateway (4321)"
 	@echo "    tunnel-nexus       Start tunnel for Protocol Nexus (3000)"
-	@echo "    tunnel-neobot      Start tunnel for Neobot Architect (19000)"
+	@echo "    tunnel-neobot      Start tunnel for neobot-orchestration (19000)"
+	@echo "    tunnel-neobot-orchestration  Explicit target for neobot-orchestration"
 	@echo "    tunnel-status      Check status of the tunnel server"
 	@echo ""
 
 install:
 	@echo "⦿ Installing dependencies..."
-	@npm install
+	@pnpm install
 
 build:
 	@echo "🏗 Building project..."
-	@npm run build
+	@pnpm run build
 	@echo "✓ Build complete."
 
 test:
 	@echo "🧪 Running test suite..."
-	@npm test
+	@pnpm test
 
 sync-ecosystem-graph:
 	@echo "🕸 Syncing ecosystem graph..."
-	@npm run sync:ecosystem-graph
+	@pnpm run sync:ecosystem-graph
 
 validate-ecosystem-graph:
 	@echo "🔎 Validating ecosystem graph..."
-	@npm run validate:ecosystem-graph
+	@pnpm run validate:ecosystem-graph
 
 clean:
 	@echo "🧹 Cleaning project..."
@@ -62,11 +64,11 @@ kill-port:
 
 dev: kill-port
 	@echo "⟠ Starting Dashboard in DEV mode..."
-	npm run dev
+	pnpm run dev
 
 start: kill-port
 	@echo "⨂ Starting Dashboard in PROD mode..."
-	npm start
+	pnpm start
 
 setup-ipfs:
 	@echo "🔗 Configuring IPFS for NΞØ Dashboard..."
@@ -94,16 +96,31 @@ health:
 # --- TUNNEL OPERATIONS -------------------------------------------------------
 
 tunnel-neo-agent:
-	@cd ../neo-tunnel && $(MAKE) client-neo-agent
+	@cd ../neo-tunnel && set -a && [ -f .env ] && . ./.env || true && set +a && \
+		[ -n "$$TUNNEL_SECRET" ] || (echo "❌ TUNNEL_SECRET não definido (../neo-tunnel/.env ou env atual)" && exit 1) && \
+		$(MAKE) client-neo-agent TUNNEL_SECRET="$$TUNNEL_SECRET" NEO_TUNNEL_URL="$${NEO_TUNNEL_URL:-wss://tunnel.neoprotocol.space}"
 
 tunnel-flowpay:
-	@cd ../neo-tunnel && $(MAKE) client-flowpay
+	@cd ../neo-tunnel && set -a && [ -f .env ] && . ./.env || true && set +a && \
+		[ -n "$$TUNNEL_SECRET" ] || (echo "❌ TUNNEL_SECRET não definido (../neo-tunnel/.env ou env atual)" && exit 1) && \
+		$(MAKE) client-flowpay TUNNEL_SECRET="$$TUNNEL_SECRET" NEO_TUNNEL_URL="$${NEO_TUNNEL_URL:-wss://tunnel.neoprotocol.space}"
 
 tunnel-nexus:
-	@cd ../neo-tunnel && $(MAKE) client-nexus
+	@cd ../neo-tunnel && set -a && [ -f .env ] && . ./.env || true && set +a && \
+		[ -n "$$TUNNEL_SECRET" ] || (echo "❌ TUNNEL_SECRET não definido (../neo-tunnel/.env ou env atual)" && exit 1) && \
+		$(MAKE) client-nexus TUNNEL_SECRET="$$TUNNEL_SECRET" NEO_TUNNEL_URL="$${NEO_TUNNEL_URL:-wss://tunnel.neoprotocol.space}"
 
 tunnel-neobot:
-	@cd ../neo-tunnel && $(MAKE) client-neobot
+	@$(MAKE) tunnel-neobot-orchestration
+
+tunnel-neobot-orchestration:
+	@echo "🚇 Tunnel → $(TUNNEL_SERVICE_NEOBOT) (localhost:19000)"
+	@echo "  Webhook: https://tunnel.neoprotocol.space/hook/$(TUNNEL_SERVICE_NEOBOT)"
+	@cd ../neo-tunnel && set -a && [ -f .env ] && . ./.env || true && set +a && \
+		[ -n "$$TUNNEL_SECRET" ] || (echo "❌ TUNNEL_SECRET não definido (../neo-tunnel/.env ou env atual)" && exit 1) && \
+		NEO_TUNNEL_URL=$${NEO_TUNNEL_URL:-wss://tunnel.neoprotocol.space} \
+		TUNNEL_SECRET=$$TUNNEL_SECRET TUNNEL_SERVICE=$(TUNNEL_SERVICE_NEOBOT) LOCAL_PORT=19000 \
+		npx tsx src/client.ts
 
 tunnel-status:
 	@cd ../neo-tunnel && $(MAKE) status

@@ -177,7 +177,7 @@ Alerts sent every 60 seconds if:
 | Still high latency    | Increase Memory to 3GB                     | .railway-scaling.yml          |
 | Circuit OPEN          | Check Nexus API online                     | connection-manager.js         |
 | Telegram not alerting | Verify TELEGRAM_BOT_TOKEN                  | .env file                     |
-| Import errors         | Run `npm install`                          | Missing dependencies          |
+| Import errors         | Run `pnpm install`                         | Missing dependencies          |
 | Server won't start    | Check syntax with `node --check server.js` | server-update-instructions.md |
 
 ---

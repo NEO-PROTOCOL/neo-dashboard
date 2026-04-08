@@ -27,9 +27,9 @@ archive/               # Legacy UI/code kept out of runtime paths
 ## How to Build & Test
 
 ```bash
-npm install
-npm start         # Express server
-npm run dev       # Dev with watch
+pnpm install
+pnpm start         # Express server
+pnpm run dev       # Dev with watch
 ```
 
 ## Key Patterns

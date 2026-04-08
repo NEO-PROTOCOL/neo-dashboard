@@ -123,7 +123,7 @@ neo-dashboard-deploy
 ### **Local Testing**
 ```bash
 # Start dashboard server
-npm run dev
+pnpm run dev
 
 # Test health endpoint in new terminal
 curl http://localhost:3000/api/ecosystem/health | jq

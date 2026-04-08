@@ -289,7 +289,7 @@ A: ~30 min for initial metrics. Full stabilization in 2 hours.
 A: Rollback by reverting server.js and pushing again. Full guide in `IMPLEMENTATION_GUIDE.md`
 
 **Q: Can I test locally first?**
-A: Yes! Run `npm run dev` locally with the same changes.
+A: Yes! Run `pnpm run dev` locally with the same changes.
 
 ---
 

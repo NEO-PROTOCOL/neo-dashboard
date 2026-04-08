@@ -21,8 +21,8 @@ Base (`.env.example`):
 ## Executar Localmente
 
 ```bash
-npm install
-npm start # ou npm run dev
+pnpm install
+pnpm start # ou pnpm run dev
 ```
 
 Acesso local: `http://localhost:3000`
