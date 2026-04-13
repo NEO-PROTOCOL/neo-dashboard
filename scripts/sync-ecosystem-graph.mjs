@@ -25,6 +25,7 @@ const targetPath = path.resolve(repoRoot, 'ecosystem-graph.json');
 // Priority 1: local filesystem (dev / CI via registry checkout)
 const localCandidates = [
   process.env.ECOSYSTEM_SOURCE_PATH,
+  path.resolve(repoRoot, 'ecosystem.json'), // Priority: Local bundled file
   path.resolve(repoRoot, '../neobot-orchestrator/config/ecosystem.json'),
   path.resolve(repoRoot, 'neobot-source/config/ecosystem.json'),
 ].filter(Boolean);
