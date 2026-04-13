@@ -1,0 +1,200 @@
+{
+  "schemaVersion": "1.0.0",
+  "scope": "public-interface-registry",
+  "generatedAt": "2026-04-13",
+  "active": [
+    {
+      "cluster": "nsfactory",
+      "service": "smart-ui",
+      "surface": "web",
+      "domain": "www.nsfactory.xyz",
+      "note": "Smart UI principal"
+    },
+    {
+      "cluster": "nsfactory",
+      "service": "smart-ui-landing",
+      "surface": "landing",
+      "domain": "landing.nsfactory.xyz",
+      "note": "Landing comercial canônica"
+    },
+    {
+      "cluster": "nsfactory",
+      "service": "smart-ui-mobile",
+      "surface": "miniapp",
+      "domain": "miniapp.nsfactory.xyz",
+      "note": "MiniApp oficial"
+    },
+    {
+      "cluster": "neoprotocol",
+      "service": "neobot-orchestrator",
+      "surface": "orchestrator",
+      "domain": "orchestrator.neoprotocol.space",
+      "note": "Plano de comando soberano"
+    },
+    {
+      "cluster": "neoprotocol",
+      "service": "neo-dashboard",
+      "surface": "dashboard",
+      "domain": "dashboard.neoprotocol.space",
+      "note": "Observability control center"
+    },
+    {
+      "cluster": "neoprotocol",
+      "service": "neo-nexus",
+      "surface": "nexus",
+      "domain": "nexus.neoprotocol.space",
+      "note": "Hub de eventos"
+    },
+    {
+      "cluster": "neoprotocol",
+      "service": "neo-agent-full",
+      "surface": "agent",
+      "domain": "agent.neoprotocol.space",
+      "note": "Agente full stack"
+    },
+    {
+      "cluster": "neoprotocol",
+      "service": "mio-system",
+      "surface": "id",
+      "domain": "id.neoprotocol.space",
+      "note": "Camada de identidade"
+    },
+    {
+      "cluster": "neoprotocol",
+      "service": "neo-growth-system",
+      "surface": "growth",
+      "domain": "growth.neoprotocol.space",
+      "note": "Control plane de ativação"
+    },
+    {
+      "cluster": "neoprotocol",
+      "service": "neo-protcl",
+      "surface": "landing",
+      "domain": "neoprotocol.space",
+      "note": "Boot / landing soberano"
+    },
+    {
+      "cluster": "neoprotocol",
+      "service": "neo-mello-eth",
+      "surface": "artifact-publisher",
+      "domain": "neomello.eth",
+      "note": "Public artifact publisher"
+    },
+    {
+      "cluster": "flowpay",
+      "service": "flowpay",
+      "surface": "marketing",
+      "domain": "flowpay.cash",
+      "note": "Landing e aquisição"
+    },
+    {
+      "cluster": "flowpay",
+      "service": "flowpay-app",
+      "surface": "app",
+      "domain": "app.flowpay.cash",
+      "note": "Aplicativo principal"
+    },
+    {
+      "cluster": "flowpay",
+      "service": "flowpay-api",
+      "surface": "api",
+      "domain": "api.flowpay.cash",
+      "note": "API financeira"
+    },
+    {
+      "cluster": "neoflowoff",
+      "service": "neo-flowoff-landing",
+      "surface": "landing",
+      "domain": "www.neoflowoff.agency",
+      "note": "Landing principal"
+    },
+    {
+      "cluster": "neoflowoff",
+      "service": "neo-flowoff-pwa",
+      "surface": "pwa",
+      "domain": "neoflowoff.agency",
+      "note": "PWA principal"
+    },
+    {
+      "cluster": "neoflowoff",
+      "service": "neo-flowoff-sites",
+      "surface": "sites",
+      "domain": "sites.neoflowoff.agency",
+      "note": "Superfície de sites"
+    },
+    {
+      "cluster": "neoflowoff",
+      "service": "neo-flowoff-lp",
+      "surface": "lp",
+      "domain": "lp.neoflowoff.agency",
+      "note": "Landing de aquisição"
+    },
+    {
+      "cluster": "neoflowoff",
+      "service": "neo-flowoff-dashboard",
+      "surface": "dashboard",
+      "domain": "dashboard.neoflowoff.agency",
+      "note": "Painel operacional"
+    },
+    {
+      "cluster": "neoflowoff",
+      "service": "pro-ia",
+      "surface": "pro",
+      "domain": "pro.neoflowoff.agency",
+      "note": "Guia e ferramentas de IA"
+    }
+  ],
+  "broken": [
+    {
+      "cluster": "nsfactory",
+      "service": "smart-nft",
+      "surface": "nft",
+      "domain": "nft.nsfactory.xyz",
+      "note": "Probe atual retorna HTTP 525; TLS ou origem precisa reparo"
+    },
+    {
+      "cluster": "neoflowoff",
+      "service": "neo-flowoff-app",
+      "surface": "app",
+      "domain": "app.neoflowoff.agency",
+      "note": "Probe atual retorna HTTP 404"
+    },
+    {
+      "cluster": "neoflowoff",
+      "service": "neo-flowoff-api",
+      "surface": "api",
+      "domain": "api.neoflowoff.agency",
+      "note": "Probe atual retorna HTTP 404"
+    }
+  ],
+  "declared": [
+    {
+      "cluster": "wodx",
+      "service": "wod-x-pro",
+      "surface": "app",
+      "domain": "app.wodx.pro",
+      "note": "Declarado no contrato público; confirmar deploy e DNS"
+    },
+    {
+      "cluster": "wodx",
+      "service": "wod-eth",
+      "surface": "api",
+      "domain": "api.wodx.pro",
+      "note": "Declarado no contrato público; confirmar deploy e DNS"
+    },
+    {
+      "cluster": "wodx",
+      "service": "wod-protocol",
+      "surface": "protocol",
+      "domain": "protocol.wodx.pro",
+      "note": "Declarado no contrato público; confirmar deploy e DNS"
+    },
+    {
+      "cluster": "wodx",
+      "service": "wod-landing",
+      "surface": "landing",
+      "domain": "landing.wodx.pro",
+      "note": "Declarado no contrato público; confirmar deploy e DNS"
+    }
+  ]
+}

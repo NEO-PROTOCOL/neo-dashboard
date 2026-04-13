@@ -4,7 +4,7 @@ const router = express.Router();
 
 // Configuration
 const FETCH_TIMEOUT_MS = 10000;    // 10s timeout per request
-const getNexusUrl = () => process.env.NEXUS_API_URL || 'https://neo-nexus-production.up.railway.app';
+const getNexusUrl = () => process.env.NEXUS_API_URL || 'https://nexus.neoprotocol.space';
 
 function fetchWithTimeout(url, options = {}) {
     const controller = new AbortController();

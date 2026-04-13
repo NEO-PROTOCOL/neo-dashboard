@@ -147,15 +147,11 @@ async function loadEcosystemNodes() {
     return ecosystemCache;
   }
 
-  // Try local file first with multiple path variations
+  // Try local file first using the dashboard's own projection.
   const localPaths = [
     process.env.ECOSYSTEM_JSON_PATH,
-    path.resolve(process.cwd(), "../neobot-orchestration/config/ecosystem.json"),
-    path.resolve(process.cwd(), "../neobot-orchestrator/config/ecosystem.json"),
-    path.resolve(process.cwd(), "../../neobot-orchestration/config/ecosystem.json"),
-    path.resolve(process.cwd(), "../../neobot-orchestrator/config/ecosystem.json"),
-    path.resolve("/app/neobot-orchestration/config/ecosystem.json"),
-    path.resolve("/app/neobot-orchestrator/config/ecosystem.json"),
+    path.resolve(process.cwd(), "ecosystem.json"),
+    path.resolve(process.cwd(), "ecosystem-graph.json"),
   ].filter(Boolean);
 
   for (const ecosystemPath of localPaths) {
@@ -173,12 +169,8 @@ async function loadEcosystemNodes() {
     }
   }
 
-  // Fallback: try to fetch from GitHub (supports repository rename variants)
-  const remoteUrls = [
-    process.env.ECOSYSTEM_SOURCE_URL,
-    "https://raw.githubusercontent.com/NEO-PROTOCOL/neobot-orchestration/main/config/ecosystem.json",
-    "https://raw.githubusercontent.com/NEO-PROTOCOL/neobot-orchestrator/main/config/ecosystem.json",
-  ].filter(Boolean);
+  // Remote fallback only if explicitly configured.
+  const remoteUrls = [process.env.ECOSYSTEM_SOURCE_URL].filter(Boolean);
 
   for (const remoteUrl of remoteUrls) {
     try {

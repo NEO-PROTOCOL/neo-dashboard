@@ -13,7 +13,7 @@ const router = express.Router();
 // ──────────────────────────────────────────────────────────────
 
 const getNexusUrl = () =>
-  process.env.NEXUS_API_URL || "https://neo-nexus-production.up.railway.app";
+  process.env.NEXUS_API_URL || "https://nexus.neoprotocol.space";
 
 // Circuit Breaker Configuration
 const circuitBreaker = new CircuitBreaker({

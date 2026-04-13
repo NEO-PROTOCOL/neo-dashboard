@@ -62,16 +62,14 @@ if (
   !process.env.NEXUS_API_URL ||
   process.env.NEXUS_API_URL.includes("neoprotocol.space")
 ) {
-  process.env.NEXUS_API_URL = "https://neo-nexus-production.up.railway.app";
+  process.env.NEXUS_API_URL = "https://nexus.neoprotocol.space";
 }
-// NEXUS_ECOSYSTEM_URL: use direct Railway URL from within Railway to avoid
-// DNS resolution delays with the custom domain (nexus.neoprotocol.space).
+// NEXUS_ECOSYSTEM_URL: canonical Nexus ecosystem endpoint.
 if (
   !process.env.NEXUS_ECOSYSTEM_URL ||
   process.env.NEXUS_ECOSYSTEM_URL.includes("neoprotocol.space")
 ) {
-  process.env.NEXUS_ECOSYSTEM_URL =
-    "https://neo-nexus-production.up.railway.app/api/ecosystem";
+  process.env.NEXUS_ECOSYSTEM_URL = "https://nexus.neoprotocol.space/api/ecosystem";
 }
 
 const execAsync = promisify(exec);
@@ -147,7 +145,7 @@ function derivePrecision(report) {
         : precision >= 75
           ? "solid"
           : precision >= 60
-            ? "watch"
+            ? "watch"     
             : "fragile",
     notes: [
       `readiness=${averageReadiness.toFixed(1)}`,

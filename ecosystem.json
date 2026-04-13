@@ -306,13 +306,14 @@
     "role": "Landing Page / Traffic",
     "hosting": {
       "platform": "Vercel (nodevercel/smart-ui-landing)",
-      "productionUrl": "https://landing-nsfactory.vercel.app/",
-      "activeUrl": "https://landing-nsfactory.vercel.app/",
+      "productionUrl": "https://landing.nsfactory.xyz/",
+      "activeUrl": "https://landing.nsfactory.xyz/",
+      "targetCustomDomain": "landing.nsfactory.xyz",
       "adminEmail": "neo@neoprotocol.space",
       "healthcheck": "/",
       "buildCommand": "pnpm build",
       "startCommand": "pnpm start",
-      "note": "Subdominio futuro, se existir, deve sair de nsfactory.xyz e nao de neoprotocol.space."
+      "note": "Domínio canônico atualizado para landing.nsfactory.xyz."
     }
   },
   {
@@ -353,13 +354,14 @@
     "role": "Interface / Mobile / MiniApp",
     "hosting": {
       "platform": "Vercel (nodevercel/smart-ui-mobile)",
-      "productionUrl": "https://miniapp-smartfactory.vercel.app",
-      "activeUrl": "https://miniapp-smartfactory.vercel.app",
+      "productionUrl": "https://miniapp.nsfactory.xyz",
+      "activeUrl": "https://miniapp.nsfactory.xyz",
+      "targetCustomDomain": "miniapp.nsfactory.xyz",
       "adminEmail": "neo@neoprotocol.space",
       "healthcheck": "/",
       "buildCommand": "pnpm build",
       "startCommand": "pnpm start",
-      "note": "Subdominio futuro, se existir, deve sair de nsfactory.xyz e nao de neoprotocol.space."
+      "note": "Domínio canônico atualizado para miniapp.nsfactory.xyz."
     }
   },
   {
@@ -375,7 +377,8 @@
       "productionUrl": "https://nft.nsfactory.xyz",
       "adminEmail": "neo@neoprotocol.space",
       "targetCustomDomain": "nft.nsfactory.xyz",
-      "healthcheck": "/"
+      "healthcheck": "/",
+      "note": "Probe atual retorna HTTP 525; TLS ou origem precisa reparo."
     }
   },
   {

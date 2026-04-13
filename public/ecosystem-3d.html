@@ -192,6 +192,88 @@
         color: #7f8ea3;
         font-size: 10px;
       }
+      .registry-panel {
+        margin-top: 10px;
+        max-width: 430px;
+        background: rgba(0, 0, 0, 0.62);
+        border: 1px solid #2a3240;
+        border-radius: 8px;
+        padding: 10px 12px;
+        pointer-events: auto;
+      }
+      .registry-panel.collapsed .registry-body {
+        display: none;
+      }
+      .registry-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+        gap: 8px;
+      }
+      .registry-header:hover span {
+        color: #d4deea !important;
+      }
+      .registry-body {
+        margin-top: 8px;
+      }
+      .registry-summary {
+        color: #b4c0d1;
+        font-size: 12px;
+        line-height: 1.4;
+      }
+      .registry-counts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 8px;
+      }
+      .registry-chip {
+        border: 1px solid #2a3240;
+        border-radius: 999px;
+        padding: 3px 8px;
+        font-size: 10px;
+        color: #d4deea;
+        background: #0b121c;
+        letter-spacing: 0.2px;
+      }
+      .registry-section {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #2a3240;
+      }
+      .registry-section-title {
+        color: #8fa2bb;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        margin-bottom: 6px;
+      }
+      .registry-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .registry-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding: 6px 8px;
+        border: 1px solid #223041;
+        border-radius: 6px;
+        background: rgba(11, 18, 28, 0.72);
+      }
+      .registry-domain {
+        color: #d4deea;
+        font-size: 11px;
+        line-height: 1.3;
+      }
+      .registry-meta {
+        color: #7f8ea3;
+        font-size: 10px;
+        line-height: 1.3;
+      }
     </style>
   </head>
   <body>
@@ -271,6 +353,17 @@
             <div id="live-summary" style="font-size:12px;color:#b4c0d1;">Loading live telemetry...</div>
             <div id="live-meta" style="font-size:11px;color:#748099;margin-top:5px;"></div>
             <div id="live-alerts" style="font-size:11px;color:#ffb74d;margin-top:8px;line-height:1.35;"></div>
+          </div>
+          <div class="registry-panel" id="registry-panel">
+            <div class="registry-header" onclick="document.getElementById('registry-panel').classList.toggle('collapsed')">
+              <span style="font-size:11px;color:#b4c0d1;letter-spacing:.3px;">◈ Public Interface Registry</span>
+              <span class="control-toggle-arrow">▼</span>
+            </div>
+            <div class="registry-body">
+              <div id="registry-summary" class="registry-summary">Loading declared surfaces...</div>
+              <div id="registry-counts" class="registry-counts"></div>
+              <div id="registry-sections"></div>
+            </div>
           </div>
           <div class="control-panel collapsed" id="filter-panel">
             <div class="control-panel-header" onclick="document.getElementById('filter-panel').classList.toggle('collapsed')">
@@ -369,6 +462,9 @@
       const liveModeEl = document.getElementById("live-mode");
       const liveMetaEl = document.getElementById("live-meta");
       const liveAlertsEl = document.getElementById("live-alerts");
+      const registrySummaryEl = document.getElementById("registry-summary");
+      const registryCountsEl = document.getElementById("registry-counts");
+      const registrySectionsEl = document.getElementById("registry-sections");
       const filterViewEl = document.getElementById("filter-view");
       const filterGroupEl = document.getElementById("filter-group");
       const filterOrgEl = document.getElementById("filter-org");
@@ -392,7 +488,13 @@
       let lastTopologySignature = null;
       let latestPayloadMeta = null;
       let latestFullGraphData = null;
+      let latestPublicRegistry = null;
       const paymentRoutesCache = {
+        checkedAt: 0,
+        payload: null,
+        inFlight: null,
+      };
+      const publicRegistryCache = {
         checkedAt: 0,
         payload: null,
         inFlight: null,
@@ -416,6 +518,89 @@
         } catch (_e) {}
         const params = new URLSearchParams(window.location.search);
         return params.get("password") || "";
+      }
+
+      async function fetchPublicInterfaceRegistry() {
+        const now = Date.now();
+        if (
+          publicRegistryCache.payload &&
+          now - publicRegistryCache.checkedAt < PAYMENT_ROUTES_TTL_MS
+        ) {
+          return publicRegistryCache.payload;
+        }
+        if (publicRegistryCache.inFlight) {
+          return publicRegistryCache.inFlight;
+        }
+        publicRegistryCache.inFlight = (async () => {
+          try {
+            const res = await fetch("public-interfaces.json", {
+              cache: "no-store",
+            });
+            if (res.ok) {
+              const payload = await res.json();
+              if (payload && typeof payload === "object") {
+                publicRegistryCache.payload = payload;
+                publicRegistryCache.checkedAt = now;
+                return payload;
+              }
+            }
+          } catch (_e) {}
+          return null;
+        })();
+        try {
+          return await publicRegistryCache.inFlight;
+        } finally {
+          publicRegistryCache.inFlight = null;
+        }
+      }
+
+      function renderPublicRegistry(registry) {
+        const active = Array.isArray(registry?.active) ? registry.active : [];
+        const broken = Array.isArray(registry?.broken) ? registry.broken : [];
+        const declared = Array.isArray(registry?.declared) ? registry.declared : [];
+
+        if (registrySummaryEl) {
+          registrySummaryEl.textContent =
+            `Declared surfaces are contractual, not health. Active ${active.length} | Broken ${broken.length} | Declared ${declared.length}.`;
+        }
+
+        if (registryCountsEl) {
+          registryCountsEl.innerHTML = [
+            `<span class="registry-chip">Active ${active.length}</span>`,
+            `<span class="registry-chip">Broken ${broken.length}</span>`,
+            `<span class="registry-chip">Declared ${declared.length}</span>`,
+          ].join("");
+        }
+
+        const sectionMarkup = (title, items, tone = "neutral", limit = null) => {
+          const slice = limit == null ? items : items.slice(0, limit);
+          const more = limit != null && items.length > limit ? `<div class="registry-meta">+ ${items.length - limit} more</div>` : "";
+          const rows = slice
+            .map(
+              (item) => `
+                <div class="registry-item">
+                  <div class="registry-domain">${escapeHtml(item.domain || item.service || "unknown")}</div>
+                  <div class="registry-meta">${escapeHtml(item.service || "")} · ${escapeHtml(item.surface || "")} · ${escapeHtml(item.note || "")}</div>
+                </div>
+              `,
+            )
+            .join("");
+          return `
+            <div class="registry-section" data-tone="${tone}">
+              <div class="registry-section-title">${escapeHtml(title)}</div>
+              <div class="registry-list">${rows || '<div class="registry-meta">No entries.</div>'}</div>
+              ${more}
+            </div>
+          `;
+        };
+
+        if (registrySectionsEl) {
+          registrySectionsEl.innerHTML = [
+            sectionMarkup("Declared", declared, "declared"),
+            sectionMarkup("Broken", broken, "broken"),
+            sectionMarkup("Active", active, "active", 8),
+          ].join("");
+        }
       }
 
       function pushTransition(line) {
@@ -1617,14 +1802,19 @@
         if (fetchInFlight) return;
         fetchInFlight = true;
         try {
-          const payload = await fetchGraphPayload();
-          const paymentPayload = await fetchPaymentRoutesCatalog();
+          const [payload, paymentPayload, publicRegistry] = await Promise.all([
+            fetchGraphPayload(),
+            fetchPaymentRoutesCatalog(),
+            fetchPublicInterfaceRegistry(),
+          ]);
           const enrichedGraphData = enrichWithPaymentData(
             payload.graphData,
             paymentPayload,
           );
           latestPayloadMeta = payload;
           latestFullGraphData = enrichedGraphData;
+          latestPublicRegistry = publicRegistry;
+          renderPublicRegistry(publicRegistry || latestPublicRegistry);
           await renderFromCurrentState();
         } catch (e) {
           liveSummaryEl.textContent = "Live telemetry error";

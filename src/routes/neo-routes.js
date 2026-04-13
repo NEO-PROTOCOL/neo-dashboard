@@ -698,11 +698,10 @@ async function probeNodeStatus(url) {
 async function loadEcosystemNodes() {
   const now = Date.now();
 
-  // Source 1: registry local filesystem (dev environment only)
-  const ecosystemPath = path.resolve(
-    process.cwd(),
-    "../neobot-orchestrator/config/ecosystem.json",
-  );
+  // Source 1: dashboard local filesystem projection.
+  const ecosystemPath = process.env.ECOSYSTEM_JSON_PATH
+    ? path.resolve(process.cwd(), process.env.ECOSYSTEM_JSON_PATH)
+    : path.resolve(process.cwd(), "ecosystem.json");
   try {
     if (fs.existsSync(ecosystemPath)) {
       const raw = fs.readFileSync(ecosystemPath, "utf8");
@@ -735,11 +734,8 @@ async function loadEcosystemNodes() {
     }
   } catch (_e) {}
 
-  // Source 3: Remote GitHub source (mirroring ecosystem-health-routes.js)
-  const remoteUrls = [
-    process.env.ECOSYSTEM_SOURCE_URL,
-    "https://raw.githubusercontent.com/NEO-PROTOCOL/neobot-orchestrator/main/config/ecosystem.json",
-  ].filter(Boolean);
+  // Source 3: Remote GitHub source only when explicitly configured.
+  const remoteUrls = [process.env.ECOSYSTEM_SOURCE_URL].filter(Boolean);
 
   for (const remoteUrl of remoteUrls) {
     try {
@@ -1102,8 +1098,8 @@ router.get("/ecosystem", async (req, res) => {
   // Fallback quando estiver em produção sem acesso ao FS local do orchestrator e sem Nexus.
   res.json({
     success: false,
-    message: "Source of truth (ecosystem.json) not accessible locally.",
-    hint: "Link to ../neobot-orchestrator/config/ecosystem.json",
+      message: "Source of truth (ecosystem.json) not accessible locally.",
+      hint: "Link to the dashboard-local ecosystem.json projection.",
   });
 });
 
