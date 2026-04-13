@@ -85,6 +85,7 @@ function normalizeGroup(node) {
   const name = String(node?.name || '').toLowerCase();
   const mix = `${id} ${name} ${org}`;
 
+  if (org.includes('neo-growth-system') || mix.includes('growth system')) return 'NEO-Growth-System';
   if (org.includes('neo smart factory') || mix.includes('smart factory')) return 'Neo Smart Factory';
   if (org.includes('flowpay') || mix.includes('flowpay')) return 'FlowPay';
   if (org.includes('fluxx')) return 'Fluxx DAO';
@@ -99,7 +100,9 @@ function normalizeGroup(node) {
   }
   if (org.includes('neo protocol') || mix.includes('neo')) return 'NEO Protocol';
   // Fallback: use the raw org field — no fake "DApps & Tools" group
-  return node?.org || 'NEO Protocol';
+  return org.includes('growth system') || mix.includes('growth system')
+    ? 'NEO-Growth-System'
+    : (node?.org || 'NEO Protocol');
 }
 
 function computeNodeVal(node, group) {
@@ -109,7 +112,7 @@ function computeNodeVal(node, group) {
   if (role.includes('orchestrator') || role.includes('event hub') || role.includes('sovereign')) return 12;
   if (id.includes('nexus') || id.includes('architect')) return 11;
   if (role.includes('protocol') || role.includes('contract')) return 9;
-  if (group === 'FlowPay' || group === 'Neo Smart Factory') return 8;
+  if (group === 'FlowPay' || group === 'Neo Smart Factory' || group === 'NEO-Growth-System') return 8;
   if (group === 'Fluxx DAO') return 7;
   if (group === 'WOD Game') return 6;
   if (group === 'NEO-FlowOFF') return 5;

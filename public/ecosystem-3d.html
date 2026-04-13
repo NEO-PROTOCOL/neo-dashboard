@@ -230,6 +230,7 @@
 
       const colorMap = {
         "NEO Protocol": "#d4deea",
+        "NEO-Growth-System": "#9affd6",
         "Neo Smart Factory": "#00ccff",
         FlowPay: "#00ffcc",
         "Fluxx DAO": "#4488ff",
@@ -700,6 +701,8 @@
         const mix =
           `${n?.id || ""} ${n?.name || ""} ${n?.role || ""}`.toLowerCase();
 
+        if (org.includes("neo-growth-system") || mix.includes("growth system"))
+          return "NEO-Growth-System";
         if (org.includes("flowpay") || mix.includes("flowpay"))
           return "FlowPay";
         if (org.includes("fluxx") || mix.includes("fluxx")) return "Fluxx Dao";
@@ -717,7 +720,9 @@
         }
         if (org.includes("neo protocol") || mix.includes("neo"))
           return "NEO Protocol";
-        return "DApps & Tools";
+        return org.includes("growth system") || mix.includes("growth system")
+          ? "NEO-Growth-System"
+          : "DApps & Tools";
       }
 
       function computeNodeVal(n, group) {
@@ -731,7 +736,12 @@
           return 12;
         if (id.includes("nexus") || id.includes("architect")) return 11;
         if (role.includes("protocol") || role.includes("contract")) return 9;
-        if (group === "FlowPay" || group === "Neo Smart Factory") return 8;
+        if (
+          group === "FlowPay" ||
+          group === "Neo Smart Factory" ||
+          group === "NEO-Growth-System"
+        )
+          return 8;
         return 6;
       }
 
