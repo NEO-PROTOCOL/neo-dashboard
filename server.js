@@ -95,6 +95,76 @@ const STACK_REPORT_CACHE_TTL_MS =
     : DEFAULT_STACK_REPORT_CACHE_TTL_MS;
 let stackReportCache = null; // { source, body, fetchedAt }
 
+function clampNumber(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function derivePrecision(report) {
+  const health = report?.ecosystem_health || {};
+  const meta = report?.meta || {};
+  const totalNodes = Math.max(Number(meta.total_nodes || 0), 1);
+  const averageReadiness = Number(health.average_readiness || 0);
+  const gradeDistribution = health.grade_distribution || {};
+  const findingsBySeverity = health.findings_by_severity || {};
+
+  const gradedNodes = Object.entries(gradeDistribution).reduce(
+    (sum, [, count]) => sum + Number(count || 0),
+    0,
+  );
+  const gradeQuality =
+    gradedNodes > 0
+      ? Object.entries(gradeDistribution).reduce((sum, [grade, count]) => {
+          const weight = {
+            A: 100,
+            B: 86,
+            C: 72,
+            D: 58,
+            F: 40,
+          }[grade] || 0;
+          return sum + weight * Number(count || 0);
+        }, 0) / gradedNodes
+      : averageReadiness;
+
+  const findingPenalty =
+    ((Number(findingsBySeverity.critical || 0) * 6) +
+      (Number(findingsBySeverity.high || 0) * 4) +
+      (Number(findingsBySeverity.medium || 0) * 2) +
+      (Number(findingsBySeverity.low || 0) * 1) +
+      (Number(findingsBySeverity.info || 0) * 0.5)) /
+    totalNodes;
+
+  const precision = clampNumber(
+    Math.round(0.68 * averageReadiness + 0.22 * gradeQuality + 12 - findingPenalty * 4),
+    0,
+    100,
+  );
+
+  return {
+    precision,
+    confidenceLabel:
+      precision >= 90
+        ? "high"
+        : precision >= 75
+          ? "solid"
+          : precision >= 60
+            ? "watch"
+            : "fragile",
+    notes: [
+      `readiness=${averageReadiness.toFixed(1)}`,
+      `grade=${gradeQuality.toFixed(1)}`,
+      `finding_penalty=${findingPenalty.toFixed(2)}`,
+    ],
+  };
+}
+
+function gradeColor(score) {
+  if (score >= 90) return "brightgreen";
+  if (score >= 80) return "green";
+  if (score >= 65) return "yellow";
+  if (score >= 50) return "orange";
+  return "red";
+}
+
 async function getCachedStackReport() {
   const now = Date.now();
   if (
@@ -297,6 +367,41 @@ app.get("/api/stack-report.json", reportRateLimit, async (_req, res) => {
   } catch (error) {
     res.status(503).json({
       error: "STACK_REPORT_UNAVAILABLE",
+      message: error.message,
+    });
+  }
+});
+
+app.get("/api/readiness-badge.json", reportRateLimit, async (_req, res) => {
+  try {
+    const { body } = await getCachedStackReport();
+    const health = body?.ecosystem_health || {};
+    const meta = body?.meta || {};
+    const score = Number(health.average_readiness || 0);
+    const findings = Number(health.total_findings || 0);
+    const nodes = Number(meta.total_nodes || 0);
+    const { precision, confidenceLabel, notes } = derivePrecision(body);
+
+    res.setHeader(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, proxy-revalidate",
+    );
+    res.json({
+      schemaVersion: 1,
+      label: "NEØ Readiness",
+      message: `${score}/100 · precision ${precision}% · ${nodes} nodes · ${findings} findings`,
+      color: gradeColor(score),
+      precision: `${precision}%`,
+      precisionScore: precision,
+      precisionLabel: confidenceLabel,
+      precisionNotes: notes,
+      namedLogo: "data:image/svg+xml;base64,",
+      style: "flat-square",
+      labelColor: "0d0d0d",
+    });
+  } catch (error) {
+    res.status(503).json({
+      error: "READINESS_BADGE_UNAVAILABLE",
       message: error.message,
     });
   }

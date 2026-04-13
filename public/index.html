@@ -106,6 +106,10 @@
                     <label>CPU</label>
                     <val id="sys-cpu">12%</val>
                 </div>
+                <div class="kpi">
+                    <label>PRECISION</label>
+                    <val id="sys-precision" style="color:var(--accent)">--%</val>
+                </div>
             </div>
         </header>
 
@@ -345,6 +349,7 @@
 
         let statsInterval = null;
         let logsInterval = null;
+        let precisionInterval = null;
         let feedBootMessageShown = false;
         let feedIdleMessageShown = false;
         let lastEventsTotal = null;
@@ -363,10 +368,12 @@
             // Initial Fetch
             await fetchNodes();
             await fetchMetrics();
+            await fetchPrecision();
             await fetchLogs();
 
             // Polling
             statsInterval = setInterval(fetchMetrics, 5000);
+            precisionInterval = setInterval(fetchPrecision, 15000);
             logsInterval = setInterval(fetchLogs, 2000);
             setInterval(fetchNodes, 30000);
         }
@@ -488,6 +495,71 @@
 
             // CPU (estimativa local do browser — explicitamente aproximada)
             document.getElementById('sys-cpu').innerText = '~' + (8 + Math.floor(Math.random() * 8)) + '%';
+        }
+
+        function calculatePrecisionFromReport(report) {
+            const health = report?.ecosystem_health || {};
+            const meta = report?.meta || {};
+            const totalNodes = Math.max(Number(meta.total_nodes || 0), 1);
+            const averageReadiness = Number(health.average_readiness || 0);
+            const grades = health.grade_distribution || {};
+            const severities = health.findings_by_severity || {};
+
+            const gradeWeights = { A: 100, B: 86, C: 72, D: 58, F: 40 };
+            const gradedNodes = Object.values(grades).reduce((sum, count) => sum + Number(count || 0), 0);
+            const gradeQuality = gradedNodes > 0
+                ? Object.entries(grades).reduce((sum, [grade, count]) => sum + (gradeWeights[grade] || 0) * Number(count || 0), 0) / gradedNodes
+                : averageReadiness;
+
+            const findingPenalty = (
+                (Number(severities.critical || 0) * 6) +
+                (Number(severities.high || 0) * 4) +
+                (Number(severities.medium || 0) * 2) +
+                (Number(severities.low || 0) * 1) +
+                (Number(severities.info || 0) * 0.5)
+            ) / totalNodes;
+
+            const precision = Math.max(0, Math.min(100,
+                Math.round((0.68 * averageReadiness) + (0.22 * gradeQuality) + 12 - (findingPenalty * 4))
+            ));
+
+            return {
+                precision,
+                label: precision >= 90 ? 'high' : precision >= 75 ? 'solid' : precision >= 60 ? 'watch' : 'fragile',
+                notes: [
+                    `readiness=${averageReadiness.toFixed(1)}`,
+                    `grade=${gradeQuality.toFixed(1)}`,
+                    `finding_penalty=${findingPenalty.toFixed(2)}`,
+                ],
+            };
+        }
+
+        async function fetchPrecision() {
+            try {
+                const res = await fetchWithAuth('/api/readiness-badge.json');
+                if (!res.ok) return;
+                const data = await res.json();
+                const precision = Number(data.precisionScore ?? parseFloat(data.precision) ?? 0);
+                const label = data.precisionLabel || (precision >= 90 ? 'high' : precision >= 75 ? 'solid' : precision >= 60 ? 'watch' : 'fragile');
+                const notes = Array.isArray(data.precisionNotes) ? data.precisionNotes : [];
+                const precisionEl = document.getElementById('sys-precision');
+                precisionEl.innerText = `${precision}%`;
+                precisionEl.title = `Derived precision (${label}): ${notes.join(' · ')}`;
+                precisionEl.style.color = precision >= 90 ? 'var(--success)' : precision >= 75 ? 'var(--accent)' : precision >= 60 ? 'var(--warning)' : '#ef4444';
+            } catch (e) {
+                try {
+                    const fallback = await fetchWithAuth('/api/stack-report.json');
+                    if (!fallback.ok) throw new Error();
+                    const report = await fallback.json();
+                    const { precision, label, notes } = calculatePrecisionFromReport(report);
+                    const precisionEl = document.getElementById('sys-precision');
+                    precisionEl.innerText = `${precision}%`;
+                    precisionEl.title = `Derived precision (${label}): ${notes.join(' · ')}`;
+                    precisionEl.style.color = precision >= 90 ? 'var(--success)' : precision >= 75 ? 'var(--accent)' : precision >= 60 ? 'var(--warning)' : '#ef4444';
+                } catch (_fallbackErr) {
+                    document.getElementById('sys-precision').innerText = '--%';
+                }
+            }
         }
 
         let lastSeenTimestamp = null;
@@ -616,6 +688,7 @@
         init = async () => {
             await oldInit();
             updateSkillsChart();
+            fetchPrecision();
         };
 
         /* COPY NODE INFO */

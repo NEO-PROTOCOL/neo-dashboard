@@ -1,8 +1,16 @@
 {
   "schemaVersion": 1,
   "label": "NE\u00d8 Readiness",
-  "message": "80.5/100 \u00b7 29 nodes \u00b7 8 findings",
+  "message": "84.1/100 \u00b7 precision 87% \u00b7 35 nodes \u00b7 20 findings",
   "color": "brightgreen",
+  "precision": "87%",
+  "precisionScore": 87,
+  "precisionLabel": "solid",
+  "precisionNotes": [
+    "readiness=84.1",
+    "grade=90.5",
+    "finding_penalty=0.60"
+  ],
   "namedLogo": "data:image/svg+xml;base64,",
   "style": "flat-square",
   "labelColor": "0d0d0d"
