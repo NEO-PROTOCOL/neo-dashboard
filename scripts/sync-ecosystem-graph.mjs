@@ -79,6 +79,29 @@ if (!sourceNodes?.length) {
 }
 
 // ── Transformation helpers ──────────────────────────────────────────────────
+const CLUSTER_LAYOUT = {
+  'NEO Protocol': { x: 0, y: 0, z: 0 },
+  'NEO-Growth-System': { x: 250, y: -70, z: 170 },
+  FlowPay: { x: -260, y: 60, z: 180 },
+  'Neo Smart Factory': { x: -230, y: -170, z: -140 },
+  'Fluxx DAO': { x: 190, y: 210, z: -100 },
+  'WOD Game': { x: 280, y: 130, z: 30 },
+  'NEO-FlowOFF': { x: 0, y: 250, z: -180 },
+  'DApps & Tools': { x: -150, y: 180, z: 220 },
+};
+
+function clusterAnchorId(group) {
+  return `__anchor__:${String(group || 'DApps & Tools').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+}
+
+function clusterAnchorLayout(group) {
+  return CLUSTER_LAYOUT[group] || CLUSTER_LAYOUT['DApps & Tools'];
+}
+
+function isAnchorNode(node) {
+  return Boolean(node?.hidden || node?.auxiliary || node?.isAnchor);
+}
+
 function normalizeGroup(node) {
   const org = String(node?.org || '').toLowerCase();
   const id = String(node?.id || '').toLowerCase();
@@ -88,7 +111,7 @@ function normalizeGroup(node) {
   if (org.includes('neo-growth-system') || mix.includes('growth system')) return 'NEO-Growth-System';
   if (org.includes('flowpay') || mix.includes('flowpay-system') || mix.includes('flowpay')) return 'FlowPay';
   if (
-    org.includes('neo smart factory') ||
+    org.includes('smart factory') ||
     mix.includes('smart-factory') ||
     mix.includes('smart factory') ||
     mix.includes('smart-ui') ||
@@ -116,10 +139,7 @@ function normalizeGroup(node) {
     return 'NEO-FlowOFF';
   }
   if (org.includes('neo protocol') || mix.includes('neo')) return 'NEO Protocol';
-  // Fallback: use the raw org field — no fake "DApps & Tools" group
-  return org.includes('growth system') || mix.includes('growth system')
-    ? 'NEO-Growth-System'
-    : (node?.org || 'NEO Protocol');
+  return 'DApps & Tools';
 }
 
 function computeNodeVal(node, group) {
@@ -268,12 +288,51 @@ for (const node of nodes) {
   byGroup.get(node.group).push(node);
 }
 
+for (const [group, groupNodes] of byGroup.entries()) {
+  if (groupNodes.length <= 1) continue;
+  const anchorId = clusterAnchorId(group);
+  if (nodeIdSet.has(anchorId)) continue;
+  const layout = clusterAnchorLayout(group);
+  nodes.push({
+    id: anchorId,
+    name: `${group} anchor`,
+    group,
+    role: 'cluster anchor',
+    org: group,
+    status: 'unknown',
+    nexusConnection: 'not_required',
+    hidden: true,
+    auxiliary: true,
+    isAnchor: true,
+    val: 1,
+    fx: layout.x,
+    fy: layout.y,
+    fz: layout.z,
+  });
+  nodeIdSet.add(anchorId);
+}
+
 for (const [, groupNodes] of byGroup.entries()) {
   if (groupNodes.length <= 1) continue;
   const hub = groupNodes.reduce((best, cur) => (cur.val > best.val ? cur : best), groupNodes[0]);
+  const anchorId = clusterAnchorId(hub.group);
   for (const node of groupNodes) {
     if (node.id === hub.id) continue;
     addLink(links, linkKeySet, node.id, hub.id, 'group');
+    const groupLink = links[links.length - 1];
+    if (groupLink) {
+      groupLink.kind = 'group';
+      groupLink.distance = 30;
+      groupLink.strength = 0.95;
+    }
+  }
+  addLink(links, linkKeySet, anchorId, hub.id, 'anchor');
+  const anchorLink = links[links.length - 1];
+  if (anchorLink) {
+    anchorLink.kind = 'anchor';
+    anchorLink.hidden = true;
+    anchorLink.distance = 90;
+    anchorLink.strength = 1.65;
   }
 }
 
@@ -282,6 +341,7 @@ const nexusId = nexusNode?.id;
 if (nexusId) {
   for (const node of nodes) {
     if (node.id === nexusId) continue;
+    if (isAnchorNode(node)) continue;
     if (node.nexusConnection === 'not_required') continue;
     addLink(
       links,
@@ -290,6 +350,12 @@ if (nexusId) {
       nexusId,
       node.nexusConnection === 'linked' ? 'nexus' : 'missing-nexus',
     );
+    const nexusLink = links[links.length - 1];
+    if (nexusLink) {
+      nexusLink.kind = node.nexusConnection === 'linked' ? 'nexus' : 'missing-nexus';
+      nexusLink.distance = node.nexusConnection === 'linked' ? 78 : 118;
+      nexusLink.strength = node.nexusConnection === 'linked' ? 0.18 : 0.12;
+    }
   }
 }
 

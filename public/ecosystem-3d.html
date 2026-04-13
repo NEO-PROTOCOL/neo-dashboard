@@ -236,6 +236,18 @@
         "Fluxx DAO": "#4488ff",
         "NEO-FlowOFF": "#ff00ff",
         "WOD Game": "#ffcc00",
+        "DApps & Tools": "#7f8ea8",
+      };
+
+      const CLUSTER_LAYOUT = {
+        "NEO Protocol": { x: 0, y: 0, z: 0 },
+        "NEO-Growth-System": { x: 250, y: -70, z: 170 },
+        FlowPay: { x: -260, y: 60, z: 180 },
+        "Neo Smart Factory": { x: -230, y: -170, z: -140 },
+        "Fluxx DAO": { x: 190, y: 210, z: -100 },
+        "WOD Game": { x: 280, y: 130, z: 30 },
+        "NEO-FlowOFF": { x: 0, y: 250, z: -180 },
+        "DApps & Tools": { x: -150, y: 180, z: 220 },
       };
 
       const statusColors = {
@@ -248,6 +260,8 @@
       const graphContainer = document.getElementById("graph-container");
       const overlay = document.querySelector(".overlay");
       const legend = document.querySelector(".legend");
+      let hoveredNodeId = null;
+      let focusedNodeId = null;
 
       overlay.insertAdjacentHTML(
         "beforeend",
@@ -543,7 +557,9 @@
       }
 
       function updateDynamicFilterOptions(nodes) {
-        const safeNodes = Array.isArray(nodes) ? nodes : [];
+        const safeNodes = (Array.isArray(nodes) ? nodes : []).filter(
+          (node) => !isAnchorNode(node),
+        );
         updateSelectOptions(
           filterGroupEl,
           safeNodes.map((n) => n?.group),
@@ -606,7 +622,9 @@
       }
 
       function applyFiltersToGraphData(fullData) {
-        const nodes = Array.isArray(fullData?.nodes) ? fullData.nodes : [];
+        const nodes = (Array.isArray(fullData?.nodes) ? fullData.nodes : []).filter(
+          (node) => !isAnchorNode(node),
+        );
         const links = Array.isArray(fullData?.links) ? fullData.links : [];
         const search = filterState.search.trim().toLowerCase();
 
@@ -653,6 +671,7 @@
         const filteredLinks = links.filter((link) => {
           const src = linkEndId(link?.source);
           const tgt = linkEndId(link?.target);
+          if (link?.hidden) return false;
           return filteredIdSet.has(src) && filteredIdSet.has(tgt);
         });
 
@@ -705,7 +724,7 @@
           return "NEO-Growth-System";
         if (org.includes("flowpay") || mix.includes("flowpay-system") || mix.includes("flowpay"))
           return "FlowPay";
-        if (org.includes("fluxx") || mix.includes("fluxx")) return "Fluxx Dao";
+        if (org.includes("fluxx") || mix.includes("fluxx")) return "Fluxx DAO";
         if (
           org.includes("smart factory") ||
           mix.includes("smart-factory") ||
@@ -737,9 +756,7 @@
         }
         if (org.includes("neo protocol") || mix.includes("neo"))
           return "NEO Protocol";
-        return org.includes("growth system") || mix.includes("growth system")
-          ? "NEO-Growth-System"
-          : "DApps & Tools";
+        return "DApps & Tools";
       }
 
       function computeNodeVal(n, group) {
@@ -761,6 +778,43 @@
         )
           return 8;
         return 6;
+      }
+
+      function isAnchorNode(node) {
+        return Boolean(node?.hidden || node?.auxiliary || node?.isAnchor);
+      }
+
+      function clusterAnchorId(group) {
+        return `__anchor__:${String(group || "DApps & Tools").toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+      }
+
+      function clusterAnchorLayout(group) {
+        return CLUSTER_LAYOUT[group] || CLUSTER_LAYOUT["DApps & Tools"];
+      }
+
+      function shouldShowNodeLabel(node) {
+        if (!node || isAnchorNode(node)) return false;
+        if (hoveredNodeId && hoveredNodeId === node.id) return true;
+        if (focusedNodeId && focusedNodeId === node.id) return true;
+        const role = String(node?.role || "").toLowerCase();
+        return (
+          node.val >= 9 ||
+          node._isPaymentNode ||
+          node.nexusConnection === "unlinked" ||
+          role.includes("orchestrator") ||
+          role.includes("event hub") ||
+          role.includes("sovereign")
+        );
+      }
+
+      function nodeLabelText(node) {
+        if (!node) return "";
+        const parts = [node.name || node.id];
+        if (node.group && node.group !== "DApps & Tools") parts.push(node.group);
+        if (node.status && node.status !== "unknown") parts.push(node.status);
+        if (node.nexusConnection && node.nexusConnection !== "not_required")
+          parts.push(`nexus:${node.nexusConnection}`);
+        return parts.join(" · ");
       }
 
       function nodeStatus(rawNode) {
@@ -872,14 +926,18 @@
       }
 
       function linkColor(link) {
-        if (link.label === "missing-nexus") return "#ff4d67";
+        if (link.kind === "anchor") return "rgba(154, 164, 178, 0.10)";
+        if (link.label === "group" || link.kind === "group")
+          return "rgba(154, 164, 178, 0.16)";
+        if (link.label === "missing-nexus") return "rgba(255, 77, 103, 0.86)";
+        if (link.kind === "nexus") return "rgba(154, 164, 178, 0.34)";
         const source = latestNodeMeta.get(linkEndId(link.source));
         const target = latestNodeMeta.get(linkEndId(link.target));
         if (source?.status === "offline" || target?.status === "offline")
-          return "#ff7d8e";
+          return "rgba(255, 125, 142, 0.58)";
         if (source?.status === "degraded" || target?.status === "degraded")
-          return "#ffb74d";
-        return "#2f3948";
+          return "rgba(255, 183, 77, 0.48)";
+        return "rgba(47, 57, 72, 0.54)";
       }
 
       function normalizeGraphData(data) {
@@ -951,20 +1009,68 @@
           if (until < now) changedUntilById.delete(id);
         }
 
+        for (const [group, groupNodes] of byGroup.entries()) {
+          if (groupNodes.length <= 1) continue;
+          const anchorId = clusterAnchorId(group);
+          if (!seen.has(anchorId)) {
+            seen.add(anchorId);
+            const layout = clusterAnchorLayout(group);
+            const anchor = {
+              id: anchorId,
+              name: `${group} anchor`,
+              group,
+              role: "cluster anchor",
+              org: group,
+              status: "unknown",
+              nexusConnection: "not_required",
+              hidden: true,
+              auxiliary: true,
+              isAnchor: true,
+              val: 1,
+              fx: layout.x,
+              fy: layout.y,
+              fz: layout.z,
+            };
+            nodes.push(anchor);
+            latestNodeMeta.set(anchor.id, anchor);
+          }
+        }
+
         for (const [, groupNodes] of byGroup.entries()) {
           if (groupNodes.length <= 1) continue;
           const hub = groupNodes.reduce(
             (best, cur) => (cur.val > best.val ? cur : best),
             groupNodes[0],
           );
+          const anchorId = clusterAnchorId(hub.group);
           groupNodes.forEach((n) => {
             if (n.id === hub.id) return;
             const key = `${n.id}->${hub.id}`;
             if (!linkKey.has(key)) {
               linkKey.add(key);
-              links.push({ source: n.id, target: hub.id, label: "group" });
+              links.push({
+                source: n.id,
+                target: hub.id,
+                label: "group",
+                kind: "group",
+                distance: 30,
+                strength: 0.95,
+              });
             }
           });
+          const anchorKey = `${anchorId}->${hub.id}`;
+          if (!linkKey.has(anchorKey)) {
+            linkKey.add(anchorKey);
+            links.push({
+              source: anchorId,
+              target: hub.id,
+              label: "anchor",
+              kind: "anchor",
+              hidden: true,
+              distance: 90,
+              strength: 1.65,
+            });
+          }
         }
 
         const nexusNode = nodes.find((n) =>
@@ -974,6 +1080,7 @@
         if (nexusId && seen.has(nexusId)) {
           nodes.forEach((n) => {
             if (n.id === nexusId) return;
+            if (isAnchorNode(n)) return;
             if (n.nexusConnection === "not_required") return;
             const key = `${n.id}->${nexusId}`;
             if (!linkKey.has(key)) {
@@ -983,6 +1090,9 @@
                 target: nexusId,
                 label:
                   n.nexusConnection === "linked" ? "nexus" : "missing-nexus",
+                kind: n.nexusConnection === "linked" ? "nexus" : "missing-nexus",
+                distance: n.nexusConnection === "linked" ? 78 : 118,
+                strength: n.nexusConnection === "linked" ? 0.18 : 0.12,
               });
             }
           });
@@ -1056,7 +1166,12 @@
       }
 
       function renderHud(payload, fullGraphData, filteredGraphData) {
-        const allData = fullGraphData || { nodes: [] };
+        const allData = {
+          nodes: (Array.isArray(fullGraphData?.nodes) ? fullGraphData.nodes : []).filter(
+            (node) => !isAnchorNode(node),
+          ),
+          links: Array.isArray(fullGraphData?.links) ? fullGraphData.links : [],
+        };
         const visibleData = filteredGraphData || allData;
         const mode = describePayloadMode(payload);
         const statusCount = allData.nodes.reduce(
@@ -1182,7 +1297,9 @@
       }
 
       function renderFallback(data, reason) {
-        const nodes = (data?.nodes || []).slice(0, 60);
+        const nodes = (Array.isArray(data?.nodes) ? data.nodes : [])
+          .filter((node) => !isAnchorNode(node))
+          .slice(0, 60);
         graphContainer.innerHTML = `
           <div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#7ee7ff;font-size:13px;letter-spacing:.3px;">
             Graph fallback mode (${reason}). Nodes loaded: ${nodes.length}
@@ -1191,8 +1308,12 @@
       }
 
       function renderStaticSvg(data, reason = "static_svg") {
-        const nodes = Array.isArray(data?.nodes) ? data.nodes : [];
-        const links = Array.isArray(data?.links) ? data.links : [];
+        const nodes = (Array.isArray(data?.nodes) ? data.nodes : []).filter(
+          (node) => !isAnchorNode(node),
+        );
+        const links = (Array.isArray(data?.links) ? data.links : []).filter(
+          (link) => !link?.hidden,
+        );
         if (!nodes.length) {
           renderFallback(data, reason);
           return;
@@ -1232,7 +1353,9 @@
             (n) => `
             <g>
               <circle cx="${n.x}" cy="${n.y}" r="5" fill="${n.color}" />
-              <text x="${n.x + 8}" y="${n.y + 4}" fill="#9aa4b2" font-size="11" font-family="Inter, sans-serif">${(n.name || "").replace(/</g, "&lt;")}</text>
+              ${shouldShowNodeLabel(n)
+                ? `<text x="${n.x + 8}" y="${n.y + 4}" fill="#9aa4b2" font-size="11" font-family="Inter, sans-serif">${escapeHtml(n.name || "")}</text>`
+                : ""}
             </g>
           `,
           )
@@ -1259,11 +1382,14 @@
         graphInstance = ForceGraph()(graphContainer)
           .graphData(data)
           .backgroundColor("#0a0a0a")
-          .nodeLabel(
-            (n) =>
-              `${n.name}\n${n.group || ""}\nstatus: ${n.status}\nnexus: ${n.nexusConnection}\npayment-routes: ${Array.isArray(n._paymentRoutes) ? n._paymentRoutes.length : 0}`,
-          )
+          .nodeVisibility((node) => !isAnchorNode(node))
+          .linkVisibility((link) => !link?.hidden)
+          .linkDistance((link) => link.distance || (link.label === "missing-nexus" ? 112 : 48))
+          .linkStrength((link) => link.strength || (link.label === "missing-nexus" ? 0.12 : 0.55))
+          .nodeLabel((n) => nodeLabelText(n))
           .nodeCanvasObject((node, ctx, globalScale) => {
+            if (isAnchorNode(node)) return;
+            const showLabel = shouldShowNodeLabel(node);
             const label = node.name || "";
             const fontSize = 10 / globalScale;
             ctx.beginPath();
@@ -1280,12 +1406,31 @@
               ctx.lineWidth = 1.2 / globalScale;
               ctx.stroke();
             }
-            ctx.font = `${fontSize}px Inter, sans-serif`;
-            ctx.fillStyle = "#9aa4b2";
-            ctx.fillText(label, node.x + 6, node.y + 3);
+            if (showLabel) {
+              ctx.font = `${fontSize}px Inter, sans-serif`;
+              ctx.fillStyle = "#9aa4b2";
+              ctx.fillText(label, node.x + 6, node.y + 3);
+            }
           })
           .linkColor((link) => linkColor(link))
-          .linkWidth((link) => (link.label === "missing-nexus" ? 1.6 : 0.7))
+          .linkWidth((link) => {
+            if (link?.kind === "anchor") return 0;
+            if (link?.kind === "group") return 0.45;
+            if (link?.kind === "nexus") return 0.9;
+            return link.label === "missing-nexus" ? 1.3 : 0.55;
+          })
+          .onNodeHover((node) => {
+            hoveredNodeId = node?.id || null;
+            try {
+              graphInstance.refresh();
+            } catch (_e) {}
+          })
+          .onNodeClick((node) => {
+            focusedNodeId = node?.id || null;
+            try {
+              graphInstance.refresh();
+            } catch (_e) {}
+          })
           .cooldownTime(2500);
 
         setTimeout(() => {
@@ -1301,24 +1446,45 @@
         graphInstance = ForceGraph3D()(graphContainer)
           .graphData(data)
           .backgroundColor("#0a0a0a")
-          .nodeLabel(
-            (node) =>
-              `<span style="color:${nodeColor(node)}"><b>${node.name}</b></span><br/>${node.group}<br/>status: ${node.status}<br/>nexus: ${node.nexusConnection}<br/>payment-routes: ${Array.isArray(node._paymentRoutes) ? node._paymentRoutes.length : 0}`,
-          )
+          .nodeVisibility((node) => !isAnchorNode(node))
+          .linkVisibility((link) => !link?.hidden)
+          .linkDistance((link) => link.distance || (link.label === "missing-nexus" ? 120 : 52))
+          .linkStrength((link) => link.strength || (link.label === "missing-nexus" ? 0.12 : 0.48))
+          .nodeLabel((node) => nodeLabelText(node))
           .nodeColor((node) => nodeColor(node))
           .nodeVal((node) => node.val)
-          .nodeRelSize(8)
-          .nodeResolution(24)
+          .nodeRelSize(6.5)
+          .nodeResolution(18)
           .linkDirectionalParticles((link) =>
-            link.label === "missing-nexus" ? 4 : 2,
+            link.kind === "anchor"
+              ? 0
+              : link.label === "missing-nexus"
+                ? 2
+                : link.kind === "nexus"
+                  ? 1
+                  : 0,
           )
-          .linkDirectionalParticleSpeed(() => 0.005)
+          .linkDirectionalParticleSpeed((link) =>
+            link.label === "missing-nexus" ? 0.003 : 0.002,
+          )
           .linkDirectionalParticleWidth((link) =>
-            link.label === "missing-nexus" ? 2.6 : 1.8,
+            link.label === "missing-nexus" ? 2.1 : link.kind === "nexus" ? 1.1 : 0,
           )
-          .linkWidth((link) => (link.label === "missing-nexus" ? 1.8 : 1))
+          .linkWidth((link) => {
+            if (link?.kind === "anchor") return 0;
+            if (link?.kind === "group") return 0.35;
+            if (link?.kind === "nexus") return 0.8;
+            return link.label === "missing-nexus" ? 1.4 : 0.75;
+          })
           .linkColor((link) => linkColor(link))
+          .onNodeHover((node) => {
+            hoveredNodeId = node?.id || null;
+            try {
+              graphInstance.refresh();
+            } catch (_e) {}
+          })
           .onNodeClick((node) => {
+            focusedNodeId = node?.id || null;
             const distance = 40;
             const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
             graphInstance.cameraPosition(
@@ -1330,6 +1496,9 @@
               node,
               3000,
             );
+            try {
+              graphInstance.refresh();
+            } catch (_e) {}
           });
 
         setTimeout(() => {
