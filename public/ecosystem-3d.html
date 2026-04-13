@@ -309,13 +309,13 @@
       const ACID_BASES = ["#b8ff3f", "#9dfd7c", "#85ffe0", "#dfff58", "#a7ffb2"];
       const ORG_LAYOUT = {
         "NEO Protocol": { x: 0, y: 0, z: 0 },
-        "NEO-Growth-System": { x: 250, y: -70, z: 170 },
-        "FlowPay (NEØ Stack)": { x: -260, y: 60, z: 180 },
-        "Neo Smart Factory": { x: -230, y: -170, z: -140 },
-        "Fluxx DAO": { x: 190, y: 210, z: -100 },
-        "WOD Game": { x: 280, y: 130, z: 30 },
-        "NEO-FlowOFF": { x: 0, y: 250, z: -180 },
-        "DApps & Tools": { x: -150, y: 180, z: 220 },
+        "NEO-Growth-System": { x: 95, y: -10, z: 55 },
+        "FlowPay (NEØ Stack)": { x: -105, y: 22, z: 62 },
+        "Neo Smart Factory": { x: -88, y: -64, z: -42 },
+        "Fluxx DAO": { x: 78, y: 88, z: -28 },
+        "WOD Game": { x: 104, y: 52, z: 22 },
+        "NEO-FlowOFF": { x: -18, y: 102, z: -56 },
+        "DApps & Tools": { x: -60, y: 68, z: 86 },
       };
 
       const statusColors = {
@@ -953,8 +953,8 @@
       function workspaceOffsetFromKey(key) {
         const seed = hashString(key);
         const angle = (seed % 360) * (Math.PI / 180);
-        const radius = 48 + (seed % 4) * 18;
-        const z = ((seed >> 3) % 7 - 3) * 18;
+        const radius = 18 + (seed % 3) * 10;
+        const z = ((seed >> 3) % 5 - 2) * 10;
         return {
           x: Math.cos(angle) * radius,
           y: Math.sin(angle) * radius,
@@ -1143,6 +1143,22 @@
           if (force && typeof force.strength === "function") {
             force.strength(strength);
           }
+        }
+      }
+
+      function configureGraphForces(instance) {
+        if (!instance || typeof instance.d3Force !== "function") return;
+        const charge = instance.d3Force("charge");
+        if (charge && typeof charge.strength === "function") {
+          charge.strength(-22);
+        }
+        const center = instance.d3Force("center");
+        if (center && typeof center.strength === "function") {
+          center.strength(0.18);
+        }
+        const radial = instance.d3Force("radial");
+        if (radial && typeof radial.strength === "function") {
+          radial.strength(0.02);
         }
       }
 
@@ -1662,6 +1678,7 @@
           (link) => link.distance || (link.label === "missing-nexus" ? 112 : 48),
           (link) => link.strength || (link.label === "missing-nexus" ? 0.12 : 0.55),
         );
+        configureGraphForces(graphInstance);
 
         setTimeout(() => {
           try {
@@ -1733,6 +1750,7 @@
           (link) => link.distance || (link.label === "missing-nexus" ? 120 : 52),
           (link) => link.strength || (link.label === "missing-nexus" ? 0.12 : 0.48),
         );
+        configureGraphForces(graphInstance);
 
         setTimeout(() => {
           try {
