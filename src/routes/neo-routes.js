@@ -664,7 +664,24 @@ async function loadEcosystemNodes() {
     console.warn("Failed to read ecosystem.json:", e.message);
   }
 
-  // Source 2: Remote GitHub source (mirroring ecosystem-health-routes.js)
+  // Source 2: Bundled local file in dashboard root (for direct deployments)
+  // This ensures that pushed changes to the dashboard repo reflect immediately.
+  const rootGraphPath = path.resolve(process.cwd(), "ecosystem-graph.json");
+  try {
+    if (fs.existsSync(rootGraphPath)) {
+      const raw = fs.readFileSync(rootGraphPath, "utf8");
+      const parsed = JSON.parse(raw);
+      const rawNodes = Array.isArray(parsed?.nodes) ? parsed.nodes : (Array.isArray(parsed) ? parsed : []);
+      if (rawNodes.length > 0) {
+        const nodes = rawNodes.filter((n) => !ECOSYSTEM_EXCLUDE_IDS.has(n?.id));
+        if (nodes.length > 0) {
+          return { success: true, nodes, source: "local-graph-file" };
+        }
+      }
+    }
+  } catch (_e) {}
+
+  // Source 3: Remote GitHub source (mirroring ecosystem-health-routes.js)
   const remoteUrls = [
     process.env.ECOSYSTEM_SOURCE_URL,
     "https://raw.githubusercontent.com/NEO-PROTOCOL/neobot-orchestrator/main/config/ecosystem.json",
