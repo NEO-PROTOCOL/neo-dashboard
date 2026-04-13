@@ -642,6 +642,8 @@ async function probeNodeStatus(url) {
 }
 
 async function loadEcosystemNodes() {
+  const now = Date.now();
+
   // Source 1: registry local filesystem (dev environment only)
   const ecosystemPath = path.resolve(
     process.cwd(),
@@ -662,7 +664,31 @@ async function loadEcosystemNodes() {
     console.warn("Failed to read ecosystem.json:", e.message);
   }
 
-  // Source 2: Nexus API (when local registry is unavailable)
+  // Source 2: Remote GitHub source (mirroring ecosystem-health-routes.js)
+  const remoteUrls = [
+    process.env.ECOSYSTEM_SOURCE_URL,
+    "https://raw.githubusercontent.com/NEO-PROTOCOL/neobot-orchestrator/main/config/ecosystem.json",
+  ].filter(Boolean);
+
+  for (const remoteUrl of remoteUrls) {
+    try {
+      const response = await fetchWithTimeout(remoteUrl, { method: "GET" }, 10000);
+      if (response.ok) {
+        const raw = await response.text();
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const nodes = parsed.filter((n) => !ECOSYSTEM_EXCLUDE_IDS.has(n?.id));
+          if (nodes.length > 0) {
+            return { success: true, nodes, source: "github" };
+          }
+        }
+      }
+    } catch (_e) {
+      // try next
+    }
+  }
+
+  // Source 3: Nexus API (when local registry and GitHub are unavailable)
   try {
     const r = await fetchWithTimeout(NEXUS_ECOSYSTEM_URL);
     if (r.ok) {
@@ -694,7 +720,7 @@ async function loadEcosystemNodes() {
     console.warn("Failed to fetch ecosystem from Nexus API:", e.message);
   }
 
-  // Source 3: ecosystem-graph.json bundled in the repo (autonomous fallback)
+  // Source 4: ecosystem-graph.json bundled in the repo (autonomous fallback)
   // This file is enriched with production URLs via `pnpm run sync:ecosystem-graph`
   // and allows the dashboard to probe node health without depending on neobot.
   const graphPath = path.resolve(process.cwd(), "ecosystem-graph.json");
