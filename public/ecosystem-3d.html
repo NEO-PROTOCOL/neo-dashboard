@@ -1087,6 +1087,21 @@
         return ACID_BASES[seed % ACID_BASES.length] || ACID_BASES[0];
       }
 
+      function nodeImportance(node) {
+        const role = String(node?.role || "").toLowerCase();
+        const val = Number(node?.val || 0);
+        if (
+          role.includes("orchestrator") ||
+          role.includes("event hub") ||
+          role.includes("sovereign") ||
+          val >= 11
+        ) {
+          return "hub";
+        }
+        if (val >= 9) return "core";
+        return "satellite";
+      }
+
       // Blend two hex colors — t=0 → pure hex1, t=1 → pure hex2
       function blendHex(hex1, hex2, t) {
         const h2r = (h) => [
@@ -1104,25 +1119,40 @@
 
       function nodeColor(node) {
         const base = nodeTone(node);
-        if (node.status === "online") return base;
-        if (node.status === "degraded") return blendHex(base, "#ffb74d", 0.28);
-        if (node.status === "offline") return blendHex(base, "#ff4d67", 0.36);
-        return blendHex(base, "#202530", 0.42);
+        const importance = nodeImportance(node);
+        const alpha =
+          importance === "hub" ? 1 :
+          importance === "core" ? 0.9 :
+          0.72;
+        if (node.status === "online") return hexToRgba(base, alpha);
+        if (node.status === "degraded") return hexToRgba(blendHex(base, "#ffb74d", 0.28), alpha);
+        if (node.status === "offline") return hexToRgba(blendHex(base, "#ff4d67", 0.36), Math.min(alpha, 0.84));
+        return hexToRgba(blendHex(base, "#202530", 0.42), Math.max(0.52, alpha - 0.1));
+      }
+
+      function hexToRgba(hex, alpha) {
+        const normalized = String(hex || "#ffffff").trim();
+        const clean = normalized.startsWith("#") ? normalized.slice(1) : normalized;
+        if (clean.length !== 6) return `rgba(255, 255, 255, ${alpha})`;
+        const r = parseInt(clean.slice(0, 2), 16);
+        const g = parseInt(clean.slice(2, 4), 16);
+        const b = parseInt(clean.slice(4, 6), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
       }
 
       function linkColor(link) {
-        if (link.kind === "anchor") return "rgba(154, 164, 178, 0.10)";
+        if (link.kind === "anchor") return "rgba(154, 164, 178, 0.06)";
         if (link.label === "group" || link.kind === "group")
-          return "rgba(154, 164, 178, 0.16)";
-        if (link.label === "missing-nexus") return "rgba(255, 77, 103, 0.86)";
-        if (link.kind === "nexus") return "rgba(154, 164, 178, 0.34)";
+          return "rgba(154, 164, 178, 0.11)";
+        if (link.label === "missing-nexus") return "rgba(255, 77, 103, 0.68)";
+        if (link.kind === "nexus") return "rgba(154, 164, 178, 0.24)";
         const source = latestNodeMeta.get(linkEndId(link.source));
         const target = latestNodeMeta.get(linkEndId(link.target));
         if (source?.status === "offline" || target?.status === "offline")
-          return "rgba(255, 125, 142, 0.58)";
+          return "rgba(255, 125, 142, 0.36)";
         if (source?.status === "degraded" || target?.status === "degraded")
-          return "rgba(255, 183, 77, 0.48)";
-        return "rgba(47, 57, 72, 0.54)";
+          return "rgba(255, 183, 77, 0.28)";
+        return "rgba(47, 57, 72, 0.28)";
       }
 
       function configureLinkPhysics(instance, distance, strength) {
@@ -1595,7 +1625,7 @@
           .map(
             (n) => `
             <g>
-              <circle cx="${n.x}" cy="${n.y}" r="5" fill="${n.color}" />
+              <circle cx="${n.x}" cy="${n.y}" r="${Math.max(3.1, Math.min(6.8, (n.val || 6) / 2.4))}" fill="${n.color}" />
               ${shouldShowNodeLabel(n)
                 ? `<text x="${n.x + 8}" y="${n.y + 4}" fill="#9aa4b2" font-size="11" font-family="Inter, sans-serif">${escapeHtml(n.name || "")}</text>`
                 : ""}
@@ -1633,8 +1663,9 @@
             const showLabel = shouldShowNodeLabel(node);
             const label = node.name || "";
             const fontSize = 10 / globalScale;
+            const radius = Math.max(2.6, Math.min(6.2, (node.val || 6) / 3));
             ctx.beginPath();
-            ctx.arc(node.x, node.y, 3, 0, 2 * Math.PI, false);
+            ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
             ctx.fillStyle = nodeColor(node);
             ctx.fill();
             if (node._isPaymentNode) {
@@ -1698,7 +1729,7 @@
           .nodeLabel((node) => nodeLabelText(node))
           .nodeColor((node) => nodeColor(node))
           .nodeVal((node) => node.val)
-          .nodeRelSize(6.5)
+          .nodeRelSize(5.6)
           .nodeResolution(18)
           .linkDirectionalParticles((link) =>
             link.kind === "anchor"
