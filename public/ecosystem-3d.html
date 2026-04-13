@@ -62,6 +62,30 @@
       .legend-body {
         margin-top: 8px;
       }
+      .legend-note {
+        margin-top: 6px;
+        color: #7f8ea3;
+        font-size: 10px;
+        line-height: 1.4;
+      }
+      .legend-group {
+        margin-top: 10px;
+      }
+      .legend-group-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: #8fa2bb;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: .4px;
+      }
+      .legend-divider {
+        border: none;
+        border-top: 1px solid #2a3240;
+        margin: 10px 0;
+      }
       .legend.collapsed .legend-body {
         display: none;
       }
@@ -184,12 +208,16 @@
         <span class="legend-arrow">▼</span>
       </div>
       <div class="legend-body" id="legend-body">
-        <div class="legend-item"><div class="dot" style="background:#ff4444"></div>NEO Protocol</div>
-        <div class="legend-item"><div class="dot" style="background:#00ccff"></div>Neo Smart Factory</div>
-        <div class="legend-item"><div class="dot" style="background:#00ffcc"></div>FlowPay</div>
-        <div class="legend-item"><div class="dot" style="background:#4488ff"></div>Fluxx DAO</div>
-        <div class="legend-item"><div class="dot" style="background:#ffcc00"></div>WOD Game</div>
-        <div class="legend-item"><div class="dot" style="background:#ff00ff"></div>NEO-FlowOFF</div>
+        <div class="legend-note">Color = família do nó. Tint = estado operacional.</div>
+        <div class="legend-group">
+          <div class="legend-group-title">Family Colors</div>
+          <div class="legend-item"><div class="dot" style="background:#ff4444"></div>NEO Protocol</div>
+          <div class="legend-item"><div class="dot" style="background:#00ccff"></div>Neo Smart Factory</div>
+          <div class="legend-item"><div class="dot" style="background:#00ffcc"></div>FlowPay</div>
+          <div class="legend-item"><div class="dot" style="background:#4488ff"></div>Fluxx DAO</div>
+          <div class="legend-item"><div class="dot" style="background:#ffcc00"></div>WOD [X] PRO / WOD Game</div>
+          <div class="legend-item"><div class="dot" style="background:#ff00ff"></div>NEO-FlowOFF</div>
+        </div>
       </div>
     </div>
 
@@ -311,10 +339,14 @@
         "beforeend",
         `
           <hr style="border:none;border-top:1px solid #2a3240;margin:8px 0" />
-          <div class="legend-item"><div class="dot" style="background:${statusColors.online}"></div>Online</div>
-          <div class="legend-item"><div class="dot" style="background:${statusColors.degraded}"></div>Degraded</div>
-          <div class="legend-item"><div class="dot" style="background:${statusColors.offline}"></div>Offline</div>
-          <div class="legend-item"><div class="dot" style="background:${statusColors.unknown}"></div>Unknown</div>
+          <hr class="legend-divider" />
+          <div class="legend-group">
+            <div class="legend-group-title">State Tint</div>
+            <div class="legend-item"><div class="dot" style="background:${statusColors.online}"></div>Online</div>
+            <div class="legend-item"><div class="dot" style="background:${statusColors.degraded}"></div>Degraded</div>
+            <div class="legend-item"><div class="dot" style="background:${statusColors.offline}"></div>Offline</div>
+            <div class="legend-item"><div class="dot" style="background:${statusColors.unknown}"></div>Unknown</div>
+          </div>
         `,
       );
 
