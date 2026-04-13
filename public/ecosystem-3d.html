@@ -290,15 +290,11 @@
         <span class="legend-arrow">▼</span>
       </div>
       <div class="legend-body" id="legend-body">
-        <div class="legend-note">Color = família do nó. Tint = estado operacional.</div>
+        <div class="legend-note">Layout = organização / workspace. Tonalidade = ácido. Tint = estado operacional.</div>
         <div class="legend-group">
-          <div class="legend-group-title">Family Colors</div>
-          <div class="legend-item"><div class="dot" style="background:#d4deea"></div>NEO Protocol</div>
-          <div class="legend-item"><div class="dot" style="background:#00ccff"></div>Neo Smart Factory</div>
-          <div class="legend-item"><div class="dot" style="background:#00ffcc"></div>FlowPay</div>
-          <div class="legend-item"><div class="dot" style="background:#4488ff"></div>Fluxx DAO</div>
-          <div class="legend-item"><div class="dot" style="background:#ffcc00"></div>WOD [X] PRO / WOD Game</div>
-          <div class="legend-item"><div class="dot" style="background:#ff00ff"></div>NEO-FlowOFF</div>
+          <div class="legend-group-title">Layout</div>
+          <div class="legend-item"><div class="dot" style="background:#b8ff3f"></div>Org / workspace clusters</div>
+          <div class="legend-item"><div class="dot" style="background:#8ef7c0"></div>Acid variations by node type</div>
         </div>
       </div>
     </div>
@@ -310,21 +306,11 @@
       const MAX_EVENT_LINES = 8;
       const PAYMENT_ROUTES_TTL_MS = 30000;
 
-      const colorMap = {
-        "NEO Protocol": "#d4deea",
-        "NEO-Growth-System": "#9affd6",
-        "Neo Smart Factory": "#00c7ff",
-        FlowPay: "#18d7b5",
-        "Fluxx DAO": "#4488ff",
-        "NEO-FlowOFF": "#ff00ff",
-        "WOD Game": "#ffcc00",
-        "DApps & Tools": "#7f8ea8",
-      };
-
-      const CLUSTER_LAYOUT = {
+      const ACID_BASES = ["#b8ff3f", "#9dfd7c", "#85ffe0", "#dfff58", "#a7ffb2"];
+      const ORG_LAYOUT = {
         "NEO Protocol": { x: 0, y: 0, z: 0 },
         "NEO-Growth-System": { x: 250, y: -70, z: 170 },
-        FlowPay: { x: -260, y: 60, z: 180 },
+        "FlowPay (NEØ Stack)": { x: -260, y: 60, z: 180 },
         "Neo Smart Factory": { x: -230, y: -170, z: -140 },
         "Fluxx DAO": { x: 190, y: 210, z: -100 },
         "WOD Game": { x: 280, y: 130, z: 30 },
@@ -382,9 +368,9 @@
                 </select>
               </div>
               <div>
-                <label class="control-label" for="filter-group">Group</label>
+                <label class="control-label" for="filter-group">Org / Workspace</label>
                 <select id="filter-group" class="control-select">
-                  <option value="all">All Groups</option>
+                  <option value="all">All Org / Workspaces</option>
                 </select>
               </div>
               <div>
@@ -900,51 +886,46 @@
         };
       }
 
-      function normalizeGroup(n) {
-        const org = String(n?.org || "").toLowerCase();
-        const mix =
-          `${n?.id || ""} ${n?.name || ""} ${n?.role || ""}`.toLowerCase();
-
-        if (org.includes("neo-growth-system") || mix.includes("growth system"))
-          return "NEO-Growth-System";
-        if (org.includes("flowpay") || mix.includes("flowpay-system") || mix.includes("flowpay"))
-          return "FlowPay";
-        if (org.includes("fluxx") || mix.includes("fluxx")) return "Fluxx DAO";
-        if (
-          org.includes("smart factory") ||
-          mix.includes("smart-factory") ||
-          mix.includes("smart factory") ||
-          mix.includes("smart-ui") ||
-          mix.includes("smart ui") ||
-          mix.includes("smart-core") ||
-          mix.includes("smart core") ||
-          mix.includes("smart-cli") ||
-          mix.includes("smart cli") ||
-          mix.includes("smart-nft") ||
-          mix.includes("smart nft") ||
-          mix.includes("smart-ui-mobile") ||
-          mix.includes("smart ui mobile") ||
-          mix.includes("smart-ui-landing") ||
-          mix.includes("smart ui landing") ||
-          mix.includes("internal ops")
-        )
-          return "Neo Smart Factory";
-        if (org.includes("wod") || mix.includes("wodxpro") || mix.includes("wod")) return "WOD Game";
-        if (
-          org.includes("neo-flowoff") ||
-          mix.includes("flowoff") ||
-          mix.includes("pro-ia") ||
-          mix.includes("node neø run") ||
-          mix.includes("node neo run")
-        ) {
-          return "NEO-FlowOFF";
+      function hashString(value) {
+        const input = String(value || "");
+        let hash = 0;
+        for (let i = 0; i < input.length; i += 1) {
+          hash = (hash * 31 + input.charCodeAt(i)) | 0;
         }
-        if (org.includes("neo protocol") || mix.includes("neo"))
-          return "NEO Protocol";
-        return "DApps & Tools";
+        return Math.abs(hash);
       }
 
-      function computeNodeVal(n, group) {
+      function resolveWorkspaceScope(raw) {
+        const candidates = [
+          raw?.workspaceScope,
+          raw?.workspace,
+          raw?.scope,
+          raw?.hosting?.workspaceScope,
+        ];
+        for (const value of candidates) {
+          const text = String(value || "").trim();
+          if (text) return text;
+        }
+        return "root";
+      }
+
+      function resolveCluster(raw) {
+        const org = String(raw?.org || "DApps & Tools").trim() || "DApps & Tools";
+        const workspace = resolveWorkspaceScope(raw);
+        const isWorkspace = workspace !== "root";
+        const label = isWorkspace ? `${org} / ${workspace}` : org;
+        const slug = label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+        return {
+          org,
+          workspace,
+          isWorkspace,
+          key: `${org}::${workspace}`,
+          label,
+          slug,
+        };
+      }
+
+      function computeNodeVal(n, cluster) {
         const role = String(n?.role || "").toLowerCase();
         const id = String(n?.id || "").toLowerCase();
         if (
@@ -956,10 +937,10 @@
         if (id.includes("nexus") || id.includes("architect")) return 11;
         if (role.includes("protocol") || role.includes("contract")) return 9;
         if (
-          group === "FlowPay" ||
-          group === "Neo Smart Factory" ||
-          group === "NEO-Growth-System" ||
-          group === "WOD Game"
+          cluster?.org === "FlowPay (NEØ Stack)" ||
+          cluster?.org === "Neo Smart Factory" ||
+          cluster?.org === "NEO-Growth-System" ||
+          cluster?.org === "WOD Game"
         )
           return 8;
         return 6;
@@ -969,12 +950,31 @@
         return Boolean(node?.hidden || node?.auxiliary || node?.isAnchor);
       }
 
-      function clusterAnchorId(group) {
-        return `__anchor__:${String(group || "DApps & Tools").toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+      function workspaceOffsetFromKey(key) {
+        const seed = hashString(key);
+        const angle = (seed % 360) * (Math.PI / 180);
+        const radius = 48 + (seed % 4) * 18;
+        const z = ((seed >> 3) % 7 - 3) * 18;
+        return {
+          x: Math.cos(angle) * radius,
+          y: Math.sin(angle) * radius,
+          z,
+        };
       }
 
-      function clusterAnchorLayout(group) {
-        return CLUSTER_LAYOUT[group] || CLUSTER_LAYOUT["DApps & Tools"];
+      function clusterAnchorId(cluster) {
+        return `__anchor__:${String(cluster?.slug || "dapps-tools")}`;
+      }
+
+      function clusterAnchorLayout(cluster) {
+        const base = ORG_LAYOUT[cluster?.org] || ORG_LAYOUT["DApps & Tools"];
+        if (!cluster?.isWorkspace) return base;
+        const offset = workspaceOffsetFromKey(cluster.key);
+        return {
+          x: base.x + offset.x,
+          y: base.y + offset.y,
+          z: base.z + offset.z,
+        };
       }
 
       function shouldShowNodeLabel(node) {
@@ -983,7 +983,7 @@
         if (focusedNodeId && focusedNodeId === node.id) return true;
         const role = String(node?.role || "").toLowerCase();
         return (
-          node.val >= 9 ||
+          node.val >= 11 ||
           node._isPaymentNode ||
           node.nexusConnection === "unlinked" ||
           role.includes("orchestrator") ||
@@ -1082,6 +1082,11 @@
         return nexusConnectionFromNode(rawNode);
       }
 
+      function nodeTone(node) {
+        const seed = hashString(`${node.org || ""}:${node.group || ""}`);
+        return ACID_BASES[seed % ACID_BASES.length] || ACID_BASES[0];
+      }
+
       // Blend two hex colors — t=0 → pure hex1, t=1 → pure hex2
       function blendHex(hex1, hex2, t) {
         const h2r = (h) => [
@@ -1097,17 +1102,12 @@
         return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
       }
 
-      // Org color is always the base — status adds a tint so identity is never lost.
-      // online   → pure org color
-      // degraded → org + 35% orange tint
-      // offline  → org + 60% red tint (critical, but org still visible)
-      // unknown  → org + 40% dark blend (greyed out but recognisable)
       function nodeColor(node) {
-        const org = colorMap[node.group] || "#9aa4b2";
-        if (node.status === "online") return org;
-        if (node.status === "degraded") return blendHex(org, "#ffb74d", 0.35);
-        if (node.status === "offline")  return blendHex(org, "#ff4d67", 0.60);
-        return blendHex(org, "#2a2a3a", 0.40); // unknown → dim org
+        const base = nodeTone(node);
+        if (node.status === "online") return base;
+        if (node.status === "degraded") return blendHex(base, "#ffb74d", 0.28);
+        if (node.status === "offline") return blendHex(base, "#ff4d67", 0.36);
+        return blendHex(base, "#202530", 0.42);
       }
 
       function linkColor(link) {
@@ -1162,9 +1162,10 @@
           }
           lastStatusById.set(id, status);
 
-          const group = normalizeGroup(raw);
+          const cluster = resolveCluster(raw);
+          const group = cluster.label;
           const isFlashing = (changedUntilById.get(id) || 0) > now;
-          const baseVal = computeNodeVal(raw, group);
+          const baseVal = computeNodeVal(raw, cluster);
           const statusPenalty =
             status === "offline" ? -2 : status === "degraded" ? -1 : 0;
 
@@ -1173,7 +1174,9 @@
             name: String(raw?.name || id),
             group,
             role: String(raw?.role || ""),
-            org: String(raw?.org || ""),
+            org: cluster.org,
+            workspaceScope: cluster.workspace,
+            clusterKey: cluster.key,
             status,
             url:
               raw?._live?.url ||
@@ -1196,16 +1199,18 @@
 
         for (const [group, groupNodes] of byGroup.entries()) {
           if (groupNodes.length <= 1) continue;
-          const anchorId = clusterAnchorId(group);
+          const cluster = resolveCluster(groupNodes[0]);
+          const anchorId = clusterAnchorId(cluster);
           if (!seen.has(anchorId)) {
             seen.add(anchorId);
-            const layout = clusterAnchorLayout(group);
+            const layout = clusterAnchorLayout(cluster);
             const anchor = {
               id: anchorId,
               name: `${group} anchor`,
               group,
               role: "cluster anchor",
-              org: group,
+              org: cluster.org,
+              workspaceScope: cluster.workspace,
               status: "unknown",
               nexusConnection: "not_required",
               hidden: true,
@@ -1227,7 +1232,7 @@
             (best, cur) => (cur.val > best.val ? cur : best),
             groupNodes[0],
           );
-          const anchorId = clusterAnchorId(hub.group);
+          const anchorId = clusterAnchorId(resolveCluster(hub));
           groupNodes.forEach((n) => {
             if (n.id === hub.id) return;
             const key = `${n.id}->${hub.id}`;
@@ -1508,19 +1513,35 @@
         const height = Math.max(graphContainer.clientHeight || 520, 420);
         const cx = width / 2;
         const cy = height / 2;
-        const radius = Math.min(width, height) * 0.34;
-        const idx = new Map();
-        nodes.forEach((n, i) => idx.set(n.id ?? n.name ?? i, i));
-
-        const positioned = nodes.map((n, i) => {
-          const a = (i / nodes.length) * Math.PI * 2;
-          return {
-            ...n,
-            x: cx + radius * Math.cos(a),
-            y: cy + radius * Math.sin(a),
-            color: nodeColor(n),
-          };
+        const clusters = new Map();
+        nodes.forEach((n) => {
+          const cluster = resolveCluster(n);
+          const key = cluster.label;
+          if (!clusters.has(key)) {
+            clusters.set(key, { cluster, nodes: [] });
+          }
+          clusters.get(key).nodes.push(n);
         });
+
+        const positioned = [];
+        for (const entry of clusters.values()) {
+          const base = clusterAnchorLayout(entry.cluster);
+          const clusterCx = cx + base.x;
+          const clusterCy = cy + base.y;
+          const localRadius = Math.max(18, Math.min(48, 14 + entry.nodes.length * 3));
+          entry.nodes.forEach((n, i) => {
+            const angle = (i / Math.max(entry.nodes.length, 1)) * Math.PI * 2;
+            positioned.push({
+              ...n,
+              x: clusterCx + localRadius * Math.cos(angle),
+              y: clusterCy + localRadius * Math.sin(angle),
+              color: nodeColor(n),
+            });
+          });
+        }
+
+        const idx = new Map();
+        positioned.forEach((n, i) => idx.set(n.id ?? n.name ?? i, i));
 
         const svgLinks = links
           .map((l) => {
