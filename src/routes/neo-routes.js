@@ -560,7 +560,7 @@ function normalizePublicUrl(url) {
   if (!url || typeof url !== "string") return null;
   const trimmed = url.trim();
   if (!trimmed) return null;
-  if (trimmed.includes(".railway.internal") || trimmed.includes("localhost")) {
+  if (trimmed.includes("localhost")) {
     return null;
   }
   if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
@@ -607,7 +607,11 @@ function hasNexusIntegration(node) {
   const hasEvents = Array.isArray(node?.nexusEvents)
     ? node.nexusEvents.length > 0 || nexusEventsConfigured
     : Boolean(node?.nexusEvents);
-  return Boolean(node?.webhookUrl || node?.webhookRoutes || hasEvents);
+  const hasWebhook = Boolean(node?.webhookUrl || node?.webhookRoutes);
+  const productionUrl = String(node?.hosting?.productionUrl || "").toLowerCase();
+  const inferredWebhook = productionUrl.includes("api/webhook") || productionUrl.includes("api/events");
+  
+  return Boolean(hasWebhook || inferredWebhook || hasEvents);
 }
 
 async function probeNodeStatus(url) {
@@ -745,7 +749,7 @@ async function loadEcosystemNodes() {
     if (fs.existsSync(graphPath)) {
       const raw = fs.readFileSync(graphPath, "utf8");
       const parsed = JSON.parse(raw);
-      const rawNodes = Array.isArray(parsed?.nodes) ? parsed.nodes : [];
+      const rawNodes = Array.isArray(parsed?.nodes) ? parsed.nodes : (Array.isArray(parsed) ? parsed : []);
       const nodes = rawNodes.filter((n) => !ECOSYSTEM_EXCLUDE_IDS.has(n?.id));
       if (nodes.length > 0) {
         return { success: true, nodes, source: "graph-file" };
@@ -1132,6 +1136,8 @@ router.get("/ecosystem/live", async (_req, res) => {
 
         if (node?._live?.nexusLinked) acc.nexusLinked += 1;
         else acc.nexusUnlinked += 1;
+
+        if (isPaymentNode(node)) acc.payment += 1;
         return acc;
       },
       {
@@ -1142,6 +1148,7 @@ router.get("/ecosystem/live", async (_req, res) => {
         unknown: 0,
         nexusLinked: 0,
         nexusUnlinked: 0,
+        payment: 0,
       },
     );
 
