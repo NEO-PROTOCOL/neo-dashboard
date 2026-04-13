@@ -1125,6 +1125,27 @@
         return "rgba(47, 57, 72, 0.54)";
       }
 
+      function configureLinkPhysics(instance, distance, strength) {
+        if (!instance) return;
+        if (typeof instance.linkDistance === "function") {
+          instance.linkDistance(distance);
+        } else if (typeof instance.d3Force === "function") {
+          const force = instance.d3Force("link");
+          if (force && typeof force.distance === "function") {
+            force.distance(distance);
+          }
+        }
+
+        if (typeof instance.linkStrength === "function") {
+          instance.linkStrength(strength);
+        } else if (typeof instance.d3Force === "function") {
+          const force = instance.d3Force("link");
+          if (force && typeof force.strength === "function") {
+            force.strength(strength);
+          }
+        }
+      }
+
       function normalizeGraphData(data) {
         return {
           nodes: (data?.nodes || []).map((n) => ({
@@ -1590,8 +1611,6 @@
           .backgroundColor("#0a0a0a")
           .nodeVisibility((node) => !isAnchorNode(node))
           .linkVisibility((link) => !link?.hidden)
-          .linkDistance((link) => link.distance || (link.label === "missing-nexus" ? 112 : 48))
-          .linkStrength((link) => link.strength || (link.label === "missing-nexus" ? 0.12 : 0.55))
           .nodeLabel((n) => nodeLabelText(n))
           .nodeCanvasObject((node, ctx, globalScale) => {
             if (isAnchorNode(node)) return;
@@ -1638,6 +1657,11 @@
             } catch (_e) {}
           })
           .cooldownTime(2500);
+        configureLinkPhysics(
+          graphInstance,
+          (link) => link.distance || (link.label === "missing-nexus" ? 112 : 48),
+          (link) => link.strength || (link.label === "missing-nexus" ? 0.12 : 0.55),
+        );
 
         setTimeout(() => {
           try {
@@ -1654,8 +1678,6 @@
           .backgroundColor("#0a0a0a")
           .nodeVisibility((node) => !isAnchorNode(node))
           .linkVisibility((link) => !link?.hidden)
-          .linkDistance((link) => link.distance || (link.label === "missing-nexus" ? 120 : 52))
-          .linkStrength((link) => link.strength || (link.label === "missing-nexus" ? 0.12 : 0.48))
           .nodeLabel((node) => nodeLabelText(node))
           .nodeColor((node) => nodeColor(node))
           .nodeVal((node) => node.val)
@@ -1706,6 +1728,11 @@
               graphInstance.refresh();
             } catch (_e) {}
           });
+        configureLinkPhysics(
+          graphInstance,
+          (link) => link.distance || (link.label === "missing-nexus" ? 120 : 52),
+          (link) => link.strength || (link.label === "missing-nexus" ? 0.12 : 0.48),
+        );
 
         setTimeout(() => {
           try {
