@@ -86,10 +86,27 @@ function normalizeGroup(node) {
   const mix = `${id} ${name} ${org}`;
 
   if (org.includes('neo-growth-system') || mix.includes('growth system')) return 'NEO-Growth-System';
-  if (org.includes('neo smart factory') || mix.includes('smart factory')) return 'Neo Smart Factory';
-  if (org.includes('flowpay') || mix.includes('flowpay')) return 'FlowPay';
+  if (org.includes('flowpay') || mix.includes('flowpay-system') || mix.includes('flowpay')) return 'FlowPay';
+  if (
+    org.includes('neo smart factory') ||
+    mix.includes('smart-factory') ||
+    mix.includes('smart factory') ||
+    mix.includes('smart-ui') ||
+    mix.includes('smart ui') ||
+    mix.includes('smart-core') ||
+    mix.includes('smart core') ||
+    mix.includes('smart-cli') ||
+    mix.includes('smart cli') ||
+    mix.includes('smart-nft') ||
+    mix.includes('smart nft') ||
+    mix.includes('smart-ui-mobile') ||
+    mix.includes('smart ui mobile') ||
+    mix.includes('smart-ui-landing') ||
+    mix.includes('smart ui landing') ||
+    mix.includes('internal ops')
+  ) return 'Neo Smart Factory';
   if (org.includes('fluxx')) return 'Fluxx DAO';
-  if (mix.includes('wod')) return 'WOD Game';
+  if (org.includes('wod') || mix.includes('wodxpro') || mix.includes('wod')) return 'WOD Game';
   if (
     org.includes('neo-flowoff') ||
     mix.includes('flowoff') ||
@@ -112,7 +129,7 @@ function computeNodeVal(node, group) {
   if (role.includes('orchestrator') || role.includes('event hub') || role.includes('sovereign')) return 12;
   if (id.includes('nexus') || id.includes('architect')) return 11;
   if (role.includes('protocol') || role.includes('contract')) return 9;
-  if (group === 'FlowPay' || group === 'Neo Smart Factory' || group === 'NEO-Growth-System') return 8;
+  if (group === 'FlowPay' || group === 'Neo Smart Factory' || group === 'NEO-Growth-System' || group === 'WOD Game') return 8;
   if (group === 'Fluxx DAO') return 7;
   if (group === 'WOD Game') return 6;
   if (group === 'NEO-FlowOFF') return 5;

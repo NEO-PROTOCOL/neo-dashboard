@@ -231,8 +231,8 @@
       const colorMap = {
         "NEO Protocol": "#d4deea",
         "NEO-Growth-System": "#9affd6",
-        "Neo Smart Factory": "#00ccff",
-        FlowPay: "#00ffcc",
+        "Neo Smart Factory": "#00c7ff",
+        FlowPay: "#18d7b5",
         "Fluxx DAO": "#4488ff",
         "NEO-FlowOFF": "#ff00ff",
         "WOD Game": "#ffcc00",
@@ -703,12 +703,29 @@
 
         if (org.includes("neo-growth-system") || mix.includes("growth system"))
           return "NEO-Growth-System";
-        if (org.includes("flowpay") || mix.includes("flowpay"))
+        if (org.includes("flowpay") || mix.includes("flowpay-system") || mix.includes("flowpay"))
           return "FlowPay";
         if (org.includes("fluxx") || mix.includes("fluxx")) return "Fluxx Dao";
-        if (org.includes("smart factory") || mix.includes("smart "))
+        if (
+          org.includes("smart factory") ||
+          mix.includes("smart-factory") ||
+          mix.includes("smart factory") ||
+          mix.includes("smart-ui") ||
+          mix.includes("smart ui") ||
+          mix.includes("smart-core") ||
+          mix.includes("smart core") ||
+          mix.includes("smart-cli") ||
+          mix.includes("smart cli") ||
+          mix.includes("smart-nft") ||
+          mix.includes("smart nft") ||
+          mix.includes("smart-ui-mobile") ||
+          mix.includes("smart ui mobile") ||
+          mix.includes("smart-ui-landing") ||
+          mix.includes("smart ui landing") ||
+          mix.includes("internal ops")
+        )
           return "Neo Smart Factory";
-        if (mix.includes("wod")) return "WOD Game";
+        if (org.includes("wod") || mix.includes("wodxpro") || mix.includes("wod")) return "WOD Game";
         if (
           org.includes("neo-flowoff") ||
           mix.includes("flowoff") ||
@@ -739,7 +756,8 @@
         if (
           group === "FlowPay" ||
           group === "Neo Smart Factory" ||
-          group === "NEO-Growth-System"
+          group === "NEO-Growth-System" ||
+          group === "WOD Game"
         )
           return 8;
         return 6;
