@@ -1,38 +1,39 @@
 {
   "meta": {
-    "generated_at": "2026-04-07T23:29:52.421577+00:00",
+    "generated_at": "2026-04-13T01:10:44.818106+00:00",
     "analyzer_version": "3.1.0",
-    "total_nodes": 29,
-    "total_orgs": 6
+    "total_nodes": 35,
+    "total_orgs": 7
   },
   "ecosystem_health": {
-    "average_readiness": 80.5,
+    "average_readiness": 84.1,
     "max_possible": 100,
     "grade_distribution": {
-      "A": 5,
-      "B": 16,
+      "A": 10,
+      "B": 17,
       "C": 1
     },
-    "total_findings": 8,
+    "total_findings": 20,
     "findings_by_severity": {
       "critical": 0,
-      "high": 0,
-      "medium": 5,
-      "low": 1,
-      "info": 2
+      "high": 1,
+      "medium": 2,
+      "low": 9,
+      "info": 8
     }
   },
   "summary": {
     "organizations": [
-      "FlowPay (NEØ Stack)",
+      "FlowPay (NE\u039e Stack)",
       "Fluxx DAO",
       "NEO Protocol",
       "NEO-FlowOFF",
+      "NEO-Growth-System",
       "Neo Smart Factory",
       "WOD Game"
     ],
     "org_breakdown": {
-      "FlowPay (NEØ Stack)": {
+      "FlowPay (NE\u039e Stack)": {
         "node_count": 1,
         "node_ids": [
           "flowpay"
@@ -63,7 +64,7 @@
           "neo-tunnel"
         ],
         "findings_count": 1,
-        "avg_readiness": 83.8
+        "avg_readiness": 81.9
       },
       "NEO-FlowOFF": {
         "node_count": 5,
@@ -76,6 +77,19 @@
         ],
         "findings_count": 0,
         "avg_readiness": 78.0
+      },
+      "NEO-Growth-System": {
+        "node_count": 6,
+        "node_ids": [
+          "neo-growth-system",
+          "neo-event-ingestor",
+          "neo-crm-core",
+          "neo-message-orchestrator",
+          "neo-provider-resend",
+          "neo-queue-worker"
+        ],
+        "findings_count": 9,
+        "avg_readiness": 100.0
       },
       "Neo Smart Factory": {
         "node_count": 9,
@@ -146,6 +160,50 @@
     ]
   },
   "dependency_graph": {
+    "neo-event-ingestor": {
+      "depends_on": [
+        "neo-nexus"
+      ],
+      "depended_by": []
+    },
+    "neo-provider-resend": {
+      "depends_on": [
+        "neo-nexus"
+      ],
+      "depended_by": []
+    },
+    "neo-nexus": {
+      "depends_on": [],
+      "depended_by": [
+        "flowpay",
+        "neo-crm-core",
+        "neo-event-ingestor",
+        "neo-growth-system",
+        "neo-message-orchestrator",
+        "neo-provider-resend",
+        "neo-queue-worker",
+        "neobot-orchestrator",
+        "smart-core"
+      ]
+    },
+    "neo-growth-system": {
+      "depends_on": [
+        "neo-nexus"
+      ],
+      "depended_by": []
+    },
+    "neo-queue-worker": {
+      "depends_on": [
+        "neo-nexus"
+      ],
+      "depended_by": []
+    },
+    "neo-crm-core": {
+      "depends_on": [
+        "neo-nexus"
+      ],
+      "depended_by": []
+    },
     "neobot-orchestrator": {
       "depends_on": [
         "neo-nexus"
@@ -164,17 +222,24 @@
       ],
       "depended_by": []
     },
-    "neo-nexus": {
-      "depends_on": [],
-      "depended_by": [
-        "flowpay",
-        "neobot-orchestrator",
-        "smart-core"
-      ]
+    "neo-message-orchestrator": {
+      "depends_on": [
+        "neo-nexus"
+      ],
+      "depended_by": []
     }
   },
   "nexus_topology": {
     "events": [
+      {
+        "event": "*",
+        "emitters": [],
+        "consumers": [
+          "neo-growth-system"
+        ],
+        "has_emitter": false,
+        "has_consumer": true
+      },
       {
         "event": "BUILD_STATUS",
         "emitters": [
@@ -182,6 +247,110 @@
         ],
         "consumers": [
           "neobot-orchestrator"
+        ],
+        "has_emitter": true,
+        "has_consumer": true
+      },
+      {
+        "event": "CHECKOUT_CREATED",
+        "emitters": [],
+        "consumers": [
+          "neo-event-ingestor",
+          "neo-crm-core"
+        ],
+        "has_emitter": false,
+        "has_consumer": true
+      },
+      {
+        "event": "CRM:MESSAGE_FAILED",
+        "emitters": [
+          "neo-message-orchestrator"
+        ],
+        "consumers": [
+          "neo-nexus",
+          "neo-growth-system"
+        ],
+        "has_emitter": true,
+        "has_consumer": true
+      },
+      {
+        "event": "CRM:MESSAGE_REQUESTED",
+        "emitters": [
+          "neo-crm-core"
+        ],
+        "consumers": [
+          "neo-message-orchestrator"
+        ],
+        "has_emitter": true,
+        "has_consumer": true
+      },
+      {
+        "event": "CRM:MESSAGE_SENT",
+        "emitters": [
+          "neo-message-orchestrator"
+        ],
+        "consumers": [
+          "neo-provider-resend"
+        ],
+        "has_emitter": true,
+        "has_consumer": true
+      },
+      {
+        "event": "EMAIL:BOUNCED",
+        "emitters": [
+          "neo-provider-resend"
+        ],
+        "consumers": [
+          "neo-nexus",
+          "neo-growth-system"
+        ],
+        "has_emitter": true,
+        "has_consumer": true
+      },
+      {
+        "event": "EMAIL:CLICKED",
+        "emitters": [
+          "neo-provider-resend"
+        ],
+        "consumers": [
+          "neo-nexus",
+          "neo-growth-system"
+        ],
+        "has_emitter": true,
+        "has_consumer": true
+      },
+      {
+        "event": "EMAIL:COMPLAINT",
+        "emitters": [
+          "neo-provider-resend"
+        ],
+        "consumers": [
+          "neo-nexus",
+          "neo-growth-system"
+        ],
+        "has_emitter": true,
+        "has_consumer": true
+      },
+      {
+        "event": "EMAIL:DELIVERED",
+        "emitters": [
+          "neo-provider-resend"
+        ],
+        "consumers": [
+          "neo-nexus",
+          "neo-growth-system"
+        ],
+        "has_emitter": true,
+        "has_consumer": true
+      },
+      {
+        "event": "EMAIL:OPENED",
+        "emitters": [
+          "neo-provider-resend"
+        ],
+        "consumers": [
+          "neo-nexus",
+          "neo-growth-system"
         ],
         "has_emitter": true,
         "has_consumer": true
@@ -216,7 +385,8 @@
           "flowpay"
         ],
         "consumers": [
-          "neo-nexus"
+          "neo-nexus",
+          "neo-growth-system"
         ],
         "has_emitter": true,
         "has_consumer": true
@@ -245,6 +415,27 @@
         "has_consumer": true
       },
       {
+        "event": "PAYMENT_CONFIRMED",
+        "emitters": [],
+        "consumers": [
+          "neo-event-ingestor"
+        ],
+        "has_emitter": false,
+        "has_consumer": true
+      },
+      {
+        "event": "QUEUE:DLQ_ALERT",
+        "emitters": [
+          "neo-queue-worker"
+        ],
+        "consumers": [
+          "neo-nexus",
+          "neo-growth-system"
+        ],
+        "has_emitter": true,
+        "has_consumer": true
+      },
+      {
         "event": "TASK_COMPLETED",
         "emitters": [
           "neobot-orchestrator"
@@ -254,14 +445,30 @@
         ],
         "has_emitter": true,
         "has_consumer": true
+      },
+      {
+        "event": "USER_CREATED",
+        "emitters": [],
+        "consumers": [
+          "neo-event-ingestor",
+          "neo-crm-core"
+        ],
+        "has_emitter": false,
+        "has_consumer": true
       }
     ],
     "wildcard_consumers": [
-      "neo-nexus"
+      "neo-nexus",
+      "neo-growth-system"
     ],
-    "total_unique_events": 7,
+    "total_unique_events": 20,
     "orphan_events": [],
-    "phantom_events": []
+    "phantom_events": [
+      "*",
+      "CHECKOUT_CREATED",
+      "PAYMENT_CONFIRMED",
+      "USER_CREATED"
+    ]
   },
   "readiness_leaderboard": [
     {
@@ -270,7 +477,32 @@
       "grade": "A"
     },
     {
-      "id": "neo-nexus",
+      "id": "neo-growth-system",
+      "score": 100,
+      "grade": "A"
+    },
+    {
+      "id": "neo-event-ingestor",
+      "score": 100,
+      "grade": "A"
+    },
+    {
+      "id": "neo-crm-core",
+      "score": 100,
+      "grade": "A"
+    },
+    {
+      "id": "neo-message-orchestrator",
+      "score": 100,
+      "grade": "A"
+    },
+    {
+      "id": "neo-provider-resend",
+      "score": 100,
+      "grade": "A"
+    },
+    {
+      "id": "neo-queue-worker",
       "score": 100,
       "grade": "A"
     },
@@ -288,6 +520,11 @@
       "id": "flowpay",
       "score": 90,
       "grade": "A"
+    },
+    {
+      "id": "neo-nexus",
+      "score": 85,
+      "grade": "B"
     },
     {
       "id": "neo-protcl",
@@ -379,9 +616,9 @@
     {
       "node_id": "neo-nexus",
       "category": "infra",
-      "severity": "medium",
-      "title": "Alto blast radius — 3 dependentes",
-      "detail": "Nos dependentes: ['flowpay', 'neobot-orchestrator', 'smart-core']."
+      "severity": "high",
+      "title": "Single Point of Failure \u2014 blast radius 9 nos",
+      "detail": "Nos dependentes: ['flowpay', 'neo-crm-core', 'neo-event-ingestor', 'neo-growth-system', 'neo-message-orchestrator', 'neo-provider-resend', 'neo-queue-worker', 'neobot-orchestrator', 'smart-core']. Falha impacta 9 nos. Considere circuit breaker / fallback."
     },
     {
       "node_id": "flowpay",
@@ -394,49 +631,133 @@
       "node_id": "__global__",
       "category": "infra",
       "severity": "medium",
-      "title": "Conflito de porta local :3000",
-      "detail": "Nos compartilhando porta 3000: ['neo-nexus', 'neo-tunnel:nexus']. Multiplos servicos nao podem rodar simultaneamente nesta porta."
-    },
-    {
-      "node_id": "__global__",
-      "category": "infra",
-      "severity": "medium",
       "title": "Conflito de porta local :8043",
       "detail": "Nos compartilhando porta 8043: ['neo-agent-full', 'neo-tunnel:neo-agent']. Multiplos servicos nao podem rodar simultaneamente nesta porta."
     },
     {
-      "node_id": "__global__",
-      "category": "infra",
-      "severity": "medium",
-      "title": "Conflito de porta local :19001",
-      "detail": "Nos compartilhando porta 19001: ['neobot-orchestrator', 'neo-tunnel:orchestrator']. Multiplos servicos nao podem rodar simultaneamente nesta porta."
+      "node_id": "neo-growth-system",
+      "category": "config",
+      "severity": "low",
+      "title": "productionUrl diverge do targetCustomDomain",
+      "detail": "productionUrl='https://neo-growth-system-production.up.railway.app' vs targetCustomDomain='growth.neoprotocol.space'. Verifique apontamento DNS."
     },
     {
-      "node_id": "__global__",
-      "category": "governance",
+      "node_id": "neo-event-ingestor",
+      "category": "topology",
       "severity": "low",
-      "title": "Admin emails inconsistentes na org 'NEO-FlowOFF'",
-      "detail": "Emails: ['factory@neoprotocol.space', 'flowoff.mkt@gmail.com']. Padronize um unico adminEmail por org."
+      "title": "webhookUrl.production usando URL temporaria",
+      "detail": "Valor: 'https://neo-event-ingestor-production.up.railway.app/events'. Recomendado usar custom domain estavel."
+    },
+    {
+      "node_id": "neo-event-ingestor",
+      "category": "config",
+      "severity": "low",
+      "title": "productionUrl diverge do targetCustomDomain",
+      "detail": "productionUrl='https://neo-event-ingestor-production.up.railway.app' vs targetCustomDomain='ingestor.neoprotocol.space'. Verifique apontamento DNS."
+    },
+    {
+      "node_id": "neo-crm-core",
+      "category": "config",
+      "severity": "low",
+      "title": "productionUrl diverge do targetCustomDomain",
+      "detail": "productionUrl='https://neo-crm-core-production.up.railway.app' vs targetCustomDomain='crm.neoprotocol.space'. Verifique apontamento DNS."
+    },
+    {
+      "node_id": "neo-message-orchestrator",
+      "category": "topology",
+      "severity": "low",
+      "title": "webhookUrl.production usando URL temporaria",
+      "detail": "Valor: 'https://neo-message-orchestrator-production.up.railway.app/notify'. Recomendado usar custom domain estavel."
+    },
+    {
+      "node_id": "neo-message-orchestrator",
+      "category": "config",
+      "severity": "low",
+      "title": "productionUrl diverge do targetCustomDomain",
+      "detail": "productionUrl='https://neo-message-orchestrator-production.up.railway.app' vs targetCustomDomain='orchestrator-growth.neoprotocol.space'. Verifique apontamento DNS."
+    },
+    {
+      "node_id": "neo-provider-resend",
+      "category": "topology",
+      "severity": "low",
+      "title": "webhookUrl.production usando URL temporaria",
+      "detail": "Valor: 'https://neo-provider-resend-production.up.railway.app/webhook/resend'. Recomendado usar custom domain estavel."
+    },
+    {
+      "node_id": "neo-provider-resend",
+      "category": "config",
+      "severity": "low",
+      "title": "productionUrl diverge do targetCustomDomain",
+      "detail": "productionUrl='https://neo-provider-resend-production.up.railway.app' vs targetCustomDomain='provider-resend.neoprotocol.space'. Verifique apontamento DNS."
+    },
+    {
+      "node_id": "neo-queue-worker",
+      "category": "config",
+      "severity": "low",
+      "title": "productionUrl diverge do targetCustomDomain",
+      "detail": "productionUrl='https://neo-queue-worker-production.up.railway.app' vs targetCustomDomain='queue.neoprotocol.space'. Verifique apontamento DNS."
     },
     {
       "node_id": "__global__",
       "category": "contract",
       "severity": "info",
       "title": "Contrato duplicado: 0xd49d3fb2...",
-      "detail": "Endereco 0xd49d3fb2c2cbba78a1e710660a628919ee78d82a declarado em: ['smart-core:FlowPay', 'flowpay:FlowPay', 'flowpay:tokenCanonical:FlowPay']. canonicalRegistry presente — source-of-truth definida."
+      "detail": "Endereco 0xd49d3fb2c2cbba78a1e710660a628919ee78d82a declarado em: ['smart-core:FlowPay', 'flowpay:FlowPay', 'flowpay:tokenCanonical:FlowPay']. canonicalRegistry presente \u2014 source-of-truth definida."
     },
     {
       "node_id": "neo-nexus",
       "category": "ops",
       "severity": "info",
-      "title": "Wildcard consumer(s): ['neo-nexus']",
-      "detail": "Absorve todos os eventos emitidos: ['BUILD_STATUS', 'FACTORY:MINT_CONFIRMED', 'FACTORY:MINT_FAILED', 'FLOWPAY:PAYMENT_RECEIVED', 'NEOBOT:ACCESS_UNLOCKED', 'NEXUS_START', 'TASK_COMPLETED']. Garanta que reactors estejam mapeando cada evento."
+      "title": "Wildcard consumer(s): ['neo-nexus', 'neo-growth-system']",
+      "detail": "Absorve todos os eventos emitidos: ['BUILD_STATUS', 'CRM:MESSAGE_FAILED', 'CRM:MESSAGE_REQUESTED', 'CRM:MESSAGE_SENT', 'EMAIL:BOUNCED', 'EMAIL:CLICKED', 'EMAIL:COMPLAINT', 'EMAIL:DELIVERED', 'EMAIL:OPENED', 'FACTORY:MINT_CONFIRMED', 'FACTORY:MINT_FAILED', 'FLOWPAY:PAYMENT_RECEIVED', 'NEOBOT:ACCESS_UNLOCKED', 'NEXUS_START', 'QUEUE:DLQ_ALERT', 'TASK_COMPLETED']. Garanta que reactors estejam mapeando cada evento."
+    },
+    {
+      "node_id": "neo-growth-system",
+      "category": "ops",
+      "severity": "info",
+      "title": "Evento consumido '*' sem emissor declarado",
+      "detail": "Pode ser evento externo (Woovi, WhatsApp API, webhook). Documente a origem com 'externalEventSources'."
+    },
+    {
+      "node_id": "neo-event-ingestor",
+      "category": "ops",
+      "severity": "info",
+      "title": "Evento consumido 'USER_CREATED' sem emissor declarado",
+      "detail": "Pode ser evento externo (Woovi, WhatsApp API, webhook). Documente a origem com 'externalEventSources'."
+    },
+    {
+      "node_id": "neo-crm-core",
+      "category": "ops",
+      "severity": "info",
+      "title": "Evento consumido 'USER_CREATED' sem emissor declarado",
+      "detail": "Pode ser evento externo (Woovi, WhatsApp API, webhook). Documente a origem com 'externalEventSources'."
+    },
+    {
+      "node_id": "neo-event-ingestor",
+      "category": "ops",
+      "severity": "info",
+      "title": "Evento consumido 'CHECKOUT_CREATED' sem emissor declarado",
+      "detail": "Pode ser evento externo (Woovi, WhatsApp API, webhook). Documente a origem com 'externalEventSources'."
+    },
+    {
+      "node_id": "neo-crm-core",
+      "category": "ops",
+      "severity": "info",
+      "title": "Evento consumido 'CHECKOUT_CREATED' sem emissor declarado",
+      "detail": "Pode ser evento externo (Woovi, WhatsApp API, webhook). Documente a origem com 'externalEventSources'."
+    },
+    {
+      "node_id": "neo-event-ingestor",
+      "category": "ops",
+      "severity": "info",
+      "title": "Evento consumido 'PAYMENT_CONFIRMED' sem emissor declarado",
+      "detail": "Pode ser evento externo (Woovi, WhatsApp API, webhook). Documente a origem com 'externalEventSources'."
     }
   ],
   "nodes": [
     {
       "id": "neobot-orchestrator",
-      "name": "Neobot — Node Warrior / Orchestrator",
+      "name": "Neobot \u2014 Node Warrior / Orchestrator",
       "org": "NEO Protocol",
       "role": "Orchestrator",
       "platform": "Local / Railway (Production)",
@@ -539,10 +860,10 @@
       "has_production": true,
       "has_contracts": false,
       "nexus_events": [],
-      "blast_radius": 3,
+      "blast_radius": 9,
       "dependency_count": 0,
-      "readiness_score": 100,
-      "readiness_grade": "A",
+      "readiness_score": 85,
+      "readiness_grade": "B",
       "readiness_breakdown": {
         "has_production_url": true,
         "has_healthcheck": true,
@@ -550,7 +871,7 @@
         "has_internal_url": true,
         "webhook_urls_complete": true,
         "nexus_events_declared": true,
-        "no_high_findings": true,
+        "no_high_findings": false,
         "no_critical_findings": true
       },
       "finding_count": 1
@@ -816,7 +1137,7 @@
     {
       "id": "flowpay",
       "name": "FlowPay Platform (Marketing + App + API)",
-      "org": "FlowPay (NEØ Stack)",
+      "org": "FlowPay (NE\u039e Stack)",
       "role": "Checkout / Financial Node (Stack)",
       "platform": "Cloudflare Workers + D1 (API) / Cloudflare Pages (Web)",
       "has_production": true,
@@ -920,7 +1241,7 @@
     },
     {
       "id": "ceo-escalavel-miniapp",
-      "name": "CEO Escalável MiniApp",
+      "name": "CEO Escal\u00e1vel MiniApp",
       "org": "NEO-FlowOFF",
       "role": "Interface / MiniApp",
       "platform": "Vercel (nodevercel/agentflow)",
@@ -1085,8 +1406,181 @@
       "finding_count": 0
     },
     {
+      "id": "neo-growth-system",
+      "name": "NEO Growth System",
+      "org": "NEO-Growth-System",
+      "role": "Growth Control Plane",
+      "platform": "Railway",
+      "has_production": true,
+      "has_contracts": false,
+      "nexus_events": [
+        "*"
+      ],
+      "blast_radius": 0,
+      "dependency_count": 1,
+      "readiness_score": 100,
+      "readiness_grade": "A",
+      "readiness_breakdown": {
+        "has_production_url": true,
+        "has_healthcheck": true,
+        "has_custom_domain": true,
+        "has_internal_url": true,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": true,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 1
+    },
+    {
+      "id": "neo-event-ingestor",
+      "name": "NEO Event Ingestor",
+      "org": "NEO-Growth-System",
+      "role": "Growth Ingestion Node",
+      "platform": "Railway",
+      "has_production": true,
+      "has_contracts": false,
+      "nexus_events": [
+        "USER_CREATED",
+        "CHECKOUT_CREATED",
+        "PAYMENT_CONFIRMED"
+      ],
+      "blast_radius": 0,
+      "dependency_count": 1,
+      "readiness_score": 100,
+      "readiness_grade": "A",
+      "readiness_breakdown": {
+        "has_production_url": true,
+        "has_healthcheck": true,
+        "has_custom_domain": true,
+        "has_internal_url": true,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": true,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 2
+    },
+    {
+      "id": "neo-crm-core",
+      "name": "NEO CRM Core",
+      "org": "NEO-Growth-System",
+      "role": "Growth Decision Engine",
+      "platform": "Railway",
+      "has_production": true,
+      "has_contracts": false,
+      "nexus_events": [
+        "CRM:MESSAGE_REQUESTED",
+        "USER_CREATED",
+        "CHECKOUT_CREATED"
+      ],
+      "blast_radius": 0,
+      "dependency_count": 1,
+      "readiness_score": 100,
+      "readiness_grade": "A",
+      "readiness_breakdown": {
+        "has_production_url": true,
+        "has_healthcheck": true,
+        "has_custom_domain": true,
+        "has_internal_url": true,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": true,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 1
+    },
+    {
+      "id": "neo-message-orchestrator",
+      "name": "NEO Message Orchestrator",
+      "org": "NEO-Growth-System",
+      "role": "Growth Orchestration Node",
+      "platform": "Railway",
+      "has_production": true,
+      "has_contracts": false,
+      "nexus_events": [
+        "CRM:MESSAGE_SENT",
+        "CRM:MESSAGE_FAILED",
+        "CRM:MESSAGE_REQUESTED"
+      ],
+      "blast_radius": 0,
+      "dependency_count": 1,
+      "readiness_score": 100,
+      "readiness_grade": "A",
+      "readiness_breakdown": {
+        "has_production_url": true,
+        "has_healthcheck": true,
+        "has_custom_domain": true,
+        "has_internal_url": true,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": true,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 2
+    },
+    {
+      "id": "neo-provider-resend",
+      "name": "NEO Provider Resend",
+      "org": "NEO-Growth-System",
+      "role": "Growth Delivery Provider",
+      "platform": "Railway",
+      "has_production": true,
+      "has_contracts": false,
+      "nexus_events": [
+        "EMAIL:DELIVERED",
+        "EMAIL:BOUNCED",
+        "EMAIL:OPENED",
+        "EMAIL:CLICKED",
+        "EMAIL:COMPLAINT",
+        "CRM:MESSAGE_SENT"
+      ],
+      "blast_radius": 0,
+      "dependency_count": 1,
+      "readiness_score": 100,
+      "readiness_grade": "A",
+      "readiness_breakdown": {
+        "has_production_url": true,
+        "has_healthcheck": true,
+        "has_custom_domain": true,
+        "has_internal_url": true,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": true,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 2
+    },
+    {
+      "id": "neo-queue-worker",
+      "name": "NEO Queue Worker",
+      "org": "NEO-Growth-System",
+      "role": "Growth Queue and DLQ Node",
+      "platform": "Railway",
+      "has_production": true,
+      "has_contracts": false,
+      "nexus_events": [
+        "QUEUE:DLQ_ALERT"
+      ],
+      "blast_radius": 0,
+      "dependency_count": 1,
+      "readiness_score": 100,
+      "readiness_grade": "A",
+      "readiness_breakdown": {
+        "has_production_url": true,
+        "has_healthcheck": true,
+        "has_custom_domain": true,
+        "has_internal_url": true,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": true,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 1
+    },
+    {
       "id": "neo-tunnel",
-      "name": "NΞØ Tunnel (open-tunneling)",
+      "name": "N\u039e\u039f Tunnel (open-tunneling)",
       "org": "NEO Protocol",
       "role": "Dev Infrastructure / Tunnel Server",
       "platform": "Railway",
