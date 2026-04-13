@@ -22,14 +22,45 @@
         left: 20px;
         pointer-events: none;
         z-index: 10;
+        max-width: min(380px, calc(100vw - 40px));
       }
-      h1 {
+      .overlay-topline {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+      .overlay-title {
         margin: 0;
         font-size: 24px;
         color: #00ffcc;
         text-transform: uppercase;
         letter-spacing: 2px;
         text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+      }
+      .overlay-subtitle {
+        color: #888;
+        margin: 0 0 12px 0;
+        font-size: 14px;
+      }
+      .overlay-actions {
+        display: flex;
+        gap: 8px;
+        margin: 8px 0 0;
+        pointer-events: auto;
+      }
+      .overlay-action-btn {
+        border: 1px solid #2a3240;
+        border-radius: 999px;
+        background: rgba(11, 18, 28, 0.92);
+        color: #c6d2e0;
+        font-size: 10px;
+        letter-spacing: 0.3px;
+        padding: 6px 10px;
+        cursor: pointer;
+      }
+      .overlay-action-btn:hover {
+        border-color: #3d4f66;
       }
       .legend {
         position: absolute;
@@ -113,7 +144,7 @@
       }
       .control-panel {
         margin-top: 10px;
-        max-width: 430px;
+        max-width: 360px;
         background: rgba(0, 0, 0, 0.62);
         border: 1px solid #2a3240;
         border-radius: 8px;
@@ -136,6 +167,27 @@
       }
       .control-panel.collapsed .control-panel-body {
         display: none;
+      }
+      .focus-mode .overlay {
+        max-width: 240px;
+      }
+      .focus-mode .overlay h1,
+      .focus-mode .overlay > p {
+        display: none !important;
+      }
+      .focus-mode .overlay-subtitle,
+      .focus-mode #live-summary,
+      .focus-mode #live-meta,
+      .focus-mode #live-alerts,
+      .focus-mode .registry-panel,
+      .focus-mode .control-panel {
+        display: none !important;
+      }
+      .focus-mode #live-mode {
+        margin-bottom: 0;
+      }
+      .focus-mode .overlay-actions {
+        margin-top: 10px;
       }
       .control-toggle-arrow {
         font-size: 9px;
@@ -194,7 +246,7 @@
       }
       .registry-panel {
         margin-top: 10px;
-        max-width: 430px;
+        max-width: 360px;
         background: rgba(0, 0, 0, 0.62);
         border: 1px solid #2a3240;
         border-radius: 8px;
@@ -340,7 +392,7 @@
             <div id="live-meta" style="font-size:11px;color:#748099;margin-top:5px;"></div>
             <div id="live-alerts" style="font-size:11px;color:#ffb74d;margin-top:8px;line-height:1.35;"></div>
           </div>
-          <div class="registry-panel" id="registry-panel">
+          <div class="registry-panel collapsed" id="registry-panel">
             <div class="registry-header" onclick="document.getElementById('registry-panel').classList.toggle('collapsed')">
               <span style="font-size:11px;color:#b4c0d1;letter-spacing:.3px;">◈ Public Interface Registry</span>
               <span class="control-toggle-arrow">▼</span>
@@ -426,6 +478,9 @@
             </div>
             </div>
           </div>
+          <div class="overlay-actions">
+            <button id="focus-toggle" class="overlay-action-btn" type="button">Hide Panels</button>
+          </div>
         `,
       );
 
@@ -462,6 +517,7 @@
       const filterSearchEl = document.getElementById("filter-search");
       const filterResetEl = document.getElementById("filter-reset");
       const filterMetaEl = document.getElementById("filter-meta");
+      const focusToggleEl = document.getElementById("focus-toggle");
 
       let graphMode = "none";
       let graphInstance = null;
@@ -496,6 +552,21 @@
         routeKind: "all",
         search: "",
       };
+
+      let focusMode = true;
+
+      function applyFocusMode() {
+        document.body.classList.toggle("focus-mode", focusMode);
+        if (focusToggleEl) {
+          focusToggleEl.textContent = focusMode ? "Show Panels" : "Hide Panels";
+        }
+      }
+
+      applyFocusMode();
+      focusToggleEl?.addEventListener("click", () => {
+        focusMode = !focusMode;
+        applyFocusMode();
+      });
 
       function getGatewayPassword() {
         try {
@@ -1625,7 +1696,7 @@
           .map(
             (n) => `
             <g>
-              <circle cx="${n.x}" cy="${n.y}" r="${Math.max(3.1, Math.min(6.8, (n.val || 6) / 2.4))}" fill="${n.color}" />
+              <circle cx="${n.x}" cy="${n.y}" r="${Math.max(3.8, Math.min(8.8, (n.val || 6) / 2.15))}" fill="${n.color}" />
               ${shouldShowNodeLabel(n)
                 ? `<text x="${n.x + 8}" y="${n.y + 4}" fill="#9aa4b2" font-size="11" font-family="Inter, sans-serif">${escapeHtml(n.name || "")}</text>`
                 : ""}
@@ -1663,7 +1734,7 @@
             const showLabel = shouldShowNodeLabel(node);
             const label = node.name || "";
             const fontSize = 10 / globalScale;
-            const radius = Math.max(2.6, Math.min(6.2, (node.val || 6) / 3));
+            const radius = Math.max(3.4, Math.min(7.4, (node.val || 6) / 2.45));
             ctx.beginPath();
             ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
             ctx.fillStyle = nodeColor(node);
@@ -1713,7 +1784,7 @@
 
         setTimeout(() => {
           try {
-            graphInstance.zoomToFit(400, 40);
+            graphInstance.zoomToFit(600, 20);
           } catch (_e) {}
         }, 500);
       }
@@ -1729,7 +1800,7 @@
           .nodeLabel((node) => nodeLabelText(node))
           .nodeColor((node) => nodeColor(node))
           .nodeVal((node) => node.val)
-          .nodeRelSize(5.6)
+          .nodeRelSize(6.4)
           .nodeResolution(18)
           .linkDirectionalParticles((link) =>
             link.kind === "anchor"
@@ -1785,7 +1856,7 @@
 
         setTimeout(() => {
           try {
-            graphInstance.zoomToFit(800, 60);
+            graphInstance.zoomToFit(700, 24);
           } catch (e) {
             console.warn("zoomToFit failed:", e);
           }
