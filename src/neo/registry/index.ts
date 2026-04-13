@@ -173,7 +173,7 @@ export class NeoSkillsRegistry {
   }
 
   async getIndexCID(): Promise<string | null> {
-    return "QmMockIndexHashPhase1"; // Placeholder
+    return null;
   }
 
   /**

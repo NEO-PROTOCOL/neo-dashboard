@@ -597,21 +597,71 @@ function resolveNodeUrl(node) {
   return null;
 }
 
-function hasNexusIntegration(node) {
-  // nexusEvents: [] means the field was explicitly configured on the node
-  // (passive acknowledgment — e.g. frontend / docs nodes that intentionally
-  // have no nexus events).  Treat it as "acknowledged" so it does NOT trigger
-  // the "unlinked" alert.  Only nodes without the nexusEvents field at all are
-  // considered truly unconfigured.
-  const nexusEventsConfigured = node != null && 'nexusEvents' in node;
-  const hasEvents = Array.isArray(node?.nexusEvents)
-    ? node.nexusEvents.length > 0 || nexusEventsConfigured
-    : Boolean(node?.nexusEvents);
+const NEXUS_REQUIRED_HINTS = [
+  "agent",
+  "orchestrator",
+  "event ingestor",
+  "queue worker",
+  "message orchestrator",
+  "identity layer",
+  "checkout",
+  "dashboard surface",
+  "payments api",
+  "edge runtime",
+  "api",
+  "tunnel server",
+  "autonomous service",
+  "worker",
+];
+
+const NEXUS_OPTIONAL_HINTS = [
+  "documentation",
+  "landing",
+  "repository",
+  "contracts",
+  "organization hub",
+  "discovered node",
+  "public acquisition surface",
+  "landing page",
+  "interface / pwa",
+  "interface / mobile",
+  "miniapp",
+  "webapp",
+  "dapp / game",
+  "governance node",
+  "tooling / cli",
+  "protocol layer",
+  "mcp storage runtime",
+  "local / discovered",
+  "private / local",
+  "static",
+];
+
+function getNexusConnection(node) {
+  const id = String(node?.id || "").toLowerCase();
+  const name = String(node?.name || "").toLowerCase();
+  const role = String(node?.role || "").toLowerCase();
+  const org = String(node?.org || "").toLowerCase();
+  const platform = String(
+    node?.platform || node?.hosting?.platform || "",
+  ).toLowerCase();
+  const mix = `${id} ${name} ${role} ${org} ${platform}`;
+
   const hasWebhook = Boolean(node?.webhookUrl || node?.webhookRoutes);
-  const productionUrl = String(node?.hosting?.productionUrl || "").toLowerCase();
-  const inferredWebhook = productionUrl.includes("api/webhook") || productionUrl.includes("api/events");
-  
-  return Boolean(hasWebhook || inferredWebhook || hasEvents);
+  const hasNexusEvents = Array.isArray(node?.nexusEvents)
+    ? node.nexusEvents.length > 0
+    : Boolean(node?.nexusEvents);
+  if (hasWebhook || hasNexusEvents) return "linked";
+
+  if (NEXUS_OPTIONAL_HINTS.some((hint) => mix.includes(hint))) {
+    return "not_required";
+  }
+
+  if (NEXUS_REQUIRED_HINTS.some((hint) => mix.includes(hint))) {
+    return "unlinked";
+  }
+
+  return "not_required";
 }
 
 async function probeNodeStatus(url) {
@@ -1097,7 +1147,9 @@ router.get("/ecosystem/live", async (_req, res) => {
           offline: 0,
           unknown: 0,
           nexusLinked: 0,
+          nexusRequired: 0,
           nexusUnlinked: 0,
+          nexusOptional: 0,
         },
         message: "Live ecosystem source unavailable",
       };
@@ -1110,7 +1162,7 @@ router.get("/ecosystem/live", async (_req, res) => {
         const probe = url
           ? await probeNodeStatus(url)
           : { status: "unknown", httpStatus: null };
-        const nexusLinked = hasNexusIntegration(node);
+        const nexusConnection = getNexusConnection(node);
         return {
           ...node,
           _live: {
@@ -1118,8 +1170,9 @@ router.get("/ecosystem/live", async (_req, res) => {
             httpStatus: probe.httpStatus,
             checkedAt,
             url,
-            nexusLinked,
-            nexusConnection: nexusLinked ? "linked" : "unlinked",
+            nexusConnection,
+            nexusLinked: nexusConnection === "linked",
+            nexusRequired: nexusConnection === "unlinked",
           },
         };
       }),
@@ -1135,7 +1188,11 @@ router.get("/ecosystem/live", async (_req, res) => {
         else acc.unknown += 1;
 
         if (node?._live?.nexusLinked) acc.nexusLinked += 1;
-        else acc.nexusUnlinked += 1;
+        else if (node?._live?.nexusRequired) {
+          acc.nexusRequired += 1;
+          acc.nexusUnlinked += 1;
+        }
+        else acc.nexusOptional += 1;
 
         if (isPaymentNode(node)) acc.payment += 1;
         return acc;
@@ -1147,7 +1204,9 @@ router.get("/ecosystem/live", async (_req, res) => {
         offline: 0,
         unknown: 0,
         nexusLinked: 0,
+        nexusRequired: 0,
         nexusUnlinked: 0,
+        nexusOptional: 0,
         payment: 0,
       },
     );

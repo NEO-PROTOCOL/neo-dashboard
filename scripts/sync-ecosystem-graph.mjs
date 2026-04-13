@@ -116,14 +116,69 @@ function computeNodeVal(node, group) {
   return 6;
 }
 
-function hasNexusIntegration(node) {
-  // nexusEvents: [] means the field was explicitly set on the node (passive
-  // acknowledgment).  Only nodes missing the field entirely are unconfigured.
-  const nexusEventsConfigured = node != null && 'nexusEvents' in node;
-  const hasEvents = Array.isArray(node?.nexusEvents)
-    ? node.nexusEvents.length > 0 || nexusEventsConfigured
+const NEXUS_REQUIRED_HINTS = [
+  'agent',
+  'orchestrator',
+  'event ingestor',
+  'queue worker',
+  'message orchestrator',
+  'identity layer',
+  'checkout',
+  'dashboard surface',
+  'payments api',
+  'edge runtime',
+  'api',
+  'tunnel server',
+  'autonomous service',
+  'worker',
+];
+
+const NEXUS_OPTIONAL_HINTS = [
+  'documentation',
+  'landing',
+  'repository',
+  'contracts',
+  'organization hub',
+  'discovered node',
+  'public acquisition surface',
+  'landing page',
+  'interface / pwa',
+  'interface / mobile',
+  'miniapp',
+  'webapp',
+  'dapp / game',
+  'governance node',
+  'tooling / cli',
+  'protocol layer',
+  'mcp storage runtime',
+  'local / discovered',
+  'private / local',
+  'static',
+];
+
+function getNexusConnection(node) {
+  const id = String(node?.id || '').toLowerCase();
+  const name = String(node?.name || '').toLowerCase();
+  const role = String(node?.role || '').toLowerCase();
+  const org = String(node?.org || '').toLowerCase();
+  const platform = String(node?.platform || node?.hosting?.platform || '').toLowerCase();
+  const mix = `${id} ${name} ${role} ${org} ${platform}`;
+
+  const hasWebhook = Boolean(node?.webhookUrl || node?.webhookRoutes);
+  const hasNexusEvents = Array.isArray(node?.nexusEvents)
+    ? node.nexusEvents.length > 0
     : Boolean(node?.nexusEvents);
-  return Boolean(node?.webhookUrl || node?.webhookRoutes || hasEvents);
+  if (hasWebhook || hasNexusEvents) return 'linked';
+
+  if (NEXUS_OPTIONAL_HINTS.some((hint) => mix.includes(hint))) {
+    return 'not_required';
+  }
+
+  if (NEXUS_REQUIRED_HINTS.some((hint) => mix.includes(hint))) {
+    return 'unlinked';
+  }
+
+  return 'not_required';
 }
 
 function resolveProductionUrl(node) {
@@ -167,7 +222,7 @@ for (const rawNode of sourceNodes) {
     name: String(rawNode?.name || id),
     group,
     status: 'unknown',
-    nexusConnection: hasNexusIntegration(rawNode) ? 'linked' : 'unlinked',
+    nexusConnection: getNexusConnection(rawNode),
     val: computeNodeVal(rawNode, group),
   };
 
@@ -207,7 +262,14 @@ const nexusId = nexusNode?.id;
 if (nexusId) {
   for (const node of nodes) {
     if (node.id === nexusId) continue;
-    addLink(links, linkKeySet, node.id, nexusId, node.nexusConnection === 'linked' ? 'nexus' : 'missing-nexus');
+    if (node.nexusConnection === 'not_required') continue;
+    addLink(
+      links,
+      linkKeySet,
+      node.id,
+      nexusId,
+      node.nexusConnection === 'linked' ? 'nexus' : 'missing-nexus',
+    );
   }
 }
 

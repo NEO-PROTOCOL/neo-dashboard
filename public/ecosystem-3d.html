@@ -741,16 +741,78 @@
         ).toLowerCase();
       }
 
+      const NEXUS_REQUIRED_HINTS = [
+        "agent",
+        "orchestrator",
+        "event ingestor",
+        "queue worker",
+        "message orchestrator",
+        "identity layer",
+        "checkout",
+        "dashboard surface",
+        "payments api",
+        "edge runtime",
+        "api",
+        "tunnel server",
+        "autonomous service",
+        "worker",
+      ];
+
+      const NEXUS_OPTIONAL_HINTS = [
+        "documentation",
+        "landing",
+        "repository",
+        "contracts",
+        "organization hub",
+        "discovered node",
+        "public acquisition surface",
+        "landing page",
+        "interface / pwa",
+        "interface / mobile",
+        "miniapp",
+        "webapp",
+        "dapp / game",
+        "governance node",
+        "tooling / cli",
+        "protocol layer",
+        "mcp storage runtime",
+        "local / discovered",
+        "private / local",
+        "static",
+      ];
+
+      function nexusConnectionFromNode(rawNode) {
+        const id = String(rawNode?.id || "").toLowerCase();
+        const name = String(rawNode?.name || "").toLowerCase();
+        const role = String(rawNode?.role || "").toLowerCase();
+        const org = String(rawNode?.org || "").toLowerCase();
+        const platform = String(
+          rawNode?.platform || rawNode?.hosting?.platform || "",
+        ).toLowerCase();
+        const mix = `${id} ${name} ${role} ${org} ${platform}`;
+
+        const hasWebhook = Boolean(
+          rawNode?.webhookUrl || rawNode?.webhookRoutes,
+        );
+        const hasNexusEvents = Array.isArray(rawNode?.nexusEvents)
+          ? rawNode.nexusEvents.length > 0
+          : Boolean(rawNode?.nexusEvents);
+        if (hasWebhook || hasNexusEvents) return "linked";
+
+        if (NEXUS_OPTIONAL_HINTS.some((hint) => mix.includes(hint))) {
+          return "not_required";
+        }
+
+        if (NEXUS_REQUIRED_HINTS.some((hint) => mix.includes(hint))) {
+          return "unlinked";
+        }
+
+        return "not_required";
+      }
+
       function nodeNexusConnection(rawNode) {
-        if (rawNode?._live?.nexusConnection)
-          return rawNode._live.nexusConnection;
-        if (
-          rawNode?.webhookUrl ||
-          rawNode?.webhookRoutes ||
-          rawNode?.nexusEvents
-        )
-          return "linked";
-        return "unlinked";
+        if (rawNode?._live?.nexusConnection) return rawNode._live.nexusConnection;
+        return nexusConnectionFromNode(rawNode);
       }
 
       // Blend two hex colors — t=0 → pure hex1, t=1 → pure hex2
@@ -884,6 +946,7 @@
         if (nexusId && seen.has(nexusId)) {
           nodes.forEach((n) => {
             if (n.id === nexusId) return;
+            if (n.nexusConnection === "not_required") return;
             const key = `${n.id}->${nexusId}`;
             if (!linkKey.has(key)) {
               linkKey.add(key);
@@ -972,7 +1035,10 @@
           (acc, node) => {
             const st = node.status || "unknown";
             acc[st] = (acc[st] || 0) + 1;
+            if (node.nexusConnection === "linked") acc.linked += 1;
             if (node.nexusConnection === "unlinked") acc.unlinked += 1;
+            else if (node.nexusConnection === "not_required")
+              acc.optional += 1;
             if (node._isPaymentNode) acc.payment += 1;
             return acc;
           },
@@ -981,7 +1047,9 @@
             degraded: 0,
             offline: 0,
             unknown: 0,
+            linked: 0,
             unlinked: 0,
+            optional: 0,
             payment: 0,
           },
         );
@@ -990,7 +1058,7 @@
         liveModeEl.style.borderColor = `${mode.tone}55`;
         liveModeEl.style.color = mode.tone;
         liveModeEl.style.background = `${mode.tone}11`;
-        liveSummaryEl.textContent = `Visible: ${visibleData.nodes.length}/${allData.nodes.length} | Payment: ${statusCount.payment} | Online: ${statusCount.online} | Degraded: ${statusCount.degraded} | Offline: ${statusCount.offline} | Unlinked: ${statusCount.unlinked}`;
+        liveSummaryEl.textContent = `Visible: ${visibleData.nodes.length}/${allData.nodes.length} | Payment: ${statusCount.payment} | Reachability: online ${statusCount.online}, degraded ${statusCount.degraded}, offline ${statusCount.offline}, unknown ${statusCount.unknown} | Operational contracts: linked ${statusCount.linked}, contract gaps ${statusCount.unlinked}, optional ${statusCount.optional}`;
 
         liveMetaEl.textContent = `Source: ${payload.source} | Access: ${payload.authenticated ? "gateway-authenticated" : "public"} | ${mode.detail} | Checked: ${new Date(
           payload.checkedAt,
@@ -1008,11 +1076,13 @@
           );
         }
         if (payload.mode === "live" && statusCount.offline > 0) {
-          alertLines.push(`[ALERT] ${statusCount.offline} node(s) offline.`);
+          alertLines.push(
+            `[ALERT] ${statusCount.offline} node(s) offline.`,
+          );
         }
         if (payload.mode === "live" && statusCount.unlinked > 0) {
           alertLines.push(
-            `[ALERT] ${statusCount.unlinked} node(s) sem link de integracao com Nexus.`,
+            `[ALERT] ${statusCount.unlinked} node(s) operacionais sem contrato de integração.`,
           );
         }
         if (payload.mode === "live") {
