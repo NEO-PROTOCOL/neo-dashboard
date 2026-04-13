@@ -160,6 +160,67 @@
         "N/A": T.textDim,
       };
 
+      function calculatePrecisionFromReport(report) {
+        const health = report?.ecosystem_health || {};
+        const meta = report?.meta || {};
+        const totalNodes = Math.max(Number(meta.total_nodes || 0), 1);
+        const averageReadiness = Number(health.average_readiness || 0);
+        const grades = health.grade_distribution || {};
+        const severities = health.findings_by_severity || {};
+
+        const gradeWeights = { A: 100, B: 86, C: 72, D: 58, F: 40 };
+        const gradedNodes = Object.values(grades).reduce(
+          (sum, count) => sum + Number(count || 0),
+          0,
+        );
+        const gradeQuality =
+          gradedNodes > 0
+            ? Object.entries(grades).reduce(
+                (sum, [grade, count]) =>
+                  sum + (gradeWeights[grade] || 0) * Number(count || 0),
+                0,
+              ) / gradedNodes
+            : averageReadiness;
+
+        const findingPenalty =
+          ((Number(severities.critical || 0) * 6) +
+            (Number(severities.high || 0) * 4) +
+            (Number(severities.medium || 0) * 2) +
+            (Number(severities.low || 0) * 1) +
+            (Number(severities.info || 0) * 0.5)) /
+          totalNodes;
+
+        const precision = Math.max(
+          0,
+          Math.min(
+            100,
+            Math.round(
+              0.68 * averageReadiness +
+                0.22 * gradeQuality +
+                12 -
+                findingPenalty * 4,
+            ),
+          ),
+        );
+
+        return {
+          precision,
+          label:
+            precision >= 90
+              ? "high"
+              : precision >= 75
+                ? "solid"
+                : precision >= 60
+                  ? "watch"
+                  : "fragile",
+          notes: [
+            `readiness=${averageReadiness.toFixed(1)}`,
+            `grade=${gradeQuality.toFixed(1)}`,
+            `finding_penalty=${findingPenalty.toFixed(2)}`,
+          ],
+        };
+      }
+
       const ORG_COLOR = {
         "NEO Protocol": T.accent,
         "Neo Smart Factory": T.cyan,
@@ -191,6 +252,7 @@
       function Header() {
         const REPORT = useContext(ReportContext);
         const meta = REPORT.meta;
+        const precision = calculatePrecisionFromReport(REPORT);
         return React.createElement(
           "header",
           {
@@ -364,6 +426,27 @@
               },
               "Operational readiness baseline",
             ),
+            React.createElement(
+              "div",
+              {
+                style: {
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  marginTop: 12,
+                  padding: "6px 10px",
+                  borderRadius: 999,
+                  border: `1px solid ${precision.precision >= 90 ? T.green : precision.precision >= 75 ? T.accent : precision.precision >= 60 ? T.yellow : T.red}33`,
+                  background: `${precision.precision >= 90 ? T.green : precision.precision >= 75 ? T.accent : precision.precision >= 60 ? T.yellow : T.red}10`,
+                  color: precision.precision >= 90 ? T.green : precision.precision >= 75 ? T.accent : precision.precision >= 60 ? T.yellow : T.red,
+                  fontSize: "0.62rem",
+                  letterSpacing: "1px",
+                  textTransform: "uppercase",
+                },
+                title: precision.notes.join(" · "),
+              },
+              `Precision ${precision.precision}% · ${precision.label}`,
+            ),
           ),
         );
       }
@@ -473,6 +556,7 @@
         const grades = h.grade_distribution;
         const sevs = h.findings_by_severity;
         const totalSev = Object.values(sevs).reduce((a, b) => a + b, 0) || 1;
+        const precision = calculatePrecisionFromReport(REPORT);
 
         return React.createElement(
           "div",
@@ -492,6 +576,19 @@
               label: "Readiness Score",
               value: h.average_readiness,
               color: h.average_readiness >= 70 ? T.green : T.yellow,
+            }),
+            React.createElement(Stat, {
+              label: "Precision",
+              value: `${precision.precision}%`,
+              color:
+                precision.precision >= 90
+                  ? T.green
+                  : precision.precision >= 75
+                    ? T.accent
+                    : precision.precision >= 60
+                      ? T.yellow
+                      : T.red,
+              sub: `${precision.label} · ${precision.notes.join(" · ")}`,
             }),
             React.createElement(Stat, {
               label: "Total Findings",
