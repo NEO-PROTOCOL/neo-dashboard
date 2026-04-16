@@ -345,9 +345,20 @@
         <span class="legend-arrow">▼</span>
       </div>
       <div class="legend-body" id="legend-body">
-        <div class="legend-note">Layout = clusters por org/workspace. Lines <span style="color:#78d4ff">azul</span> = mesmo grupo; <span style="color:#00ffc8">ciano</span> = Nexus; vermelho = gap Nexus. Ligações macro = cinza-azulado.</div>
+        <div class="legend-note">Clusters por org. Links derivados do ecosystem.json canônico.</div>
         <div class="legend-group">
-          <div class="legend-group-title">Layout</div>
+          <div class="legend-group-title">Links</div>
+          <div class="legend-item"><div class="dot" style="background:rgba(90,140,180,0.6)"></div>Ecosystem (pertence)</div>
+          <div class="legend-item"><div class="dot" style="background:rgba(120,210,255,0.9)"></div>Mesmo grupo (intra-org)</div>
+          <div class="legend-item"><div class="dot" style="background:rgba(0,255,210,0.9)"></div>Nexus linked</div>
+          <div class="legend-item"><div class="dot" style="background:rgba(0,200,255,0.9)"></div>Orchestration</div>
+          <div class="legend-item"><div class="dot" style="background:rgba(255,255,255,0.7)"></div>Architect</div>
+          <div class="legend-item"><div class="dot" style="background:rgba(255,170,50,0.9)"></div>Event flow (emit → consume)</div>
+          <div class="legend-item"><div class="dot" style="background:rgba(200,120,255,0.9)"></div>Shared contract</div>
+          <div class="legend-item"><div class="dot" style="background:rgba(255,220,100,0.85)"></div>Dependency ref</div>
+        </div>
+        <div class="legend-group">
+          <div class="legend-group-title">Nodes</div>
           <div class="legend-item"><div class="dot" style="background:#b8ff3f"></div>Org / workspace clusters</div>
           <div class="legend-item"><div class="dot" style="background:#8ef7c0"></div>Acid variations by node type</div>
         </div>
@@ -1053,6 +1064,7 @@
 
       function shouldShowNodeLabel(node) {
         if (!node || isAnchorNode(node)) return false;
+        if (node._isArchitect) return true;
         if (hoveredNodeId && hoveredNodeId === node.id) return true;
         if (focusedNodeId && focusedNodeId === node.id) return true;
         const role = String(node?.role || "").toLowerCase();
@@ -1192,6 +1204,7 @@
       }
 
       function nodeColor(node) {
+        if (node._isArchitect) return "rgba(255, 255, 255, 0.95)";
         const base = nodeTone(node);
         const importance = nodeImportance(node);
         const alpha =
@@ -1217,6 +1230,12 @@
       function linkColor(link) {
         // High-contrast on #0a0a0a — previous alphas (0.06–0.28) were effectively invisible.
         if (link.kind === "anchor") return "rgba(120, 160, 195, 0.42)";
+        if (link.kind === "ecosystem") return "rgba(90, 140, 180, 0.32)";
+        if (link.kind === "architect") return "rgba(255, 255, 255, 0.55)";
+        if (link.kind === "orchestration") return "rgba(0, 200, 255, 0.72)";
+        if (link.kind === "event-flow") return "rgba(255, 170, 50, 0.78)";
+        if (link.kind === "shared-contract") return "rgba(200, 120, 255, 0.75)";
+        if (link.kind === "dependency") return "rgba(255, 220, 100, 0.65)";
         if (link.label === "group" || link.kind === "group")
           return "rgba(120, 210, 255, 0.62)";
         if (link.label === "missing-nexus") return "rgba(255, 95, 120, 0.88)";
@@ -1405,30 +1424,205 @@
           }
         }
 
-        const nexusNode = nodes.find((n) =>
-          n.id.toLowerCase().includes("nexus"),
-        );
+        // ── Central hubs: Nexus + Orchestrator ──
+        // Every node is part of the ecosystem → connects to Nexus.
+        // Orchestrator has orchestration relation with every org.
+        const nexusNode = nodes.find((n) => n.id.toLowerCase().includes("nexus"));
+        const orchestratorNode = nodes.find((n) => n.id === "neobot-orchestrator");
         const nexusId = nexusNode?.id || null;
+        const orchestratorId = orchestratorNode?.id || null;
+
+        // Nexus: all nodes connect — linked nodes get strong "nexus" link,
+        // all others get a softer "ecosystem" link (they belong, period).
         if (nexusId && seen.has(nexusId)) {
           nodes.forEach((n) => {
             if (n.id === nexusId) return;
+            if (n.id === orchestratorId) return; // orchestrator links separately
             if (isAnchorNode(n)) return;
-            if (n.nexusConnection === "not_required") return;
             const key = `${n.id}->${nexusId}`;
+            if (linkKey.has(key)) return;
+            linkKey.add(key);
+            const isLinked = n.nexusConnection === "linked";
+            links.push({
+              source: n.id,
+              target: nexusId,
+              label: isLinked ? "nexus" : "ecosystem",
+              kind: isLinked ? "nexus" : "ecosystem",
+              distance: isLinked ? 78 : 110,
+              strength: isLinked ? 0.18 : 0.08,
+            });
+          });
+        }
+
+        // Orchestrator ↔ Nexus direct link
+        if (orchestratorId && nexusId && orchestratorId !== nexusId) {
+          const key = `${orchestratorId}->${nexusId}`;
+          if (!linkKey.has(key)) {
+            linkKey.add(key);
+            links.push({
+              source: orchestratorId, target: nexusId,
+              label: "orchestration", kind: "orchestration",
+              distance: 45, strength: 0.6,
+            });
+          }
+        }
+
+        // Orchestrator connects to the hub node of every OTHER org
+        if (orchestratorId && seen.has(orchestratorId)) {
+          const orchestratorOrg = orchestratorNode?.org;
+          for (const [, groupNodes] of byGroup.entries()) {
+            const hub = groupNodes.reduce((best, cur) => cur.val > best.val ? cur : best, groupNodes[0]);
+            if (hub.org === orchestratorOrg) continue; // skip own org
+            if (isAnchorNode(hub)) continue;
+            const key = `${orchestratorId}->${hub.id}:orch`;
             if (!linkKey.has(key)) {
               linkKey.add(key);
               links.push({
-                source: n.id,
-                target: nexusId,
-                label:
-                  n.nexusConnection === "linked" ? "nexus" : "missing-nexus",
-                kind: n.nexusConnection === "linked" ? "nexus" : "missing-nexus",
-                distance: n.nexusConnection === "linked" ? 78 : 118,
-                strength: n.nexusConnection === "linked" ? 0.18 : 0.12,
+                source: orchestratorId, target: hub.id,
+                label: "orchestration", kind: "orchestration",
+                distance: 85, strength: 0.15,
               });
             }
+          }
+        }
+
+        // ── neomello — the architect (visual-only node) ──
+        const neoMelloId = "neomello";
+        if (!seen.has(neoMelloId)) {
+          seen.add(neoMelloId);
+          const melloNode = {
+            id: neoMelloId,
+            name: "NEØ MELLØ",
+            group: "NEO Protocol",
+            role: "The Architect",
+            org: "NEO Protocol",
+            workspaceScope: "root",
+            clusterKey: "NEO Protocol::root",
+            status: "online",
+            nexusConnection: "linked",
+            val: 14,
+            _isArchitect: true,
+          };
+          nodes.push(melloNode);
+          latestNodeMeta.set(neoMelloId, melloNode);
+          if (!byGroup.has("NEO Protocol")) byGroup.set("NEO Protocol", []);
+          byGroup.get("NEO Protocol").push(melloNode);
+
+          // Architect → Orchestrator + Nexus
+          [orchestratorId, nexusId].forEach((hubId) => {
+            if (!hubId) return;
+            const key = `${neoMelloId}->${hubId}:arch`;
+            if (!linkKey.has(key)) {
+              linkKey.add(key);
+              links.push({ source: neoMelloId, target: hubId, label: "architect", kind: "architect", distance: 35, strength: 0.7 });
+            }
+          });
+          // Architect → hub of every org
+          for (const [, groupNodes] of byGroup.entries()) {
+            const hub = groupNodes.reduce((best, cur) => cur.val > best.val ? cur : best, groupNodes[0]);
+            if (hub.id === neoMelloId || hub.id === orchestratorId || hub.id === nexusId) continue;
+            if (isAnchorNode(hub)) continue;
+            const key = `${neoMelloId}->${hub.id}:arch`;
+            if (!linkKey.has(key)) {
+              linkKey.add(key);
+              links.push({ source: neoMelloId, target: hub.id, label: "architect", kind: "architect", distance: 75, strength: 0.12 });
+            }
+          }
+        }
+
+        // ── Cross-org visual links ──
+        // Derived from ecosystem.json declarations: event flow, shared
+        // contracts, explicit refs.  Pure visual — no runtime calculation.
+        const emitIndex = new Map();   // event-name → [nodeId, ...]
+        const consumeIndex = new Map();
+        valid.forEach((raw) => {
+          const id = String(raw?.id || "").trim();
+          if (!id || !seen.has(id)) return;
+          const ev = raw?.nexusEvents;
+          const emits = Array.isArray(ev?.emits) ? ev.emits : (Array.isArray(ev) ? ev : []);
+          const consumes = Array.isArray(ev?.consumes) ? ev.consumes : [];
+          emits.forEach((e) => {
+            const k = String(e).trim();
+            if (!k || k === "*") return;
+            if (!emitIndex.has(k)) emitIndex.set(k, []);
+            emitIndex.get(k).push(id);
+          });
+          consumes.forEach((e) => {
+            const k = String(e).trim();
+            if (!k || k === "*") return;
+            if (!consumeIndex.has(k)) consumeIndex.set(k, []);
+            consumeIndex.get(k).push(id);
+          });
+        });
+        // emit → consume  (event flow)
+        for (const [event, emitters] of emitIndex.entries()) {
+          const consumers = consumeIndex.get(event) || [];
+          emitters.forEach((src) => {
+            consumers.forEach((tgt) => {
+              if (src === tgt) return;
+              const key = `${src}->${tgt}:flow`;
+              if (!linkKey.has(key)) {
+                linkKey.add(key);
+                links.push({ source: src, target: tgt, label: "event-flow", kind: "event-flow", distance: 95, strength: 0.22 });
+              }
+            });
           });
         }
+
+        // Shared contract addresses → visual link
+        const contractIndex = new Map(); // address → [nodeId, ...]
+        valid.forEach((raw) => {
+          const id = String(raw?.id || "").trim();
+          if (!id || !seen.has(id)) return;
+          const mainnet = raw?.contracts?.mainnet || raw?.tokenCanonical?.asset?.contractAddress;
+          const addresses = typeof mainnet === "object" ? Object.values(mainnet) : (typeof mainnet === "string" ? [mainnet] : []);
+          addresses.forEach((addr) => {
+            const a = String(addr).trim().toLowerCase();
+            if (!a || a.length < 10) return;
+            if (!contractIndex.has(a)) contractIndex.set(a, []);
+            contractIndex.get(a).push(id);
+          });
+        });
+        for (const [, peers] of contractIndex.entries()) {
+          for (let i = 0; i < peers.length; i++) {
+            for (let j = i + 1; j < peers.length; j++) {
+              const key = `${peers[i]}->${peers[j]}:contract`;
+              if (!linkKey.has(key)) {
+                linkKey.add(key);
+                links.push({ source: peers[i], target: peers[j], label: "shared-contract", kind: "shared-contract", distance: 80, strength: 0.28 });
+              }
+            }
+          }
+        }
+
+        // Explicit cross-refs (stateLayer, canonicalRegistry, workspace pointers)
+        const refPairs = [];
+        valid.forEach((raw) => {
+          const id = String(raw?.id || "").trim();
+          if (!id || !seen.has(id)) return;
+          // stateLayer.growthSystem.workspace → look for matching node
+          const gsWorkspace = raw?.stateLayer?.growthSystem?.workspace;
+          if (gsWorkspace) {
+            const target = valid.find((r) => {
+              const lp = String(r?.localPath || "");
+              return lp && gsWorkspace.includes(lp.split("/").pop());
+            });
+            if (target?.id && seen.has(target.id)) refPairs.push([id, target.id]);
+          }
+          // canonicalRegistry.repo → match by repo url
+          const canonRepo = raw?.canonicalRegistry?.repo || raw?.tokenCanonical?.canonicalRegistry?.repo;
+          if (canonRepo) {
+            const target = valid.find((r) => r?.repository && r.repository === canonRepo && r.id !== id);
+            if (target?.id && seen.has(target.id)) refPairs.push([id, target.id]);
+          }
+        });
+        refPairs.forEach(([src, tgt]) => {
+          const key = `${src}->${tgt}:ref`;
+          if (!linkKey.has(key)) {
+            linkKey.add(key);
+            links.push({ source: src, target: tgt, label: "dependency", kind: "dependency", distance: 88, strength: 0.20 });
+          }
+        });
 
         return { nodes, links };
       }
@@ -1762,6 +1956,12 @@
           .linkColor((link) => linkColor(link))
           .linkWidth((link) => {
             if (link?.kind === "anchor") return 0.2;
+            if (link?.kind === "ecosystem") return 0.4;
+            if (link?.kind === "architect") return 1.3;
+            if (link?.kind === "orchestration") return 1.6;
+            if (link?.kind === "event-flow") return 1.6;
+            if (link?.kind === "shared-contract") return 1.4;
+            if (link?.kind === "dependency") return 1.1;
             if (link?.kind === "group") return 1.0;
             if (link?.kind === "nexus") return 1.45;
             return link.label === "missing-nexus" ? 1.7 : 1.05;
@@ -1806,26 +2006,48 @@
           .nodeVal((node) => node.val)
           .nodeRelSize(6.4)
           .nodeResolution(18)
-          .linkDirectionalParticles((link) =>
-            link.kind === "anchor"
-              ? 0
-              : link.label === "missing-nexus"
-                ? 3
-                : link.kind === "nexus"
-                  ? 2
-                  : link.kind === "group"
-                    ? 1
-                    : 1,
-          )
-          .linkDirectionalParticleSpeed((link) =>
-            link.label === "missing-nexus" ? 0.004 : link.kind === "nexus" ? 0.0032 : 0.0025,
-          )
-          .linkDirectionalParticleWidth((link) =>
-            link.label === "missing-nexus" ? 2.4 : link.kind === "nexus" ? 1.8 : 1.2,
-          )
+          .linkDirectionalParticles((link) => {
+            if (link.kind === "anchor") return 0;
+            if (link.kind === "ecosystem") return 0;
+            if (link.kind === "architect") return 2;
+            if (link.kind === "orchestration") return 2;
+            if (link.kind === "event-flow") return 3;
+            if (link.kind === "shared-contract") return 2;
+            if (link.kind === "dependency") return 2;
+            if (link.label === "missing-nexus") return 3;
+            if (link.kind === "nexus") return 2;
+            if (link.kind === "group") return 1;
+            return 1;
+          })
+          .linkDirectionalParticleSpeed((link) => {
+            if (link.kind === "architect") return 0.003;
+            if (link.kind === "orchestration") return 0.004;
+            if (link.kind === "event-flow") return 0.005;
+            if (link.kind === "shared-contract") return 0.003;
+            if (link.kind === "dependency") return 0.003;
+            if (link.label === "missing-nexus") return 0.004;
+            if (link.kind === "nexus") return 0.0032;
+            return 0.0025;
+          })
+          .linkDirectionalParticleWidth((link) => {
+            if (link.kind === "architect") return 1.6;
+            if (link.kind === "orchestration") return 2.0;
+            if (link.kind === "event-flow") return 2.2;
+            if (link.kind === "shared-contract") return 2.0;
+            if (link.kind === "dependency") return 1.6;
+            if (link.label === "missing-nexus") return 2.4;
+            if (link.kind === "nexus") return 1.8;
+            return 1.2;
+          })
           .linkOpacity(0.92)
           .linkWidth((link) => {
             if (link?.kind === "anchor") return 0.15;
+            if (link?.kind === "ecosystem") return 0.45;
+            if (link?.kind === "architect") return 1.5;
+            if (link?.kind === "orchestration") return 1.9;
+            if (link?.kind === "event-flow") return 1.8;
+            if (link?.kind === "shared-contract") return 1.6;
+            if (link?.kind === "dependency") return 1.3;
             if (link?.kind === "group") return 1.15;
             if (link?.kind === "nexus") return 1.65;
             return link.label === "missing-nexus" ? 1.85 : 1.2;
