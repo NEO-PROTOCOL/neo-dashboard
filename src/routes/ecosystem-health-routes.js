@@ -10,9 +10,22 @@ const NODE_PROBE_TIMEOUT = Number(
   process.env.ECOSYSTEM_NODE_PROBE_TIMEOUT_MS || 2500,
 );
 const ECOSYSTEM_CACHE_TTL = 60000; // 1 minute cache
+const DEFAULT_ECOSYSTEM_SOURCE_URL =
+  process.env.ECOSYSTEM_SOURCE_URL ||
+  "https://nexus.neoprotocol.space/api/ecosystem";
 
 let ecosystemCache = null;
 let ecosystemCacheTime = 0;
+
+// Nodes excluded from health aggregation (same rules as neo-routes).
+const ECOSYSTEM_EXCLUDE_IDS = new Set([
+  "flowpay-core", // standalone commercial product — see stackBoundary in orchestrator ecosystem
+]);
+
+function filterEcosystemNodes(nodes) {
+  if (!Array.isArray(nodes)) return [];
+  return nodes.filter((n) => !ECOSYSTEM_EXCLUDE_IDS.has(n?.id));
+}
 
 // Project progress metadata based on recent development
 // Updated: 2026-03-17
@@ -147,6 +160,35 @@ async function loadEcosystemNodes() {
     return ecosystemCache;
   }
 
+  // Try canonical read-only endpoint first.
+  try {
+    const response = await fetchWithTimeout(
+      DEFAULT_ECOSYSTEM_SOURCE_URL,
+      { method: "GET" },
+      10000,
+    );
+    if (response.ok) {
+      const raw = await response.text();
+      const parsed = JSON.parse(raw);
+      const nodes = Array.isArray(parsed)
+        ? parsed
+        : Array.isArray(parsed?.nodes)
+          ? parsed.nodes
+          : [];
+      if (nodes.length > 0) {
+        const filtered = filterEcosystemNodes(nodes);
+        if (filtered.length > 0) {
+          const result = { success: true, nodes: filtered, source: "remote" };
+          ecosystemCache = result;
+          ecosystemCacheTime = now;
+          return result;
+        }
+      }
+    }
+  } catch (_e) {
+    // Try next path
+  }
+
   // Try local file first using the dashboard's own projection.
   const localPaths = [
     process.env.ECOSYSTEM_JSON_PATH,
@@ -158,8 +200,9 @@ async function loadEcosystemNodes() {
     try {
       const raw = await fsPromises.readFile(ecosystemPath, "utf8");
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const result = { success: true, nodes: parsed, source: "local-file" };
+      const filtered = filterEcosystemNodes(parsed);
+      if (Array.isArray(parsed) && filtered.length > 0) {
+        const result = { success: true, nodes: filtered, source: "local-file" };
         ecosystemCache = result;
         ecosystemCacheTime = now;
         return result;
@@ -179,8 +222,11 @@ async function loadEcosystemNodes() {
 
       const raw = await response.text();
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const result = { success: true, nodes: parsed, source: "github" };
+      const filtered = filterEcosystemNodes(
+        Array.isArray(parsed) ? parsed : [],
+      );
+      if (filtered.length > 0) {
+        const result = { success: true, nodes: filtered, source: "github" };
         ecosystemCache = result;
         ecosystemCacheTime = now;
         return result;
@@ -196,7 +242,9 @@ async function loadEcosystemNodes() {
     if (fs.existsSync(graphPath)) {
       const raw = await fsPromises.readFile(graphPath, "utf8");
       const parsed = JSON.parse(raw);
-      const nodes = Array.isArray(parsed?.nodes) ? parsed.nodes : [];
+      const nodes = filterEcosystemNodes(
+        Array.isArray(parsed?.nodes) ? parsed.nodes : [],
+      );
       if (nodes.length > 0) {
         const result = { success: true, nodes, source: "graph-file" };
         ecosystemCache = result;

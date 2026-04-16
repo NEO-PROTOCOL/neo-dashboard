@@ -9,6 +9,9 @@ const NEOBOT_URL =
 const NEXUS_ECOSYSTEM_URL =
   process.env.NEXUS_ECOSYSTEM_URL ||
   "https://nexus.neoprotocol.space/api/ecosystem";
+const DEFAULT_ECOSYSTEM_SOURCE_URL =
+  process.env.ECOSYSTEM_SOURCE_URL ||
+  "https://nexus.neoprotocol.space/api/ecosystem";
 const FETCH_TIMEOUT = 5000;
 const NODE_PROBE_TIMEOUT = Number(
   process.env.ECOSYSTEM_NODE_PROBE_TIMEOUT_MS || 2500,
@@ -698,7 +701,33 @@ async function probeNodeStatus(url) {
 async function loadEcosystemNodes() {
   const now = Date.now();
 
-  // Source 1: dashboard local filesystem projection.
+  // Source 1: canonical read-only endpoint.
+  try {
+    const response = await fetchWithTimeout(
+      DEFAULT_ECOSYSTEM_SOURCE_URL,
+      { method: "GET" },
+      10000,
+    );
+    if (response.ok) {
+      const raw = await response.text();
+      const parsed = JSON.parse(raw);
+      const nodes = Array.isArray(parsed)
+        ? parsed
+        : Array.isArray(parsed?.nodes)
+          ? parsed.nodes
+          : [];
+      if (nodes.length > 0) {
+        const filtered = nodes.filter((n) => !ECOSYSTEM_EXCLUDE_IDS.has(n?.id));
+        if (filtered.length > 0) {
+          return { success: true, nodes: filtered, source: "remote" };
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("Failed to read remote ecosystem source:", e.message);
+  }
+
+  // Source 2: dashboard local filesystem projection.
   const ecosystemPath = process.env.ECOSYSTEM_JSON_PATH
     ? path.resolve(process.cwd(), process.env.ECOSYSTEM_JSON_PATH)
     : path.resolve(process.cwd(), "ecosystem.json");
@@ -717,7 +746,7 @@ async function loadEcosystemNodes() {
     console.warn("Failed to read ecosystem.json:", e.message);
   }
 
-  // Source 2: Bundled local file in dashboard root (for direct deployments)
+  // Source 3: Bundled local file in dashboard root (for direct deployments)
   // This ensures that pushed changes to the dashboard repo reflect immediately.
   const rootGraphPath = path.resolve(process.cwd(), "ecosystem-graph.json");
   try {
@@ -734,7 +763,7 @@ async function loadEcosystemNodes() {
     }
   } catch (_e) {}
 
-  // Source 3: Remote GitHub source only when explicitly configured.
+  // Source 4: Remote GitHub source only when explicitly configured.
   const remoteUrls = [process.env.ECOSYSTEM_SOURCE_URL].filter(Boolean);
 
   for (const remoteUrl of remoteUrls) {
@@ -755,7 +784,7 @@ async function loadEcosystemNodes() {
     }
   }
 
-  // Source 3: Nexus API (when local registry and GitHub are unavailable)
+  // Source 5: Nexus API (when local registry and GitHub are unavailable)
   try {
     const r = await fetchWithTimeout(NEXUS_ECOSYSTEM_URL);
     if (r.ok) {
