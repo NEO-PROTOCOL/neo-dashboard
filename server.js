@@ -322,6 +322,10 @@ const telegramBot = new SimpleTelegramBot(
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Railway (and other reverse proxies) set X-Forwarded-For. Required so express-rate-limit
+// can identify clients; see https://express-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_FORWARDED_FOR/
+app.set("trust proxy", process.env.TRUST_PROXY === "0" ? false : 1);
+
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 
