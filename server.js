@@ -428,8 +428,7 @@ app.use(express.static(PUBLIC_DIR));
 // ------------------------------------------------------------------
 // Security Middleware (NΞØ Auth)
 // ------------------------------------------------------------------
-const GATEWAY_PASSWORD =
-  process.env.GATEWAY_PASSWORD || process.env.CLAWDBOT_GATEWAY_PASSWORD;
+const GATEWAY_PASSWORD = process.env.GATEWAY_PASSWORD;
 
 // Production safety: require a gateway password when running in production.
 if (process.env.NODE_ENV === "production" && !GATEWAY_PASSWORD) {
