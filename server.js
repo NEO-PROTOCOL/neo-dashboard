@@ -322,9 +322,26 @@ const telegramBot = new SimpleTelegramBot(
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Railway (and other reverse proxies) set X-Forwarded-For. Required so express-rate-limit
-// can identify clients; see https://express-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_FORWARDED_FOR/
-app.set("trust proxy", process.env.TRUST_PROXY === "0" ? false : 1);
+const runningOnRailway = Boolean(
+  process.env.RAILWAY_ENVIRONMENT ||
+    process.env.RAILWAY_ENVIRONMENT_NAME ||
+    process.env.RAILWAY_PROJECT_ID,
+);
+
+function resolveTrustProxy() {
+  if (process.env.TRUST_PROXY === "0") return false;
+  const n = Number(process.env.TRUST_PROXY);
+  if (Number.isFinite(n) && n >= 0) return n;
+  // One edge hop (typical for Railway); use TRUST_PROXY=N to tune.
+  return 1;
+}
+
+// Railway sets X-Forwarded-For / Forwarded. trust proxy must be set so req.ip is the client.
+// express-rate-limit v8 also runs strict header validations; see reportRateLimit.validate below.
+app.set("trust proxy", resolveTrustProxy());
+console.log(
+  `[SYS] trust proxy=${JSON.stringify(app.get("trust proxy"))} railway=${runningOnRailway} TRUST_PROXY=${process.env.TRUST_PROXY ?? "unset"}`,
+);
 
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
@@ -355,6 +372,13 @@ const reportRateLimit = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // v8 validates proxy headers in keyGenerator; Railway headers can still trip ValidationError
+  // and abort the process. We already set trust proxy; disable these checks behind the edge.
+  validate: {
+    xForwardedForHeader: false,
+    forwardedHeader: false,
+    trustProxy: false,
+  },
 });
 
 app.get("/api/stack-report.json", reportRateLimit, async (_req, res) => {
@@ -432,7 +456,7 @@ app.use(express.static(PUBLIC_DIR));
 // ------------------------------------------------------------------
 // Security Middleware (NΞØ Auth)
 // ------------------------------------------------------------------
-const GATEWAY_PASSWORD = process.env.GATEWAY_PASSWORD;
+const { GATEWAY_PASSWORD } = process.env;
 
 // Production safety: require a gateway password when running in production.
 if (process.env.NODE_ENV === "production" && !GATEWAY_PASSWORD) {
