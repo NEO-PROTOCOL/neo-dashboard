@@ -436,6 +436,20 @@ app.get("/api/readiness-badge.json", reportRateLimit, async (_req, res) => {
   }
 });
 
+// Public API health (before /api auth) — probes e plataforma não devem logar [SECURITY].
+app.get("/api/health", (_req, res) => {
+  res.json({
+    status: "ok",
+    telegram: process.env.TELEGRAM_BOT_TOKEN ? "configured" : "missing",
+    nexus_url: (process.env.NEXUS_API_URL || "FALLBACK").replace(
+      /(:\/\/).+?(\/|$)/,
+      "$1***$2",
+    ),
+    scheduler: "active",
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Legacy path redirect for existing frontend references (will be updated next)
 app.get("/stack-report.json", (_req, res) => {
   res.redirect(307, "/api/stack-report.json");
@@ -597,20 +611,6 @@ app.get("/health", (req, res) => {
   res.json({
     status: "ok",
     service: "neo-dashboard",
-    timestamp: new Date().toISOString(),
-  });
-});
-
-// Health Check (API)
-app.get("/api/health", (req, res) => {
-  res.json({
-    status: "ok",
-    telegram: process.env.TELEGRAM_BOT_TOKEN ? "configured" : "missing",
-    nexus_url: (process.env.NEXUS_API_URL || "FALLBACK").replace(
-      /(:\/\/).+?(\/|$)/,
-      "$1***$2",
-    ),
-    scheduler: "active",
     timestamp: new Date().toISOString(),
   });
 });
