@@ -262,7 +262,7 @@ function captureLog(type, args) {
   }
 
   serverLogs.unshift({ timestamp, type, message });
-  if (serverLogs.length > MAX_LOGS) serverLogs.pop();
+  serverLogs.splice(MAX_LOGS);
 
   process.stdout.write(`[${type.toUpperCase()}] ${message}\n`);
 }
@@ -630,7 +630,7 @@ app.post("/api/logs", (req, res) => {
       type: type ?? "info",
       message: `[CORE] ${message}`,
     });
-    if (serverLogs.length > MAX_LOGS) serverLogs.pop();
+    serverLogs.splice(MAX_LOGS);
   }
   res.json({ success: true });
 });
