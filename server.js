@@ -705,7 +705,7 @@ app.post("/api/messages", async (req, res) => {
 // ------------------------------------------------------------------
 app.get("/api/monitor/health", async (req, res) => {
   const snapshot = await collectMonitorSnapshot();
-  const status = snapshot.nexus.status === "offline" ? "degraded" : "healthy";
+  const status = { offline: "degraded" }[snapshot.nexus.status] ?? "healthy";
   res.json({ status, ...snapshot });
 });
 
@@ -717,7 +717,7 @@ app.get("/api/monitor/alerts", async (req, res) => {
     alerts.push({
       code: "NEXUS_OFFLINE",
       severity: "high",
-      message: `Nexus indisponível (${snapshot.nexus.error || "sem detalhe"})`,
+      message: `Nexus indisponível (${snapshot.nexus.error ?? "sem detalhe"})`,
     });
   } else if (snapshot.nexus.status !== "ok") {
     alerts.push({
@@ -727,7 +727,7 @@ app.get("/api/monitor/alerts", async (req, res) => {
     });
   }
 
-  if ((snapshot.nexus.latency_ms || 0) > 2000) {
+  if ((snapshot.nexus.latency_ms ?? 0) > 2000) {
     alerts.push({
       code: "NEXUS_LATENCY_HIGH",
       severity: "medium",
@@ -735,9 +735,7 @@ app.get("/api/monitor/alerts", async (req, res) => {
     });
   }
 
-  if (alerts.length > 0) {
-    monitorState.alertsTotal += alerts.length;
-  }
+  monitorState.alertsTotal += alerts.length;
 
   res.json({
     hasAlert: alerts.length > 0,
@@ -762,7 +760,7 @@ app.get("/api/monitor/metrics", async (req, res) => {
 
 app.post("/api/monitor/test-alert", async (req, res) => {
   const chatId = process.env.TELEGRAM_CHAT_ID;
-  if (telegramBot?.token && chatId) {
+  if (chatId && telegramBot?.token) {
     await telegramBot.sendMessage(
       chatId,
       `🧪 TEST ALERT\nDashboard: ${process.env.PUBLIC_URL || `http://localhost:${PORT}`}\nTime: ${new Date().toISOString()}`,
