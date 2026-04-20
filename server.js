@@ -626,8 +626,8 @@ app.post("/api/logs", (req, res) => {
   const { type, message, timestamp } = req.body;
   if (message) {
     serverLogs.unshift({
-      timestamp: timestamp || new Date().toISOString(),
-      type: type || "info",
+      timestamp: timestamp ?? new Date().toISOString(),
+      type: type ?? "info",
       message: `[CORE] ${message}`,
     });
     if (serverLogs.length > MAX_LOGS) serverLogs.pop();
