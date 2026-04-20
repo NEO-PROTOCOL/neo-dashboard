@@ -957,6 +957,8 @@
           const id = String(n?.id || "");
           const prev = prevById.get(id);
           if (!prev) return n;
+          // Layout fixo por org (ilhas): não herdar posição antiga do force graph.
+          if (n._orgIslandFixed) return n;
           return {
             ...n,
             x: prev.x,
@@ -1071,6 +1073,54 @@
           y: base.y + offset.y,
           z: base.z + offset.z,
         };
+      }
+
+      /**
+       * Posições fixas (fx/fy/fz) por cluster — alinhado ao modo SVG estático:
+       * hub (maior val) no centro da âncora org; satélites em anel 3D.
+       * A simulação deixa de “puxar” tudo para o Nexus visualmente.
+       */
+      function assignOrgIslandLayout3D(nodes, byGroup) {
+        const twoPi = Math.PI * 2;
+        for (const [, groupNodes] of byGroup.entries()) {
+          const real = groupNodes.filter((n) => !isAnchorNode(n));
+          if (!real.length) continue;
+          const cluster = resolveCluster(real[0]);
+          const layout = clusterAnchorLayout(cluster);
+          const hub = real.reduce(
+            (best, cur) => ((cur.val || 0) > (best.val || 0) ? cur : best),
+            real[0],
+          );
+          const satellites = real.filter((n) => n.id !== hub.id);
+          const setFixed = (node, x, y, z) => {
+            node.fx = x;
+            node.fy = y;
+            node.fz = z;
+            node.x = x;
+            node.y = y;
+            node.z = z;
+            node.vx = 0;
+            node.vy = 0;
+            node.vz = 0;
+            node._orgIslandFixed = true;
+          };
+          setFixed(hub, layout.x, layout.y, layout.z);
+          const nSat = satellites.length;
+          const localRadius = Math.max(
+            22,
+            Math.min(58, 16 + Math.max(nSat, 1) * 3.4),
+          );
+          satellites.forEach((node, i) => {
+            const angle = (i / Math.max(nSat, 1)) * twoPi;
+            const zJitter = ((hashString(node.id) >> 2) % 5 - 2) * 9;
+            setFixed(
+              node,
+              layout.x + localRadius * Math.cos(angle),
+              layout.y + localRadius * Math.sin(angle),
+              layout.z + zJitter,
+            );
+          });
+        }
       }
 
       function shouldShowNodeLabel(node) {
@@ -1283,17 +1333,18 @@
 
       function configureGraphForces(instance) {
         if (!instance || typeof instance.d3Force !== "function") return;
+        // Nós com fx/fy/fz (layout ilhas por org): forças globais fracas evitam jitter residual.
         const charge = instance.d3Force("charge");
         if (charge && typeof charge.strength === "function") {
-          charge.strength(-16);
+          charge.strength(-2);
         }
         const center = instance.d3Force("center");
         if (center && typeof center.strength === "function") {
-          center.strength(0.26);
+          center.strength(0.04);
         }
         const radial = instance.d3Force("radial");
         if (radial && typeof radial.strength === "function") {
-          radial.strength(0.02);
+          radial.strength(0.004);
         }
       }
 
@@ -1634,6 +1685,8 @@
             links.push({ source: src, target: tgt, label: "dependency", kind: "dependency", distance: 88, strength: 0.20 });
           }
         });
+
+        assignOrgIslandLayout3D(nodes, byGroup);
 
         return { nodes, links };
       }
