@@ -403,9 +403,9 @@ app.get("/api/readiness-badge.json", reportRateLimit, async (_req, res) => {
     const { body } = await getCachedStackReport();
     const health = body?.ecosystem_health || {};
     const meta = body?.meta || {};
-    const score = Number(health.average_readiness || 0);
-    const findings = Number(health.total_findings || 0);
-    const nodes = Number(meta.total_nodes || 0);
+    const score = Number(health.average_readiness ?? 0);
+    const findings = Number(health.total_findings ?? 0);
+    const nodes = Number(meta.total_nodes ?? 0);
     const { precision, confidenceLabel, notes } = derivePrecision(body);
 
     res.setHeader(
