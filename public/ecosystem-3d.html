@@ -375,10 +375,16 @@
       const ACID_BASES = ["#b8ff3f", "#9dfd7c", "#85ffe0", "#dfff58", "#a7ffb2"];
       const ORG_LAYOUT = {
         "NEO Protocol": { x: 0, y: 0, z: 0 },
+        // Token / protocol repos sob org NEO-PROTOCOL (ecosystem.json)
+        "NEO-PROTOCOL": { x: 32, y: -28, z: 18 },
         "NEO-Growth-System": { x: 95, y: -10, z: 55 },
+        // ecosystem.json usa "FlowPay System"; legado mantido com as mesmas coords
+        "FlowPay System": { x: -105, y: 22, z: 62 },
         "FlowPay (NEØ Stack)": { x: -105, y: 22, z: 62 },
         "Neo Smart Factory": { x: -88, y: -64, z: -42 },
         "Fluxx DAO": { x: 78, y: 88, z: -28 },
+        // ecosystem.json usa "WodXPro"; legado "WOD Game" mantido
+        "WodXPro": { x: 104, y: 52, z: 22 },
         "WOD Game": { x: 104, y: 52, z: 22 },
         "NEO-FlowOFF": { x: -18, y: 102, z: -56 },
         "DApps & Tools": { x: -60, y: 68, z: 86 },
@@ -1022,10 +1028,15 @@
         if (id.includes("nexus") || id.includes("architect")) return 11;
         if (role.includes("protocol") || role.includes("contract")) return 9;
         if (
+          cluster?.org === "FlowPay System" ||
           cluster?.org === "FlowPay (NEØ Stack)" ||
           cluster?.org === "Neo Smart Factory" ||
           cluster?.org === "NEO-Growth-System" ||
-          cluster?.org === "WOD Game"
+          cluster?.org === "NEO-FlowOFF" ||
+          cluster?.org === "Fluxx DAO" ||
+          cluster?.org === "WodXPro" ||
+          cluster?.org === "WOD Game" ||
+          cluster?.org === "NEO-PROTOCOL"
         )
           return 8;
         return 6;
