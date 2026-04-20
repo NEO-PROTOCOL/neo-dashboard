@@ -143,6 +143,46 @@
         margin-right: 10px;
         flex-shrink: 0;
       }
+      .overlay-intro {
+        color: #888;
+        font-size: 12px;
+        line-height: 1.45;
+        max-width: 440px;
+      }
+      .overlay-intro .kbd {
+        color: #b4c0d1;
+        font-weight: 700;
+      }
+      .legend-dot--ecosystem {
+        background: rgba(90, 140, 180, 0.6);
+      }
+      .legend-dot--intra-group {
+        background: rgba(120, 210, 255, 0.9);
+      }
+      .legend-dot--nexus-linked {
+        background: rgba(0, 255, 210, 0.9);
+      }
+      .legend-dot--orchestration {
+        background: rgba(0, 200, 255, 0.9);
+      }
+      .legend-dot--architect {
+        background: rgba(255, 255, 255, 0.7);
+      }
+      .legend-dot--event-flow {
+        background: rgba(255, 170, 50, 0.9);
+      }
+      .legend-dot--shared-contract {
+        background: rgba(200, 120, 255, 0.9);
+      }
+      .legend-dot--dependency {
+        background: rgba(255, 220, 100, 0.85);
+      }
+      .legend-dot--org-cluster {
+        background: #b8ff3f;
+      }
+      .legend-dot--acid-variation {
+        background: #8ef7c0;
+      }
       .control-panel {
         margin-top: 10px;
         max-width: 360px;
@@ -334,7 +374,12 @@
   <body>
     <div class="overlay">
       <h1>NEØ Protocol Ecosystem</h1>
-      <p style="color: #888">Interactive 3D Graph Visualization</p>
+      <p class="overlay-intro">
+        Grafo 3D — <span class="kbd">botão esquerdo + arrastar</span>: rodar câmara (órbita).
+        <span class="kbd">Scroll</span>: zoom.
+        <span class="kbd">botão direito + arrastar</span>: pan.
+        Luz direcional + nevoeiro suave ajudam a ler profundidade; linhas com curvatura leve para separar cruzamentos.
+      </p>
     </div>
 
     <div id="graph-container"></div>
@@ -345,22 +390,22 @@
         <span class="legend-arrow">▼</span>
       </div>
       <div class="legend-body" id="legend-body">
-        <div class="legend-note">Clusters por org. Links derivados do ecosystem.json canônico.</div>
+        <div class="legend-note">Clusters por org. Links derivados do ecosystem.json canônico. Câmara tipo órbita: esquerdo = rodar, scroll = zoom, direito = pan.</div>
         <div class="legend-group">
           <div class="legend-group-title">Links</div>
-          <div class="legend-item"><div class="dot" style="background:rgba(90,140,180,0.6)"></div>Ecosystem (pertence)</div>
-          <div class="legend-item"><div class="dot" style="background:rgba(120,210,255,0.9)"></div>Mesmo grupo (intra-org)</div>
-          <div class="legend-item"><div class="dot" style="background:rgba(0,255,210,0.9)"></div>Nexus linked</div>
-          <div class="legend-item"><div class="dot" style="background:rgba(0,200,255,0.9)"></div>Orchestration</div>
-          <div class="legend-item"><div class="dot" style="background:rgba(255,255,255,0.7)"></div>Architect</div>
-          <div class="legend-item"><div class="dot" style="background:rgba(255,170,50,0.9)"></div>Event flow (emit → consume)</div>
-          <div class="legend-item"><div class="dot" style="background:rgba(200,120,255,0.9)"></div>Shared contract</div>
-          <div class="legend-item"><div class="dot" style="background:rgba(255,220,100,0.85)"></div>Dependency ref</div>
+          <div class="legend-item"><div class="dot legend-dot--ecosystem"></div>Ecosystem (pertence)</div>
+          <div class="legend-item"><div class="dot legend-dot--intra-group"></div>Mesmo grupo (intra-org)</div>
+          <div class="legend-item"><div class="dot legend-dot--nexus-linked"></div>Nexus linked</div>
+          <div class="legend-item"><div class="dot legend-dot--orchestration"></div>Orchestration</div>
+          <div class="legend-item"><div class="dot legend-dot--architect"></div>Architect</div>
+          <div class="legend-item"><div class="dot legend-dot--event-flow"></div>Event flow (emit → consume)</div>
+          <div class="legend-item"><div class="dot legend-dot--shared-contract"></div>Shared contract</div>
+          <div class="legend-item"><div class="dot legend-dot--dependency"></div>Dependency ref</div>
         </div>
         <div class="legend-group">
           <div class="legend-group-title">Nodes</div>
-          <div class="legend-item"><div class="dot" style="background:#b8ff3f"></div>Org / workspace clusters</div>
-          <div class="legend-item"><div class="dot" style="background:#8ef7c0"></div>Acid variations by node type</div>
+          <div class="legend-item"><div class="dot legend-dot--org-cluster"></div>Org / workspace clusters</div>
+          <div class="legend-item"><div class="dot legend-dot--acid-variation"></div>Acid variations by node type</div>
         </div>
       </div>
     </div>
@@ -1348,6 +1393,77 @@
         }
       }
 
+      /** Órbita + luzes mais contrastantes + nevoeiro (leitura humana em 3D). */
+      function configure3DNavigationAndLighting(graphInstance) {
+        if (!graphInstance) return;
+        try {
+          if (typeof graphInstance.controlType === "function") {
+            graphInstance.controlType("orbit");
+          }
+          if (typeof graphInstance.showNavInfo === "function") {
+            graphInstance.showNavInfo(true);
+          }
+          if (typeof graphInstance.enableNavigationControls === "function") {
+            graphInstance.enableNavigationControls(true);
+          }
+          if (typeof graphInstance.enableNodeDrag === "function") {
+            graphInstance.enableNodeDrag(false);
+          }
+          if (typeof graphInstance.linkCurvature === "function") {
+            graphInstance.linkCurvature(0.14);
+          }
+        } catch (e) {
+          console.warn("3d nav:", e?.message || e);
+        }
+
+        const tuneLights = () => {
+          try {
+            const scene = graphInstance.scene();
+            if (!scene?.traverse) return;
+            scene.traverse((o) => {
+              if (!o?.isLight) return;
+              if (o.type === "DirectionalLight") {
+                const base = Math.max(Number(o.intensity) || 0.55, 0.7);
+                o.intensity = base * 1.38;
+                if (o.position?.set) o.position.set(130, 200, 110);
+              }
+              if (o.type === "AmbientLight") {
+                const a = Math.max(Number(o.intensity) || 0.35, 0.28);
+                o.intensity = Math.min(0.78, a * 1.12);
+              }
+            });
+          } catch (_e) {}
+        };
+        requestAnimationFrame(tuneLights);
+        requestAnimationFrame(() => requestAnimationFrame(tuneLights));
+
+        try {
+          const ctl =
+            typeof graphInstance.controls === "function"
+              ? graphInstance.controls()
+              : null;
+          if (ctl) {
+            if ("enableDamping" in ctl) ctl.enableDamping = true;
+            if ("dampingFactor" in ctl) ctl.dampingFactor = 0.07;
+            if ("rotateSpeed" in ctl) ctl.rotateSpeed = 0.62;
+            if ("minDistance" in ctl) ctl.minDistance = 72;
+            if ("maxDistance" in ctl) ctl.maxDistance = 960;
+          }
+        } catch (_e) {}
+
+        try {
+          import("https://cdn.jsdelivr.net/npm/three@0.164.1/+esm")
+            .then((T) => {
+              try {
+                const scene = graphInstance.scene();
+                if (!scene || scene.fog) return;
+                scene.fog = new T.FogExp2(0x0a0a0a, 0.00152);
+              } catch (_e) {}
+            })
+            .catch(() => {});
+        } catch (_e) {}
+      }
+
       function normalizeGraphData(data) {
         return {
           nodes: (data?.nodes || []).map((n) => ({
@@ -2146,6 +2262,7 @@
           (link) => link.strength || (link.label === "missing-nexus" ? 0.12 : 0.48),
         );
         configureGraphForces(graphInstance);
+        configure3DNavigationAndLighting(graphInstance);
 
         setTimeout(() => {
           try {
