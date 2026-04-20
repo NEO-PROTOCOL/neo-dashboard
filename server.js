@@ -655,7 +655,7 @@ app.get("/api/reminders", async (req, res) => {
 
 app.post("/api/reminders", async (req, res) => {
   const { text, when } = req.body;
-  if (!text || !when) return res.status(400).json({ error: "Missing args" });
+  if (!(text && when)) return res.status(400).json({ error: "Missing args" });
 
   console.log(`[Mock] Reminder created: ${text} at ${when}`);
   stats.totalReminders++;
@@ -667,7 +667,7 @@ app.get("/api/messages", (req, res) => res.json(messages.slice(-10).reverse()));
 
 app.post("/api/messages", async (req, res) => {
   const { to, message } = req.body;
-  if (!to || !message) return res.status(400).json({ error: "Missing args" });
+  if (!(to && message)) return res.status(400).json({ error: "Missing args" });
 
   try {
     const scriptPath = path.join(
