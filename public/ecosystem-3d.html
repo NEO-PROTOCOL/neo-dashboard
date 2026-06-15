@@ -1465,6 +1465,22 @@
             if ("rotateSpeed" in ctl) ctl.rotateSpeed = 0.62;
             if ("minDistance" in ctl) ctl.minDistance = 72;
             if ("maxDistance" in ctl) ctl.maxDistance = 960;
+            if ("autoRotate" in ctl) ctl.autoRotate = true;
+            if ("autoRotateSpeed" in ctl) ctl.autoRotateSpeed = 0.38;
+
+            // Pause rotation on user interaction, resume after 3s idle
+            let _rotateTimer = null;
+            const _pauseRotation = () => {
+              if (!("autoRotate" in ctl)) return;
+              ctl.autoRotate = false;
+              clearTimeout(_rotateTimer);
+              _rotateTimer = setTimeout(() => {
+                ctl.autoRotate = true;
+              }, 3000);
+            };
+            graphContainer.addEventListener("pointerdown", _pauseRotation, { passive: true });
+            graphContainer.addEventListener("wheel", _pauseRotation, { passive: true });
+            graphContainer.addEventListener("touchstart", _pauseRotation, { passive: true });
           }
         } catch (_e) {}
 
