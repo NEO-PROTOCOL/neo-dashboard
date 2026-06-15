@@ -350,6 +350,97 @@
         flex-direction: column;
         gap: 6px;
       }
+
+      /* ── Password Modal ── */
+      #pw-modal {
+        position: fixed; inset: 0; z-index: 2000;
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(5, 10, 18, 0.92);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+      }
+      #pw-modal.hidden { display: none; }
+      .pw-card {
+        background: #0b121c;
+        border: 1px solid #2a3240;
+        border-radius: 14px;
+        padding: 36px 32px 28px;
+        width: min(340px, calc(100vw - 40px));
+        display: flex; flex-direction: column; gap: 14px;
+        box-shadow: 0 0 60px rgba(0, 229, 255, 0.08);
+      }
+      .pw-title {
+        color: #00e5ff; font-size: 18px; font-weight: 700;
+        letter-spacing: 2px; text-transform: uppercase;
+        text-shadow: 0 0 12px rgba(0,229,255,0.4);
+        margin: 0 0 4px;
+      }
+      .pw-sub { color: #748099; font-size: 12px; margin: 0; line-height: 1.5; }
+      .pw-input {
+        width: 100%; box-sizing: border-box;
+        background: #060d16; border: 1px solid #2a3240;
+        border-radius: 8px; color: #d4deea;
+        font-size: 14px; padding: 10px 12px;
+        outline: none; letter-spacing: 0.5px;
+      }
+      .pw-input:focus { border-color: #00e5ff55; }
+      .pw-submit {
+        background: #00e5ff18; border: 1px solid #00e5ff55;
+        border-radius: 8px; color: #00e5ff;
+        font-size: 13px; letter-spacing: 0.5px;
+        padding: 10px; cursor: pointer; width: 100%;
+      }
+      .pw-submit:hover { background: #00e5ff28; }
+      .pw-err { color: #ff4d67; font-size: 11px; display: none; }
+      .pw-skip { color: #748099; font-size: 10px; text-align: center; cursor: pointer; }
+      .pw-skip:hover { color: #b4c0d1; }
+
+      /* ── Node Detail Panel ── */
+      #node-panel {
+        position: fixed; top: 0; right: 0; bottom: 0;
+        width: min(320px, 90vw);
+        background: rgba(8, 14, 24, 0.96);
+        border-left: 1px solid #2a3240;
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
+        z-index: 1500;
+        transform: translateX(100%);
+        transition: transform 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex; flex-direction: column;
+        overflow: hidden;
+      }
+      #node-panel.open { transform: translateX(0); }
+      .np-header {
+        padding: 18px 16px 14px;
+        border-bottom: 1px solid #1e2d3f;
+        display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+      }
+      .np-name { color: #e8f0f8; font-size: 15px; font-weight: 600; line-height: 1.3; margin: 0; }
+      .np-close {
+        background: none; border: none; color: #748099;
+        font-size: 18px; cursor: pointer; padding: 0 4px; line-height: 1;
+        flex-shrink: 0;
+      }
+      .np-close:hover { color: #d4deea; }
+      .np-body { padding: 14px 16px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 12px; }
+      .np-status-row { display: flex; align-items: center; gap: 8px; }
+      .np-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+      .np-status-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+      .np-section { display: flex; flex-direction: column; gap: 4px; }
+      .np-label { color: #748099; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+      .np-value { color: #c6d2e0; font-size: 12px; line-height: 1.45; word-break: break-word; }
+      .np-link {
+        color: #00e5ff; font-size: 11px; text-decoration: none;
+        word-break: break-all; display: inline-block;
+      }
+      .np-link:hover { text-decoration: underline; }
+      .np-badge {
+        display: inline-flex; align-items: center;
+        border-radius: 4px; padding: 2px 7px;
+        font-size: 10px; font-weight: 600; letter-spacing: 0.4px;
+        border: 1px solid currentColor; opacity: 0.9;
+      }
+
       .registry-item {
         display: flex;
         flex-direction: column;
@@ -380,6 +471,33 @@
         <span class="kbd">botão direito + arrastar</span>: pan.
         Luz direcional + nevoeiro suave ajudam a ler profundidade; linhas com curvatura leve para separar cruzamentos.
       </p>
+    </div>
+
+    <!-- Password Modal -->
+    <div id="pw-modal" class="hidden">
+      <div class="pw-card">
+        <h2 class="pw-title">NEØ Ecosystem</h2>
+        <p class="pw-sub">Insira o gateway password para acessar dados ao vivo. Ou acesse sem senha para ver o mapa estático.</p>
+        <input id="pw-input" class="pw-input" type="password" placeholder="Gateway password" autocomplete="current-password" />
+        <div id="pw-err" class="pw-err">Senha incorreta. Tente novamente.</div>
+        <button id="pw-submit" class="pw-submit" type="button">Entrar</button>
+        <div id="pw-skip" class="pw-skip">Continuar sem senha (mapa estático)</div>
+      </div>
+    </div>
+
+    <!-- Node Detail Panel -->
+    <div id="node-panel">
+      <div class="np-header">
+        <div>
+          <p class="np-name" id="np-name">—</p>
+          <div class="np-status-row" style="margin-top:6px">
+            <div class="np-dot" id="np-dot"></div>
+            <span class="np-status-label" id="np-status-label">—</span>
+          </div>
+        </div>
+        <button class="np-close" id="np-close" title="Fechar">✕</button>
+      </div>
+      <div class="np-body" id="np-body"></div>
     </div>
 
     <div id="graph-container"></div>
@@ -1921,14 +2039,29 @@
           console.warn("ecosystem API unavailable:", e?.message || e);
         }
 
-        const staticRes = await fetch("ecosystem-graph.json");
+        try {
+          const staticRes = await fetch("/ecosystem-graph.json");
+          if (staticRes.ok) {
+            return {
+              mode: "static",
+              authenticated,
+              source: "static-json",
+              checkedAt: new Date().toISOString(),
+              summary: null,
+              graphData: normalizeGraphData(await staticRes.json()),
+            };
+          }
+        } catch (_e) {
+          console.warn("static fallback unavailable:", _e?.message || _e);
+        }
+
         return {
           mode: "static",
           authenticated,
-          source: "static-json",
+          source: "empty",
           checkedAt: new Date().toISOString(),
           summary: null,
-          graphData: normalizeGraphData(await staticRes.json()),
+          graphData: { nodes: [], links: [] },
         };
       }
 
@@ -2214,10 +2347,9 @@
             } catch (_e) {}
           })
           .onNodeClick((node) => {
-            focusedNodeId = node?.id || null;
-            try {
-              graphInstance.refresh();
-            } catch (_e) {}
+            if (!node) return;
+            window._openNodePanel?.(node);
+            try { graphInstance.refresh(); } catch (_e) {}
           })
           .cooldownTime(2500);
         configureLinkPhysics(
@@ -2364,21 +2496,16 @@
             } catch (_e) {}
           })
           .onNodeClick((node) => {
-            focusedNodeId = node?.id || null;
+            if (!node) return;
             const distance = 40;
             const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
             graphInstance.cameraPosition(
-              {
-                x: node.x * distRatio,
-                y: node.y * distRatio,
-                z: node.z * distRatio,
-              },
+              { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
               node,
-              3000,
+              1200,
             );
-            try {
-              graphInstance.refresh();
-            } catch (_e) {}
+            window._openNodePanel?.(node);
+            try { graphInstance.refresh(); } catch (_e) {}
           });
         configureLinkPhysics(
           graphInstance,
@@ -2534,9 +2661,159 @@
         }
       }
 
+      // ── Password Modal ──────────────────────────────────────────────
+      const pwModal   = document.getElementById("pw-modal");
+      const pwInput   = document.getElementById("pw-input");
+      const pwSubmit  = document.getElementById("pw-submit");
+      const pwSkip    = document.getElementById("pw-skip");
+      const pwErr     = document.getElementById("pw-err");
+
+      function showPwModal() {
+        pwModal.classList.remove("hidden");
+        setTimeout(() => pwInput.focus(), 80);
+      }
+
+      async function tryPassword(pw) {
+        try {
+          const res = await fetch("/api/neo/ecosystem", {
+            headers: { "x-gateway-password": pw },
+          });
+          return res.ok;
+        } catch (_e) { return false; }
+      }
+
+      pwSubmit.addEventListener("click", async () => {
+        const pw = pwInput.value.trim();
+        if (!pw) return;
+        pwSubmit.textContent = "Verificando…";
+        pwSubmit.disabled = true;
+        pwErr.style.display = "none";
+        const ok = await tryPassword(pw);
+        if (ok) {
+          try { localStorage.setItem(API_PASS_KEY, pw); } catch (_e) {}
+          pwModal.classList.add("hidden");
+          await refreshGraph();
+          if (!refreshTimer) refreshTimer = setInterval(refreshGraph, LIVE_REFRESH_MS);
+        } else {
+          pwErr.style.display = "block";
+          pwInput.value = "";
+          pwInput.focus();
+        }
+        pwSubmit.textContent = "Entrar";
+        pwSubmit.disabled = false;
+      });
+
+      pwInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") pwSubmit.click();
+      });
+
+      pwSkip.addEventListener("click", () => {
+        pwModal.classList.add("hidden");
+        refreshGraph();
+        if (!refreshTimer) refreshTimer = setInterval(refreshGraph, LIVE_REFRESH_MS);
+      });
+
+      // ── Node Detail Panel ────────────────────────────────────────────
+      const nodePanel     = document.getElementById("node-panel");
+      const npName        = document.getElementById("np-name");
+      const npDot         = document.getElementById("np-dot");
+      const npStatusLabel = document.getElementById("np-status-label");
+      const npBody        = document.getElementById("np-body");
+      const npClose       = document.getElementById("np-close");
+
+      const statusMeta = {
+        online:   { color: "#39d98a", label: "Online" },
+        degraded: { color: "#ffb74d", label: "Degraded" },
+        offline:  { color: "#ff4d67", label: "Offline" },
+        unknown:  { color: "#7b8797", label: "Unknown" },
+      };
+      const nexusMeta = {
+        linked:       { color: "#00e5ff", label: "Nexus Linked" },
+        unlinked:     { color: "#ff4d67", label: "Nexus Unlinked" },
+        not_required: { color: "#748099", label: "Nexus N/A" },
+      };
+
+      function openNodePanel(node) {
+        if (!node || node.id === focusedNodeId && nodePanel.classList.contains("open")) {
+          nodePanel.classList.toggle("open");
+          return;
+        }
+        focusedNodeId = node.id;
+        const st = statusMeta[node.status] || statusMeta.unknown;
+        const nx = nexusMeta[node.nexusConnection] || nexusMeta.not_required;
+
+        npName.textContent = node.name || node.id;
+        npDot.style.background = st.color;
+        npDot.style.boxShadow = `0 0 6px ${st.color}88`;
+        npStatusLabel.textContent = st.label;
+        npStatusLabel.style.color = st.color;
+
+        const rows = [];
+
+        if (node.org)  rows.push({ label: "Org",   value: node.org });
+        if (node.role) rows.push({ label: "Role",  value: node.role });
+        if (node.group && node.group !== node.org) rows.push({ label: "Grupo", value: node.group });
+
+        rows.push({
+          label: "Nexus",
+          html: `<span class="np-badge" style="color:${nx.color};border-color:${nx.color}44">${nx.label}</span>`,
+        });
+
+        if (node.url) rows.push({
+          label: "URL",
+          html: `<a class="np-link" href="${escapeHtml(node.url)}" target="_blank" rel="noopener">${escapeHtml(node.url)}</a>`,
+        });
+
+        const raw = latestFullGraphData?.nodes?.find?.(n => n.id === node.id);
+        const repo = raw?.repository;
+        if (repo) rows.push({
+          label: "Repositório",
+          html: `<a class="np-link" href="${escapeHtml(repo)}" target="_blank" rel="noopener">${escapeHtml(repo.replace("https://github.com/", ""))}</a>`,
+        });
+
+        const routes = Array.isArray(node._paymentRoutes) ? node._paymentRoutes : [];
+        if (routes.length) {
+          rows.push({
+            label: `Payment Routes (${routes.length})`,
+            html: routes.slice(0, 5).map(r =>
+              `<div style="font-size:10px;color:#b4c0d1;margin-top:3px">${escapeHtml(r.kind || "")} · ${escapeHtml(r.env || "")} · <span style="color:#748099">${escapeHtml(r.method || "")} ${escapeHtml(r.path || r.url || "")}</span></div>`
+            ).join("") + (routes.length > 5 ? `<div style="font-size:10px;color:#748099;margin-top:3px">+ ${routes.length - 5} more</div>` : ""),
+          });
+        }
+
+        npBody.innerHTML = rows.map(row => `
+          <div class="np-section">
+            <div class="np-label">${escapeHtml(row.label)}</div>
+            ${row.html ? `<div class="np-value">${row.html}</div>` : `<div class="np-value">${escapeHtml(row.value || "—")}</div>`}
+          </div>
+        `).join("");
+
+        nodePanel.classList.add("open");
+      }
+
+      npClose.addEventListener("click", () => {
+        nodePanel.classList.remove("open");
+        focusedNodeId = null;
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          nodePanel.classList.remove("open");
+          focusedNodeId = null;
+        }
+      });
+
+      // Expose for render3D/render2D onNodeClick
+      window._openNodePanel = openNodePanel;
+
+      // ── Init ─────────────────────────────────────────────────────────
       bindFilterEvents();
 
       (async () => {
+        if (!getGatewayPassword()) {
+          showPwModal();
+          return; // refreshGraph called by modal submit/skip
+        }
         await refreshGraph();
         refreshTimer = setInterval(refreshGraph, LIVE_REFRESH_MS);
       })();

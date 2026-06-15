@@ -13,7 +13,8 @@ import {
 } from "./lib/ecosystem-graph-from-source.mjs";
 
 const repoRoot = process.cwd();
-const targetPath = path.resolve(repoRoot, "ecosystem-graph.json");
+// Served as a static fallback via Express (public/) — root location was never reachable
+const targetPath = path.resolve(repoRoot, "public", "ecosystem-graph.json");
 
 const sourceNodes = await loadEcosystemSourceArray(repoRoot);
 

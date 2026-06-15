@@ -38,6 +38,6 @@ neo-config.env
 config-test.js
 app-settings.json
 
-# Generated artifacts — regenerated at startup via sync-ecosystem-graph.mjs
+# Generated artifacts — regenerated at build via sync-ecosystem-graph.mjs
 # Never commit this file; it is auto-synced from the ecosystem source on deploy
-ecosystem-graph.json
+public/ecosystem-graph.json
