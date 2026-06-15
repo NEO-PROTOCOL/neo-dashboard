@@ -13,6 +13,7 @@ export async function loadEcosystemSourceArray(
 ) {
   const localCandidates = [
     process.env.ECOSYSTEM_SOURCE_PATH,
+    path.resolve(repoRoot, "../neo-nexus/config/ecosystem.json"),
     path.resolve(repoRoot, "ecosystem.json"),
     path.resolve(repoRoot, "../neobot-orchestrator/config/ecosystem.json"),
     path.resolve(repoRoot, "neobot-source/config/ecosystem.json"),
