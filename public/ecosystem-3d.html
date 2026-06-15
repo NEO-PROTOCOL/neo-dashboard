@@ -417,7 +417,7 @@
       const MAX_EVENT_LINES = 8;
       const PAYMENT_ROUTES_TTL_MS = 30000;
 
-      const ACID_BASES = ["#b8ff3f", "#9dfd7c", "#85ffe0", "#dfff58", "#a7ffb2"];
+      const ACID_BASES = ["#00e5ff", "#7c4dff", "#ff9800", "#00e676", "#ff4081", "#ffea00", "#e040fb", "#64ffda", "#40c4ff", "#b2ff59"];
       const ORG_LAYOUT = {
         "NEO Protocol": { x: 0, y: 0, z: 0 },
         // Token / protocol repos sob org NEO-PROTOCOL (ecosystem.json)
@@ -435,6 +435,20 @@
         "DApps & Tools": { x: -60, y: 68, z: 86 },
       };
 
+      const ORG_COLORS = {
+        "NEO Protocol":         "#00e5ff",
+        "NEO-PROTOCOL":         "#00bcd4",
+        "NEO-Growth-System":    "#00e676",
+        "FlowPay System":       "#ff9800",
+        "FlowPay (NEØ Stack)":  "#ff9800",
+        "Neo Smart Factory":    "#ff5722",
+        "Fluxx DAO":            "#e040fb",
+        "WodXPro":              "#ff4081",
+        "WOD Game":             "#ff4081",
+        "NEO-FlowOFF":          "#ffea00",
+        "DApps & Tools":        "#536dfe",
+      };
+
       const statusColors = {
         online: "#39d98a",
         degraded: "#ffb74d",
@@ -447,6 +461,8 @@
       const legend = document.querySelector(".legend");
       let hoveredNodeId = null;
       let focusedNodeId = null;
+      let _THREE = null;
+      let _spriteTexture = null;
 
       overlay.insertAdjacentHTML(
         "beforeend",
@@ -1275,7 +1291,9 @@
       }
 
       function nodeTone(node) {
-        const seed = hashString(`${node.org || ""}:${node.group || ""}`);
+        const org = node.org || "";
+        if (ORG_COLORS[org]) return ORG_COLORS[org];
+        const seed = hashString(`${org}:${node.group || ""}`);
         return ACID_BASES[seed % ACID_BASES.length] || ACID_BASES[0];
       }
 
@@ -1334,25 +1352,24 @@
       }
 
       function linkColor(link) {
-        // High-contrast on #0a0a0a — previous alphas (0.06–0.28) were effectively invisible.
-        if (link.kind === "anchor") return "rgba(120, 160, 195, 0.42)";
-        if (link.kind === "ecosystem") return "rgba(90, 140, 180, 0.32)";
-        if (link.kind === "architect") return "rgba(255, 255, 255, 0.55)";
-        if (link.kind === "orchestration") return "rgba(0, 200, 255, 0.72)";
-        if (link.kind === "event-flow") return "rgba(255, 170, 50, 0.78)";
-        if (link.kind === "shared-contract") return "rgba(200, 120, 255, 0.75)";
-        if (link.kind === "dependency") return "rgba(255, 220, 100, 0.65)";
+        if (link.kind === "anchor") return "rgba(100, 140, 180, 0.18)";
+        if (link.kind === "ecosystem") return "rgba(80, 160, 220, 0.22)";
+        if (link.kind === "architect") return "rgba(255, 255, 255, 0.70)";
+        if (link.kind === "orchestration") return "rgba(0, 220, 255, 0.85)";
+        if (link.kind === "event-flow") return "rgba(255, 165, 40, 0.90)";
+        if (link.kind === "shared-contract") return "rgba(220, 100, 255, 0.88)";
+        if (link.kind === "dependency") return "rgba(255, 230, 80, 0.78)";
         if (link.label === "group" || link.kind === "group")
-          return "rgba(120, 210, 255, 0.62)";
-        if (link.label === "missing-nexus") return "rgba(255, 95, 120, 0.88)";
-        if (link.kind === "nexus") return "rgba(0, 255, 210, 0.72)";
+          return "rgba(100, 200, 255, 0.48)";
+        if (link.label === "missing-nexus") return "rgba(255, 80, 110, 0.95)";
+        if (link.kind === "nexus") return "rgba(0, 255, 200, 0.85)";
         const source = latestNodeMeta.get(linkEndId(link.source));
         const target = latestNodeMeta.get(linkEndId(link.target));
         if (source?.status === "offline" || target?.status === "offline")
-          return "rgba(255, 130, 150, 0.72)";
+          return "rgba(255, 100, 130, 0.85)";
         if (source?.status === "degraded" || target?.status === "degraded")
-          return "rgba(255, 195, 100, 0.62)";
-        return "rgba(170, 190, 220, 0.58)";
+          return "rgba(255, 185, 80, 0.75)";
+        return "rgba(160, 185, 220, 0.42)";
       }
 
       function configureLinkPhysics(instance, distance, strength) {
@@ -1456,8 +1473,36 @@
             .then((T) => {
               try {
                 const scene = graphInstance.scene();
-                if (!scene || scene.fog) return;
-                scene.fog = new T.FogExp2(0x0a0a0a, 0.00152);
+                if (!scene) return;
+                if (!scene.fog) {
+                  scene.fog = new T.FogExp2(0x0a0a0a, 0.00095);
+                }
+                // Add starfield if not already present
+                if (!scene.getObjectByName("__starfield__")) {
+                  const count = 1800;
+                  const positions = new Float32Array(count * 3);
+                  for (let i = 0; i < count; i++) {
+                    const r = 600 + Math.random() * 900;
+                    const theta = Math.random() * Math.PI * 2;
+                    const phi = Math.acos(2 * Math.random() - 1);
+                    positions[i * 3]     = r * Math.sin(phi) * Math.cos(theta);
+                    positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+                    positions[i * 3 + 2] = r * Math.cos(phi);
+                  }
+                  const geo = new T.BufferGeometry();
+                  geo.setAttribute("position", new T.BufferAttribute(positions, 3));
+                  const mat = new T.PointsMaterial({
+                    color: 0xffffff,
+                    size: 1.6,
+                    sizeAttenuation: true,
+                    transparent: true,
+                    opacity: 0.5,
+                    depthWrite: false,
+                  });
+                  const stars = new T.Points(geo, mat);
+                  stars.name = "__starfield__";
+                  scene.add(stars);
+                }
               } catch (_e) {}
             })
             .catch(() => {});
@@ -2173,6 +2218,67 @@
         }, 500);
       }
 
+      function getGlowTexture(T) {
+        if (_spriteTexture) return _spriteTexture;
+        const canvas = document.createElement("canvas");
+        canvas.width = 128;
+        canvas.height = 128;
+        const ctx = canvas.getContext("2d");
+        const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+        g.addColorStop(0,   "rgba(255,255,255,1)");
+        g.addColorStop(0.2, "rgba(255,255,255,0.9)");
+        g.addColorStop(0.5, "rgba(255,255,255,0.35)");
+        g.addColorStop(1,   "rgba(255,255,255,0)");
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, 128, 128);
+        _spriteTexture = new T.CanvasTexture(canvas);
+        return _spriteTexture;
+      }
+
+      function makeNodeObject(node, T) {
+        if (isAnchorNode(node)) {
+          const g = new T.Group();
+          g.visible = false;
+          return g;
+        }
+        const color = nodeTone(node);
+        const importance = nodeImportance(node);
+        const size = Math.max(4, Math.min(14, (node.val || 6) * 1.1));
+        const tex = getGlowTexture(T);
+        const group = new T.Group();
+
+        // Core bright sprite
+        const coreMat = new T.SpriteMaterial({
+          map: tex,
+          color: new T.Color(color),
+          blending: T.AdditiveBlending,
+          transparent: true,
+          depthWrite: false,
+          opacity: importance === "hub" ? 1.0 : importance === "core" ? 0.9 : 0.8,
+        });
+        const core = new T.Sprite(coreMat);
+        const coreScale = size * 1.8;
+        core.scale.set(coreScale, coreScale, coreScale);
+        group.add(core);
+
+        // Outer halo (larger, dimmer)
+        const haloOpacity = importance === "hub" ? 0.32 : importance === "core" ? 0.20 : 0.12;
+        const haloMat = new T.SpriteMaterial({
+          map: tex,
+          color: new T.Color(color),
+          blending: T.AdditiveBlending,
+          transparent: true,
+          depthWrite: false,
+          opacity: haloOpacity,
+        });
+        const halo = new T.Sprite(haloMat);
+        const haloScale = coreScale * (importance === "hub" ? 3.5 : 2.4);
+        halo.scale.set(haloScale, haloScale, haloScale);
+        group.add(halo);
+
+        return group;
+      }
+
       function render3D(data) {
         graphMode = "3d";
         graphContainer.innerHTML = "";
@@ -2185,7 +2291,9 @@
           .nodeColor((node) => nodeColor(node))
           .nodeVal((node) => node.val)
           .nodeRelSize(6.4)
-          .nodeResolution(18)
+          .nodeResolution(24)
+          .nodeThreeObject((node) => _THREE ? makeNodeObject(node, _THREE) : null)
+          .nodeThreeObjectExtend(false)
           .linkDirectionalParticles((link) => {
             if (link.kind === "anchor") return 0;
             if (link.kind === "ecosystem") return 0;
@@ -2283,6 +2391,12 @@
         try {
           await ensure3DLibrary();
           if (typeof ForceGraph3D !== "function") throw new Error("3d_runtime");
+          // Preload THREE for custom glowing node objects
+          try {
+            _THREE = await import("https://cdn.jsdelivr.net/npm/three@0.164.1/+esm");
+          } catch (_e) {
+            console.warn("THREE preload failed, using default nodes");
+          }
           render3D(data);
         } catch (e) {
           await ensure2DLibrary();
