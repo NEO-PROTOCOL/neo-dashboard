@@ -537,20 +537,17 @@
 
       const ACID_BASES = ["#00e5ff", "#7c4dff", "#ff9800", "#00e676", "#ff4081", "#ffea00", "#e040fb", "#64ffda", "#40c4ff", "#b2ff59"];
       const ORG_LAYOUT = {
-        "NEO Protocol": { x: 0, y: 0, z: 0 },
-        // Token / protocol repos sob org NEO-PROTOCOL (ecosystem.json)
-        "NEO-PROTOCOL": { x: 32, y: -28, z: 18 },
-        "NEO-Growth-System": { x: 95, y: -10, z: 55 },
-        // ecosystem.json usa "FlowPay System"; legado mantido com as mesmas coords
-        "FlowPay System": { x: -105, y: 22, z: 62 },
-        "FlowPay (NEØ Stack)": { x: -105, y: 22, z: 62 },
-        "Neo Smart Factory": { x: -88, y: -64, z: -42 },
-        "Fluxx DAO": { x: 78, y: 88, z: -28 },
-        // ecosystem.json usa "WodXPro"; legado "WOD Game" mantido
-        "WodXPro": { x: 104, y: 52, z: 22 },
-        "WOD Game": { x: 104, y: 52, z: 22 },
-        "NEO-FlowOFF": { x: -18, y: 102, z: -56 },
-        "DApps & Tools": { x: -60, y: 68, z: 86 },
+        "NEO Protocol":         { x:   0, y:    0, z:    0 },
+        "NEO-PROTOCOL":         { x:  80, y:  -70, z:   45 },
+        "NEO-Growth-System":    { x: 240, y:  -25, z:  138 },
+        "FlowPay System":       { x: -262, y:  55, z:  155 },
+        "FlowPay (NEØ Stack)":  { x: -262, y:  55, z:  155 },
+        "Neo Smart Factory":    { x: -220, y: -160, z: -105 },
+        "Fluxx DAO":            { x:  195, y:  220, z:  -70 },
+        "WodXPro":              { x:  260, y:  130, z:   55 },
+        "WOD Game":             { x:  260, y:  130, z:   55 },
+        "NEO-FlowOFF":          { x:  -45, y:  255, z: -140 },
+        "DApps & Tools":        { x: -150, y:  170, z:  215 },
       };
 
       const ORG_COLORS = {
@@ -1286,8 +1283,8 @@
           setFixed(hub, layout.x, layout.y, layout.z);
           const nSat = satellites.length;
           const localRadius = Math.max(
-            22,
-            Math.min(58, 16 + Math.max(nSat, 1) * 3.4),
+            38,
+            Math.min(100, 28 + Math.max(nSat, 1) * 5.5),
           );
           satellites.forEach((node, i) => {
             const angle = (i / Math.max(nSat, 1)) * twoPi;
@@ -1542,7 +1539,7 @@
             graphInstance.enableNavigationControls(true);
           }
           if (typeof graphInstance.enableNodeDrag === "function") {
-            graphInstance.enableNodeDrag(false);
+            graphInstance.enableNodeDrag(true);
           }
           if (typeof graphInstance.linkCurvature === "function") {
             graphInstance.linkCurvature(0.14);
@@ -1581,8 +1578,8 @@
             if ("enableDamping" in ctl) ctl.enableDamping = true;
             if ("dampingFactor" in ctl) ctl.dampingFactor = 0.07;
             if ("rotateSpeed" in ctl) ctl.rotateSpeed = 0.62;
-            if ("minDistance" in ctl) ctl.minDistance = 72;
-            if ("maxDistance" in ctl) ctl.maxDistance = 960;
+            if ("minDistance" in ctl) ctl.minDistance = 80;
+            if ("maxDistance" in ctl) ctl.maxDistance = 2200;
             if ("autoRotate" in ctl) ctl.autoRotate = true;
             if ("autoRotateSpeed" in ctl) ctl.autoRotateSpeed = 0.38;
 
@@ -1837,7 +1834,7 @@
               links.push({
                 source: orchestratorId, target: hub.id,
                 label: "orchestration", kind: "orchestration",
-                distance: 85, strength: 0.15,
+                distance: 260, strength: 0.04,
               });
             }
           }
@@ -1920,7 +1917,7 @@
               const key = `${src}->${tgt}:flow`;
               if (!linkKey.has(key)) {
                 linkKey.add(key);
-                links.push({ source: src, target: tgt, label: "event-flow", kind: "event-flow", distance: 95, strength: 0.22 });
+                links.push({ source: src, target: tgt, label: "event-flow", kind: "event-flow", distance: 280, strength: 0.03 });
               }
             });
           });
@@ -2354,8 +2351,8 @@
           .cooldownTime(2500);
         configureLinkPhysics(
           graphInstance,
-          (link) => link.distance || (link.label === "missing-nexus" ? 112 : 48),
-          (link) => link.strength || (link.label === "missing-nexus" ? 0.12 : 0.55),
+          (link) => link.distance || (link.label === "missing-nexus" ? 240 : 48),
+          (link) => link.strength || (link.label === "missing-nexus" ? 0.03 : 0.55),
         );
         configureGraphForces(graphInstance);
 
@@ -2466,27 +2463,27 @@
             return 0.0025;
           })
           .linkDirectionalParticleWidth((link) => {
-            if (link.kind === "architect") return 1.6;
-            if (link.kind === "orchestration") return 2.0;
-            if (link.kind === "event-flow") return 2.2;
-            if (link.kind === "shared-contract") return 2.0;
-            if (link.kind === "dependency") return 1.6;
-            if (link.label === "missing-nexus") return 2.4;
-            if (link.kind === "nexus") return 1.8;
-            return 1.2;
+            if (link.kind === "architect") return 0.8;
+            if (link.kind === "orchestration") return 1.0;
+            if (link.kind === "event-flow") return 1.1;
+            if (link.kind === "shared-contract") return 1.0;
+            if (link.kind === "dependency") return 0.8;
+            if (link.label === "missing-nexus") return 1.2;
+            if (link.kind === "nexus") return 0.9;
+            return 0.6;
           })
-          .linkOpacity(0.92)
+          .linkOpacity(0.48)
           .linkWidth((link) => {
-            if (link?.kind === "anchor") return 0.15;
-            if (link?.kind === "ecosystem") return 0.45;
-            if (link?.kind === "architect") return 1.5;
-            if (link?.kind === "orchestration") return 1.9;
-            if (link?.kind === "event-flow") return 1.8;
-            if (link?.kind === "shared-contract") return 1.6;
-            if (link?.kind === "dependency") return 1.3;
-            if (link?.kind === "group") return 1.15;
-            if (link?.kind === "nexus") return 1.65;
-            return link.label === "missing-nexus" ? 1.85 : 1.2;
+            if (link?.kind === "anchor") return 0.08;
+            if (link?.kind === "ecosystem") return 0.18;
+            if (link?.kind === "architect") return 0.55;
+            if (link?.kind === "orchestration") return 0.7;
+            if (link?.kind === "event-flow") return 0.65;
+            if (link?.kind === "shared-contract") return 0.58;
+            if (link?.kind === "dependency") return 0.45;
+            if (link?.kind === "group") return 0.4;
+            if (link?.kind === "nexus") return 0.6;
+            return link.label === "missing-nexus" ? 0.68 : 0.42;
           })
           .linkColor((link) => linkColor(link))
           .onNodeHover((node) => {
@@ -2509,15 +2506,15 @@
           });
         configureLinkPhysics(
           graphInstance,
-          (link) => link.distance || (link.label === "missing-nexus" ? 120 : 52),
-          (link) => link.strength || (link.label === "missing-nexus" ? 0.12 : 0.48),
+          (link) => link.distance || (link.label === "missing-nexus" ? 240 : 52),
+          (link) => link.strength || (link.label === "missing-nexus" ? 0.03 : 0.48),
         );
         configureGraphForces(graphInstance);
         configure3DNavigationAndLighting(graphInstance);
 
         setTimeout(() => {
           try {
-            graphInstance.zoomToFit(900, 80);
+            graphInstance.zoomToFit(1200, 120);
           } catch (e) {
             console.warn("zoomToFit failed:", e);
           }
