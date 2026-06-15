@@ -5,7 +5,7 @@ import {
   expectedGraphNodeIdSet,
 } from "./lib/ecosystem-graph-from-source.mjs";
 
-const graphPath = path.resolve(process.cwd(), "ecosystem-graph.json");
+const graphPath = path.resolve(process.cwd(), "public", "ecosystem-graph.json");
 const raw = fs.readFileSync(graphPath, "utf8");
 const graph = JSON.parse(raw);
 

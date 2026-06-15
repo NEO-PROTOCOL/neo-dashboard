@@ -59,14 +59,14 @@ O desenvolvimento segue o fluxo de entrega oficial:
 
 ---
 
-```
+```assignature
 ▓▓▓ NΞØ MELLØ
 ─────────────────────────────
 Core Architect · NΞØ Protocol
 neo@neoprotocol.space
 ```
 
-```
+```logo
       ▄
    ▄██▄░
   █  █ █░

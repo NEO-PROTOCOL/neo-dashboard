@@ -1,8 +1,8 @@
 {
-  "extends": [
-    "development"
-  ],
+  "extends": ["development"],
   "hints": {
-    "no-inline-styles": "off"
-  }
+    "no-inline-styles": "off",
+    "no-missing-blanklines": "off",
+    "no-trailing-spaces": "off"
+  },
 }

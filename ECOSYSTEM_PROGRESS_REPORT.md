@@ -10,7 +10,6 @@
 The dashboard has been updated to reflect significant progress across the NEØ Protocol stack. **8 major projects have advanced** and their status is now consolidated in a unified observability layer.
 
 | Metric | Value |
-|--------|-------|
 | Total Ecosystem Services | 29 |
 | Projects Advanced | 8 |
 | Core Infrastructure Status | 🟢 All Active |
@@ -65,7 +64,7 @@ The dashboard has been updated to reflect significant progress across the NEØ P
 - **Now:** Active v1.0 with health monitoring
 - **Status:** 🟢 Online
 - **Milestone:** System Event Bus operational
-- **URL:** <https://nexus.neoprotocol.space>
+- **URL:** <https://nexus.neoprotocol.space/health>
 
 #### 2. **neo-agent-full** (Autonomous Cloud)
 
@@ -223,28 +222,30 @@ Enhanced with:
 
 ## 🚀 How to Use the New Endpoints
 
+> **Note**: All `/api/*` endpoints are protected by the NΞØ Auth Gateway. You must provide your gateway password either via the `x-gateway-password` HTTP header or the `?password=` query parameter.
+
 ### **Monitor Ecosystem Health**
 
 ```bash
-curl https://dashboard.neoprotocol.space/api/ecosystem/health
+curl -H "x-gateway-password: $GATEWAY_PASSWORD" https://dashboard.neoprotocol.space/api/ecosystem/health
 ```
 
 ### **Track Project Milestones**
 
 ```bash
-curl https://dashboard.neoprotocol.space/api/ecosystem/progress
+curl -H "x-gateway-password: $GATEWAY_PASSWORD" https://dashboard.neoprotocol.space/api/ecosystem/progress
 ```
 
 ### **Get Live Service Status**
 
 ```bash
-curl https://dashboard.neoprotocol.space/api/neo/ecosystem/live
+curl -H "x-gateway-password: $GATEWAY_PASSWORD" https://dashboard.neoprotocol.space/api/neo/ecosystem/live
 ```
 
 ### **Search Skills Registry**
 
 ```bash
-curl "https://dashboard.neoprotocol.space/api/neo/search?q=neo"
+curl -H "x-gateway-password: $GATEWAY_PASSWORD" "https://dashboard.neoprotocol.space/api/neo/search?q=neo"
 ```
 
 ---
@@ -341,8 +342,8 @@ curl "https://dashboard.neoprotocol.space/api/neo/search?q=neo"
 ## 📞 References
 
 - **Dashboard:** <https://dashboard.neoprotocol.space>
-- **Nexus Hub:** <https://nexus.neoprotocol.space>
-- **Orchestrator:** <https://orchestrator.neoprotocol.space>
+- **Nexus Hub:** <https://nexus.neoprotocol.space/health>
+- **Orchestrator:** <https://orchestrator.neoprotocol.space/health>
 - **Ecosystem Config:** `/neobot-orchestrator/config/ecosystem.json`
 
 ---

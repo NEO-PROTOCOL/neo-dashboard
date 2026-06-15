@@ -1,15 +1,17 @@
 # Instruções de Atualização do server.js
 
-## 🎯 O que será alterado:
+## 🎯 O que será alterado
+
 1. Trocar `nexus-routes.js` por `nexus-routes-v2.js`
 2. Adicionar importação do monitoring
 3. Inicializar sistema de monitoramento
 
-## 📝 Alterações Necessárias:
+## 📝 Alterações Necessárias
 
 ### SEÇÃO 1: Importações (Linhas 1-12)
 
 **ENCONTRAR:**
+
 ```javascript
 import automationRoutes from './automation-routes.js';
 import neoRoutes from './neo-routes.js';
@@ -18,6 +20,7 @@ import aiRoutes from './ai-routes.js';
 ```
 
 **SUBSTITUIR POR:**
+
 ```javascript
 import automationRoutes from './automation-routes.js';
 import neoRoutes from './neo-routes.js';
@@ -31,6 +34,7 @@ import { setupMonitoring } from './monitoring-setup.js';  // ← NOVA LINHA
 ### SEÇÃO 2: Mount Routes (Linhas 187-191)
 
 **ENCONTRAR:**
+
 ```javascript
 // Mount Routes
 app.use('/api/automations', automationRoutes);
@@ -40,6 +44,7 @@ app.use('/api/ai', aiRoutes);
 ```
 
 **SUBSTITUIR POR:**
+
 ```javascript
 // Mount Routes
 app.use('/api/automations', automationRoutes);
@@ -53,6 +58,7 @@ app.use('/api/ai', aiRoutes);
 ### SEÇÃO 3: Server Startup (Linhas 300-316)
 
 **ENCONTRAR:**
+
 ```javascript
 // ------------------------------------------------------------------
 // Server Start
@@ -77,6 +83,7 @@ app.listen(PORT, () => {
 ```
 
 **SUBSTITUIR POR:**
+
 ```javascript
 // ------------------------------------------------------------------
 // Initialize Monitoring

@@ -1,9 +1,11 @@
 # 🚀 Guia de Implementação - Solução P0
 
 ## Resumo Executivo
+
 **Objetivo:** Reduzir "Connection reset by peer" em 70% e latência do flowpay-gw em 40%
 **Tempo Total:** ~2 horas
 **Impacto Esperado:**
+
 - Latência: 500-800ms → 200-400ms ⚡
 - Error Rate: redução de 10% para < 2% 🎯
 - Conexões estáveis: Circuit Breaker + Retry 🔄
@@ -15,6 +17,7 @@
 ### ✅ Fase 1: Código (30 minutos)
 
 - [ ] **Passo 1.1** - Verificar arquivos criados
+
   ```bash
   ls -la neo-dashboard-deploy/{connection-manager.js,nexus-routes-v2.js,monitoring-setup.js}
   ```
@@ -30,6 +33,7 @@
   Encontrar a linha onde o app inicia (por volta de `app.listen(PORT, ...)`)
 
   **ANTES:**
+
   ```javascript
   app.listen(PORT, () => {
     const publicUrl = process.env.PUBLIC_URL || `http://localhost:${PORT}`;
@@ -38,6 +42,7 @@
   ```
 
   **DEPOIS:**
+
   ```javascript
   // Importar no topo do arquivo
   import { setupMonitoring } from './monitoring-setup.js';
@@ -52,11 +57,13 @@
   ```
 
 - [ ] **Passo 1.4** - Instalar dependências necessárias
+
   ```bash
   pnpm install  # Já devem estar instaladas
   ```
 
 - [ ] **Passo 1.5** - Testar localmente
+
   ```bash
   pnpm run dev
   # Deve iniciar sem erros
@@ -66,6 +73,7 @@
 ### ✅ Fase 2: Railway Scaling (10 minutos)
 
 - [ ] **Passo 2.1** - Acessar Railway Dashboard
+
   ```
   https://railway.app → neo-dashboard-production
   ```
@@ -85,6 +93,7 @@
 ### ✅ Fase 3: Verificação (30 minutos)
 
 - [ ] **Passo 3.1** - Verificar health check
+
   ```bash
   # Local
   curl http://localhost:3000/api/health
@@ -94,6 +103,7 @@
   ```
 
 - [ ] **Passo 3.2** - Monitorar métricas em tempo real
+
   ```bash
   # Abrir novo terminal
   while true; do
@@ -103,6 +113,7 @@
   ```
 
 - [ ] **Passo 3.3** - Verificar logs
+
   ```bash
   railway logs -s neo-dashboard
   # Procurar por:
@@ -112,6 +123,7 @@
   ```
 
 - [ ] **Passo 3.4** - Testar Telegram alerts (opcional)
+
   ```bash
   curl -X POST https://neo-dashboard-production-2e56.up.railway.app/api/monitor/test-alert
   # Deve receber mensagem no Telegram
@@ -132,6 +144,7 @@
   - Connection resets: < 1 por 5 minutos
 
 - [ ] **Passo 4.2** - Monitorar por 2 horas
+
   ```bash
   # Executar este script para acompanhar progresso
   for i in {1..120}; do
@@ -147,6 +160,7 @@
 ## 🔧 Configuração Avançada (Opcional)
 
 ### Aumentar Retry Attempts
+
 Se ainda houver muitas falhas, editar `nexus-routes-v2.js`:
 
 ```javascript
@@ -161,6 +175,7 @@ const retryConfig = {
 ```
 
 ### Ajustar Thresholds de Alerta
+
 Editar `monitoring-setup.js`:
 
 ```javascript
@@ -169,6 +184,7 @@ highLatency: this.metrics.avgLatency > 1500,   // ← Reduzir de 2000ms para 150
 ```
 
 ### Configurar Múltiplas Replicas (Próxima Fase)
+
 Uma vez que os recursos verticais melhorarem, em 1-2 semanas:
 
 1. No Railway: Set `instances: 3` no flowpay-gw
@@ -180,6 +196,7 @@ Uma vez que os recursos verticais melhorarem, em 1-2 semanas:
 ## 📊 Métricas para Monitorar
 
 ### Dashboard Local
+
 ```
 http://localhost:3000/api/monitor/health
 http://localhost:3000/api/monitor/metrics
@@ -187,12 +204,14 @@ http://localhost:3000/api/monitor/alerts
 ```
 
 ### Production
+
 ```
 https://neo-dashboard-production-2e56.up.railway.app/api/monitor/health
 https://neo-dashboard-production-2e56.up.railway.app/api/monitor/metrics
 ```
 
-### O que procurar:
+### O que procurar
+
 ```json
 {
   "dashboard": {
@@ -210,25 +229,33 @@ https://neo-dashboard-production-2e56.up.railway.app/api/monitor/metrics
 ## 🔍 Troubleshooting
 
 ### Problema: Latência ainda alta (> 500ms)
+
 **Solução:**
+
 1. Aumentar memory para 3072Mi
 2. Aumentar CPU para 1500m
 3. Adicionar mais replicas (instances: 3)
 
 ### Problema: Circuit Breaker fica aberto
+
 **Solução:**
+
 1. Verificar se Nexus API está online
 2. Aumentar FAIL_THRESHOLD em connection-manager.js
 3. Verificar logs: `railway logs -s neo-nexus-production`
 
 ### Problema: Telegram não envia alertas
+
 **Solução:**
+
 1. Verificar `TELEGRAM_BOT_TOKEN` em .env
 2. Verificar `TELEGRAM_CHAT_ID` em .env
 3. Testar: `curl -X POST .../api/monitor/test-alert`
 
 ### Problema: "Connection reset by peer" continua
+
 **Solução:**
+
 1. Aumentar `maxSockets` em connection-manager.js (default: 50)
 2. Verificar firewall/NAT rules
 3. Aumentar TCP keepAlive timeout
@@ -238,6 +265,7 @@ https://neo-dashboard-production-2e56.up.railway.app/api/monitor/metrics
 ## 📝 Logs Esperados
 
 ### ✅ Sucesso
+
 ```
 [MONITOR] System monitoring started - Checks every 60 seconds
 [NEXUS] GET /api/retry/stats - OK (245ms)
@@ -246,6 +274,7 @@ https://neo-dashboard-production-2e56.up.railway.app/api/monitor/metrics
 ```
 
 ### ❌ Problemas
+
 ```
 [NEXUS] Connection reset by peer  → Resolvido pela Fase 1 ✓
 [NEXUS] High latency on flowpay-gw → Resolvido pela Fase 2 ✓
@@ -277,6 +306,7 @@ https://neo-dashboard-production-2e56.up.railway.app/api/monitor/metrics
 ## ❓ Dúvidas?
 
 Se algo não funcionar:
+
 1. Verificar `railway logs -s neo-dashboard`
 2. Testar endpoint: `/api/monitor/health`
 3. Revisar valores em `.env` e `app-settings.json`
@@ -284,6 +314,7 @@ Se algo não funcionar:
 ---
 
 **Status da Implementação:**
+
 - [x] Arquivos criados
 - [ ] Server.js atualizado
 - [ ] Railway scaling aplicado

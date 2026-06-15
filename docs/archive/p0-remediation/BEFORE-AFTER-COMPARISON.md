@@ -3,7 +3,8 @@
 ## 🔴 BEFORE (Current State - Your Logs Today)
 
 ### System Feed (Dashboard Logs)
-```
+
+```bash
 17:27:40 INFO   Ledger validated block #9283
 17:27:46 ERROR  Connection reset by peer (192.168.x.x)          ❌ PROBLEMA 1
 17:27:47 WARN   High latency on node [flowpay-gw]               ❌ PROBLEMA 2
@@ -27,7 +28,8 @@
 ```
 
 ### Problems Visible
-```
+
+```bash
 ❌ Connection resets: 5 in ~7 minutes (frequency: every 1-2 min)
 ❌ High latency warnings: 4 warnings visible
 ❌ No recovery mechanism (same errors keep repeating)
@@ -36,6 +38,7 @@
 ```
 
 ### Metrics Summary (BEFORE)
+
 ```json
 {
   "error_rate": 0.105,              // 10.5% - TOO HIGH
@@ -54,7 +57,8 @@
 ## ✅ AFTER (After Implementation - Expected in 2 Hours)
 
 ### System Feed (Dashboard Logs) - WITH FIX
-```
+
+```bash
 [SYS] Bootstrap sequence complete.
 [SYS] Manually loaded env from neo-config.env
 [SYS] Loaded settings from app-settings.json
@@ -82,7 +86,8 @@
 ```
 
 ### Improvements Visible
-```
+
+```bash
 ✅ Connection resets: 0 in 7 minutes (was 5)
 ✅ No high latency warnings (was 4)
 ✅ All requests succeed on first try (automatic retry works)
@@ -91,6 +96,7 @@
 ```
 
 ### Metrics Summary (AFTER)
+
 ```json
 {
   "error_rate": 0.008,              // 0.8% - EXCELLENT (was 10.5%)
@@ -108,6 +114,7 @@
 
 ## 📈 Detailed Metrics Comparison
 
+```bash
 | Metric | Before | After | Improvement |
 |--------|--------|-------|-------------|
 | **Error Rate** | 10.5% | 0.8% | **92% ↓** |
@@ -119,13 +126,15 @@
 | **Recovery Time** | Manual investigation | Auto retry + circuit breaker | **Instant** |
 | **Visibility** | ❌ None | ✅ Full | **New feature** |
 | **Alerts** | ❌ Manual | ✅ Telegram 24/7 | **New feature** |
+```
 
 ---
 
 ## 🔄 Request Flow Comparison
 
 ### BEFORE: Single Failure = Game Over ❌
-```
+
+```bash
 User Request
     ↓
 Network connection lost
@@ -137,7 +146,8 @@ Status: DOWN ❌
 ```
 
 ### AFTER: Intelligent Recovery ✅
-```
+
+```bash
 User Request
     ↓
 Network connection lost (transient)
@@ -156,7 +166,8 @@ Status: UP ✅
 ## 📱 Telegram Alerts Comparison
 
 ### BEFORE: No Automation ❌
-```
+
+```bash
 Problem occurs
     ↓
 Hours/days pass
@@ -169,6 +180,7 @@ Too late - already lost traffic
 ```
 
 ### AFTER: Real-time Alerts ✅
+
 ```
 Problem occurs (rare!)
     ↓
@@ -189,6 +201,7 @@ Prevents escalation
 ## 🛠️ Architecture Comparison
 
 ### BEFORE: Simple but Brittle
+
 ```
 Request → Direct Fetch → Nexus API
   ↓
@@ -198,6 +211,7 @@ User impact: Immediate
 ```
 
 ### AFTER: Resilient Architecture
+
 ```
 Request → Connection Manager
   ├─ Connection Pool (reuse)
@@ -222,6 +236,7 @@ User: Always gets response (or quick failure)
 ### Scenario: Nexus API Slow for 5 seconds
 
 **BEFORE:**
+
 ```
 T+0s: Request arrives
 T+0-5s: Waiting for Nexus API (slow)
@@ -232,6 +247,7 @@ Next 10 requests: Also fail (cascade)
 ```
 
 **AFTER:**
+
 ```
 T+0s: Request arrives
 T+0-1s: Attempt 1 → Timeout
@@ -252,6 +268,7 @@ Everything: Back to normal automatically
 ## 🎯 Dashboard Experience
 
 ### BEFORE: Stressful 😰
+
 ```
 Dashboard refreshes...
 "High latency warning!"
@@ -268,6 +285,7 @@ You:
 ```
 
 ### AFTER: Peaceful 😌
+
 ```
 Dashboard refreshes...
 "All systems CLOSED (healthy)"
@@ -288,6 +306,7 @@ You:
 ## 📚 Log Examples in Detail
 
 ### BEFORE: Frustrating Errors ❌
+
 ```
 17:27:46 ERROR  Connection reset by peer (192.168.x.x)
 │
@@ -302,6 +321,7 @@ No context. No retry. No recovery.
 ```
 
 ### AFTER: Clear and Actionable ✅
+
 ```
 17:27:46 [CIRCUIT] CLOSED - Service healthy
 17:27:47 [NEXUS] GET /api/retry/stats - OK (245ms)
@@ -318,7 +338,7 @@ Meaning:
 
 ## 🏆 Success Criteria
 
-### ✅ After implementation, these should be true:
+### ✅ After implementation, these should be true
 
 ```
 □ Error rate < 2%
@@ -338,11 +358,13 @@ Meaning:
 ## 📞 How to Validate
 
 ### Test 1: Check Health Endpoint
+
 ```bash
 curl https://neo-dashboard-production-2e56.up.railway.app/api/monitor/health | jq .
 ```
 
 Expected:
+
 ```json
 {
   "dashboard": {
@@ -354,6 +376,7 @@ Expected:
 ```
 
 ### Test 2: Monitor for 2 Hours
+
 ```bash
 watch -n 30 'curl -s https://neo-dashboard-production-2e56.up.railway.app/api/monitor/health | jq .dashboard'
 ```
@@ -361,6 +384,7 @@ watch -n 30 'curl -s https://neo-dashboard-production-2e56.up.railway.app/api/mo
 Expected: Consistent low error rate and latency
 
 ### Test 3: Check Logs
+
 ```bash
 railway logs -s neo-dashboard --follow
 ```
