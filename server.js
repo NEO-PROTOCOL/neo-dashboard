@@ -490,6 +490,43 @@ const isRailwayInternalIp = (ip) => {
   );
 };
 
+// IP auto-ban: after AUTH_BAN_THRESHOLD failures in AUTH_WINDOW_MS, ban for AUTH_BAN_DURATION_MS.
+const AUTH_BAN_THRESHOLD    = Number(process.env.AUTH_BAN_THRESHOLD    || 10);
+const AUTH_WINDOW_MS        = Number(process.env.AUTH_WINDOW_MS        || 5  * 60 * 1000); // 5 min
+const AUTH_BAN_DURATION_MS  = Number(process.env.AUTH_BAN_DURATION_MS  || 60 * 60 * 1000); // 1 h
+
+const _authFailures = new Map(); // ip → { count, windowStart }
+const _bannedIps    = new Map(); // ip → bannedUntil (ms)
+
+function normalizeIp(raw) {
+  return (raw || "").replace("::ffff:", "");
+}
+
+function isIpBanned(ip) {
+  const until = _bannedIps.get(ip);
+  if (!until) return false;
+  if (Date.now() < until) return true;
+  _bannedIps.delete(ip);
+  _authFailures.delete(ip);
+  return false;
+}
+
+function recordAuthFailure(ip) {
+  const now = Date.now();
+  let rec = _authFailures.get(ip);
+  if (!rec || now - rec.windowStart > AUTH_WINDOW_MS) {
+    rec = { count: 0, windowStart: now };
+  }
+  rec.count += 1;
+  _authFailures.set(ip, rec);
+  if (rec.count >= AUTH_BAN_THRESHOLD) {
+    const until = now + AUTH_BAN_DURATION_MS;
+    _bannedIps.set(ip, until);
+    _authFailures.delete(ip);
+    console.warn(`[SECURITY] Auto-banned ${ip} for 1h after ${rec.count} failed auth attempts`);
+  }
+}
+
 const authMiddleware = (req, res, next) => {
   const providedPassword =
     req.headers["x-gateway-password"] || req.query.password;
@@ -498,10 +535,22 @@ const authMiddleware = (req, res, next) => {
     return next();
   }
 
-  // Suppress noisy security logs for Railway's internal health-check probes.
-  if (!isRailwayInternalIp(req.ip)) {
-    console.warn(`[SECURITY] Unauthorized access attempt from ${req.ip}`);
+  const ip = normalizeIp(req.ip);
+
+  // Skip logging/tracking for Railway internal probes.
+  if (isRailwayInternalIp(ip)) {
+    return res.status(401).json({
+      error: "UNAUTHORIZED_ACCESS",
+      message: "Valid x-gateway-password header or password query parameter required",
+    });
   }
+
+  if (isIpBanned(ip)) {
+    return res.status(429).end(); // silent — no log spam for already-banned IPs
+  }
+
+  recordAuthFailure(ip);
+  console.warn(`[SECURITY] Unauthorized access attempt from ${ip}`);
   res.status(401).json({
     error: "UNAUTHORIZED_ACCESS",
     message: "Valid x-gateway-password header or password query parameter required",
