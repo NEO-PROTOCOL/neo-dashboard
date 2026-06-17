@@ -9,8 +9,9 @@ import { promisify } from "util";
 import rateLimit from "express-rate-limit";
 import automationRoutes from "./src/routes/automation-routes.js";
 import neoRoutes from "./src/routes/neo-routes.js";
-import nexusRoutes from "./src/routes/nexus-routes.js";
+import nexusRoutesV2 from "./src/routes/nexus-routes-v2.js";
 import aiRoutes from "./src/routes/ai-routes.js";
+import { setupMonitoring } from "./monitoring-setup.js";
 import ecosystemHealthRoutes from "./src/routes/ecosystem-health-routes.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -276,7 +277,7 @@ console.log = (...args) => captureLog("info", args);
 console.error = (...args) => captureLog("error", args);
 console.warn = (...args) => captureLog("warn", args);
 
-class SimpleTelegramBot {
+export class SimpleTelegramBot {
   constructor(token, defaultChatId) {
     this.token = token;
     this.defaultChatId = defaultChatId;
@@ -563,7 +564,7 @@ app.use("/api", authMiddleware);
 // Mount Routes
 app.use("/api/automations", automationRoutes);
 app.use("/api/neo", neoRoutes);
-app.use("/api/nexus", nexusRoutes);
+app.use("/api/nexus", nexusRoutesV2);
 app.use("/api/ecosystem", ecosystemHealthRoutes);
 app.use("/api/ai", aiRoutes);
 
@@ -834,6 +835,11 @@ app.get("/", (req, res) => {
 });
 
 // ------------------------------------------------------------------
+// Initialize Monitoring
+// ------------------------------------------------------------------
+setupMonitoring(app, telegramBot);
+
+// ------------------------------------------------------------------
 // Server Start
 // ------------------------------------------------------------------
 app.listen(PORT, () => {
@@ -849,6 +855,7 @@ app.listen(PORT, () => {
 ║
 ║   Dashboard: ${publicUrl}
 ║   NEO API: ${publicUrl}/api/neo
+║   Monitor: ${publicUrl}/api/monitor/health
 ║
 ╚═══════════════════════════════════════════════════════
     `);
