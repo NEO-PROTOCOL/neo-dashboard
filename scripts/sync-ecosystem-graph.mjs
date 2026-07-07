@@ -23,8 +23,10 @@ if (!sourceNodes?.length) {
     console.warn("[sync] No source found. Keeping existing ecosystem-graph.json (stale).");
     process.exit(0);
   }
-  console.error("[sync] No ecosystem source available and no fallback file exists.");
-  process.exit(1);
+  console.warn("[sync] No ecosystem source available. Writing empty placeholder graph.");
+  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+  fs.writeFileSync(targetPath, JSON.stringify({ nodes: [], links: [] }, null, 2) + "\n", "utf8");
+  process.exit(0);
 }
 
 const { nodes, byGroup } = buildNodesWithAnchors(sourceNodes);
@@ -114,3 +116,4 @@ const output = { nodes, links };
 fs.writeFileSync(targetPath, `${JSON.stringify(output, null, 2)}\n`, "utf8");
 
 console.log(`synced ecosystem-graph.json with ${nodes.length} nodes and ${links.length} links`);
+
