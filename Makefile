@@ -34,24 +34,24 @@ help:
 
 install:
 	@echo "⦿ Installing dependencies..."
-	@pnpm install
+	@pnpm --ignore-workspace install
 
 build:
 	@echo "🏗 Building project..."
-	@pnpm run build
+	@pnpm --ignore-workspace run build
 	@echo "✓ Build complete."
 
 test:
 	@echo "🧪 Running test suite..."
-	@pnpm test
+	@pnpm --ignore-workspace test
 
 sync-ecosystem-graph:
 	@echo "🕸 Syncing ecosystem graph..."
-	@pnpm run sync:ecosystem-graph
+	@pnpm --ignore-workspace run sync:ecosystem-graph
 
 validate-ecosystem-graph:
 	@echo "🔎 Validating ecosystem graph..."
-	@pnpm run validate:ecosystem-graph
+	@pnpm --ignore-workspace run validate:ecosystem-graph
 
 clean:
 	@echo "🧹 Cleaning project..."
