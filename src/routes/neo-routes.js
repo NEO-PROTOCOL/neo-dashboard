@@ -11,7 +11,7 @@ const NEXUS_ECOSYSTEM_URL =
   "https://nexus.neoprotocol.space/api/ecosystem";
 const DEFAULT_ECOSYSTEM_SOURCE_URL =
   process.env.ECOSYSTEM_SOURCE_URL ||
-  "https://nexus.neoprotocol.space/api/ecosystem";
+  "https://orchestrator.neoprotocol.space/config/ecosystem.json";
 const FETCH_TIMEOUT = 5000;
 const NODE_PROBE_TIMEOUT = Number(
   process.env.ECOSYSTEM_NODE_PROBE_TIMEOUT_MS || 2500,

@@ -54,3 +54,14 @@ pnpm run dev       # Dev with watch
 - Never modify ecosystem graph data manually
 - Authenticate all API endpoints
 - Rate limit public endpoints
+
+## PNPM Boundary and Canonical Inputs
+
+- PNPM runtime/store may be shared by the parent workspace, but this dashboard owns its `package.json`, lockfile and
+  `node_modules`. Run `pnpm install --frozen-lockfile` only in this repository; never repair a sibling project while
+  validating the dashboard.
+- Execute release checks with the Node version managed by mise that satisfies the repository engine contract.
+- `pnpm build` regenerates the ignored visual graph from the canonical orchestrator endpoint. Do not commit a generated
+  graph snapshot.
+- Readiness data comes from the canonical orchestrator report. Keep `stack-report.json` only as a deploy fallback and
+  regenerate it from the orchestrator before release.

@@ -13,9 +13,9 @@ export async function loadEcosystemSourceArray(
 ) {
   const localCandidates = [
     process.env.ECOSYSTEM_SOURCE_PATH,
+    path.resolve(repoRoot, "../neobot-orchestrator/config/ecosystem.json"),
     path.resolve(repoRoot, "../neo-nexus/config/ecosystem.json"),
     path.resolve(repoRoot, "ecosystem.json"),
-    path.resolve(repoRoot, "../neobot-orchestrator/config/ecosystem.json"),
     path.resolve(repoRoot, "neobot-source/config/ecosystem.json"),
   ].filter(Boolean);
 
@@ -38,7 +38,7 @@ export async function loadEcosystemSourceArray(
     const url =
       process.env.ECOSYSTEM_SOURCE_URL ||
       process.env.NEXUS_ECOSYSTEM_URL ||
-      "https://nexus.neoprotocol.space/api/ecosystem";
+      "https://orchestrator.neoprotocol.space/config/ecosystem.json";
 
     if (!silent) console.log(`[sync] No local source. Fetching from: ${url}`);
     try {

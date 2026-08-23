@@ -18,6 +18,24 @@ Base (`.env.example`):
 - `ANTHROPIC_API_KEY`: Chat/admin IA.
 - `TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID`: Opcionais para alertas.
 
+## Dependências PNPM e dados canônicos
+
+O runtime e o store PNPM podem ser compartilhados no workspace superior, mas este dashboard é um importador soberano:
+seu lockfile e `node_modules` não devem ser restaurados por instalações em projetos vizinhos.
+
+Use o Node gerenciado por mise que satisfaça o contrato do repositório para validações de release.
+
+```bash
+pnpm install --frozen-lockfile
+pnpm build
+pnpm validate:ecosystem-graph
+pnpm test
+```
+
+O build regenera `public/ecosystem-graph.json` a partir do orquestrador canônico. O arquivo é ignorado no Git de
+propósito. O dashboard lê a topologia e o relatório de readiness diretamente do endpoint do orquestrador; o
+`stack-report.json` local é apenas fallback de deploy e deve ser regenerado antes de publicar.
+
 ## Executar Localmente
 
 ```bash

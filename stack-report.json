@@ -1,45 +1,75 @@
 {
   "meta": {
-    "generated_at": "2026-04-13T01:10:44.818106+00:00",
+    "generated_at": "2026-08-23T16:16:38.762321+00:00",
     "analyzer_version": "3.1.0",
-    "total_nodes": 35,
-    "total_orgs": 7
+    "total_nodes": 83,
+    "total_orgs": 11
   },
   "ecosystem_health": {
-    "average_readiness": 84.1,
+    "average_readiness": 57.9,
     "max_possible": 100,
     "grade_distribution": {
-      "A": 10,
+      "A": 14,
       "B": 17,
-      "C": 1
+      "C": 7,
+      "D": 39
     },
-    "total_findings": 20,
+    "total_findings": 21,
     "findings_by_severity": {
       "critical": 0,
       "high": 1,
-      "medium": 2,
-      "low": 9,
-      "info": 8
+      "medium": 8,
+      "low": 10,
+      "info": 2
     }
   },
   "summary": {
     "organizations": [
-      "FlowPay (NE\u039e Stack)",
+      "Chat-as-a-Protocol",
+      "FlowPay System",
       "Fluxx DAO",
+      "Mello Labs",
       "NEO Protocol",
       "NEO-FlowOFF",
       "NEO-Growth-System",
+      "NEO-PROTOCOL",
+      "Neo Avatar Project",
       "Neo Smart Factory",
-      "WOD Game"
+      "WodXPro"
     ],
     "org_breakdown": {
-      "FlowPay (NE\u039e Stack)": {
-        "node_count": 1,
+      "Chat-as-a-Protocol": {
+        "node_count": 10,
         "node_ids": [
-          "flowpay"
+          "neo-flow-chat-ui",
+          "neo-chat-uncensored",
+          "chat-standards-template",
+          "neo-flow-admin",
+          "neo-flow-ingest",
+          "neo-flow-system",
+          "neo-flow-worker",
+          "neo-flow-infra",
+          "chat-as-a-protocol-github",
+          "chat-as-a-protocol-workspace"
         ],
         "findings_count": 1,
-        "avg_readiness": 90.0
+        "avg_readiness": 42.0
+      },
+      "FlowPay System": {
+        "node_count": 9,
+        "node_ids": [
+          "flowpay",
+          "flowpay-marketing",
+          "flowpay-docs-page",
+          "flowpay-docs",
+          "flowpay-api",
+          "flowpay-infra",
+          "flowpay-app",
+          "flowpay-support-bridge",
+          "geo-block-flowpay"
+        ],
+        "findings_count": 6,
+        "avg_readiness": 51.1
       },
       "Fluxx DAO": {
         "node_count": 2,
@@ -50,49 +80,95 @@
         "findings_count": 0,
         "avg_readiness": 80.0
       },
+      "Mello Labs": {
+        "node_count": 1,
+        "node_ids": [
+          "mypersonal_multiagents"
+        ],
+        "findings_count": 0,
+        "avg_readiness": 35.0
+      },
       "NEO Protocol": {
-        "node_count": 9,
+        "node_count": 14,
         "node_ids": [
           "neobot-orchestrator",
-          "neo-protocol-hub",
           "neo-mcp-server",
           "neo-agent-full",
+          "neo-agent-react",
           "neo-nexus",
           "mio-system",
           "neo-protcl",
           "neo-dashboard",
-          "neo-tunnel"
+          "neo-tunnel",
+          "neo-protocol-landing",
+          "neo-id",
+          "neo-convert",
+          "neo-protocol-contracts",
+          "neo-protocol-web"
         ],
         "findings_count": 1,
-        "avg_readiness": 81.9
+        "avg_readiness": 67.9
       },
       "NEO-FlowOFF": {
-        "node_count": 5,
+        "node_count": 14,
         "node_ids": [
           "neo-flowoff-landing",
-          "neo-flowoff-pwa",
           "pro-ia",
           "ceo-escalavel-miniapp",
-          "neo-mello-eth"
+          "neo-mello-eth",
+          "flow-links-bio",
+          "neoflw-token",
+          "neo-landing-open",
+          "neoflow-content-machine",
+          "neo-flw-landing",
+          "neoflowoff-chat-ui",
+          "neo-digitalfather",
+          "neo-sdr-adapter",
+          "neo-landing-sdr",
+          "neo-oficial-page"
         ],
         "findings_count": 0,
-        "avg_readiness": 78.0
+        "avg_readiness": 48.9
       },
       "NEO-Growth-System": {
-        "node_count": 6,
+        "node_count": 11,
         "node_ids": [
           "neo-growth-system",
           "neo-event-ingestor",
           "neo-crm-core",
           "neo-message-orchestrator",
           "neo-provider-resend",
-          "neo-queue-worker"
+          "neo-queue-worker",
+          "neo-crm-dashboard",
+          "neo-provider-messaging",
+          "neo-provider-telegram",
+          "neo-ipfs-drive",
+          "neo-whatsapp-connect"
         ],
-        "findings_count": 9,
-        "avg_readiness": 100.0
+        "findings_count": 0,
+        "avg_readiness": 70.5
+      },
+      "NEO-PROTOCOL": {
+        "node_count": 3,
+        "node_ids": [
+          "neoflw-token-page",
+          "neo-context",
+          "neo-agent-runtime"
+        ],
+        "findings_count": 1,
+        "avg_readiness": 58.3
+      },
+      "Neo Avatar Project": {
+        "node_count": 2,
+        "node_ids": [
+          "paulinha-feed",
+          "paulinha_ugc"
+        ],
+        "findings_count": 4,
+        "avg_readiness": 70.0
       },
       "Neo Smart Factory": {
-        "node_count": 9,
+        "node_count": 10,
         "node_ids": [
           "smart-factory",
           "smart-core",
@@ -102,43 +178,55 @@
           "smart-factory-docs",
           "internal-ops",
           "smart-ui-mobile",
-          "smart-nft"
+          "smart-nft",
+          "docs"
         ],
         "findings_count": 0,
-        "avg_readiness": 75.0
+        "avg_readiness": 71.0
       },
-      "WOD Game": {
-        "node_count": 3,
+      "WodXPro": {
+        "node_count": 7,
         "node_ids": [
           "wod-x-pro",
           "wod-eth",
-          "wod-protocol"
+          "wod-protocol",
+          "wod-contracts",
+          "wod-api",
+          "wod-landing",
+          "neo-token-wodeth"
         ],
         "findings_count": 0,
-        "avg_readiness": 80.0
+        "avg_readiness": 54.3
       }
     },
     "platforms": [
-      "Cloudflare Workers + D1 (API) / Cloudflare Pages (Web)",
+      "Astro PWA / Local",
       "Documentation / Unassigned",
       "ENS / IPFS / Storacha / Static Hosts",
+      "GitHub",
+      "GitHub / Remote Canonical",
       "IPFS / Web3",
-      "Local / MCP Runtime",
+      "Local / Discovered",
+      "Local / Distributed",
       "Local / Railway (Production)",
       "Mainnet / Base",
       "N/A (Contracts Repository)",
       "N/A (Local CLI)",
       "Private / Local",
       "Railway",
+      "Railway (multi-service)",
+      "Railway + Cloudflare Workers + R1",
       "Railway / Base",
-      "Repository / Distributed Governance",
+      "Railway / Storacha",
       "Repository / Organization Hub",
+      "Static HTTP / Local",
       "Vercel",
       "Vercel (nodevercel/agentflow)",
       "Vercel (nodevercel/smart-ui-dashboard)",
       "Vercel (nodevercel/smart-ui-landing)",
       "Vercel (nodevercel/smart-ui-mobile)",
-      "Vercel / IPFS"
+      "Vercel (static + 1 serverless function)",
+      "Vercel / IPFS / Cloudflare"
     ],
     "single_points_of_failure": [
       "neo-nexus"
@@ -146,21 +234,86 @@
     "dependency_cycles": [],
     "nodes_with_mainnet_contracts": [
       "smart-core",
-      "flowpay"
+      "flowpay",
+      "neoflw-token-page"
     ],
     "nodes_without_production_url": [
-      "neo-protocol-hub",
-      "neo-mcp-server",
+      "neo-agent-react",
       "smart-factory",
       "smart-core",
       "smart-cli",
       "smart-factory-docs",
       "internal-ops",
-      "fluxx-backend"
+      "fluxx-backend",
+      "neo-protocol-landing",
+      "neo-id",
+      "neo-convert",
+      "neo-protocol-contracts",
+      "flow-links-bio",
+      "neoflw-token",
+      "neo-landing-open",
+      "neoflow-content-machine",
+      "neo-flw-landing",
+      "docs",
+      "wod-contracts",
+      "wod-api",
+      "wod-landing",
+      "flowpay-docs-page",
+      "flowpay-docs",
+      "flowpay-infra",
+      "neo-flow-chat-ui",
+      "neoflowoff-chat-ui",
+      "neo-digitalfather",
+      "neo-sdr-adapter",
+      "neo-crm-dashboard",
+      "neo-provider-messaging",
+      "neo-provider-telegram",
+      "neo-token-wodeth",
+      "chat-standards-template",
+      "neo-flow-admin",
+      "neo-flow-ingest",
+      "neo-flow-system",
+      "neo-flow-worker",
+      "neo-flow-infra",
+      "chat-as-a-protocol-github",
+      "neo-context",
+      "neo-agent-runtime",
+      "chat-as-a-protocol-workspace",
+      "mypersonal_multiagents",
+      "neo-protocol-web",
+      "neo-landing-sdr",
+      "neo-oficial-page",
+      "flowpay-support-bridge",
+      "geo-block-flowpay",
+      "neo-ipfs-drive",
+      "neo-whatsapp-connect"
     ]
   },
   "dependency_graph": {
+    "neo-nexus": {
+      "depends_on": [],
+      "depended_by": [
+        "flowpay",
+        "mio-system",
+        "neo-agent-full",
+        "neo-chat-uncensored",
+        "neo-crm-core",
+        "neo-event-ingestor",
+        "neo-growth-system",
+        "neo-message-orchestrator",
+        "neo-provider-resend",
+        "neo-queue-worker",
+        "neobot-orchestrator",
+        "smart-core"
+      ]
+    },
     "neo-event-ingestor": {
+      "depends_on": [
+        "neo-nexus"
+      ],
+      "depended_by": []
+    },
+    "neo-agent-full": {
       "depends_on": [
         "neo-nexus"
       ],
@@ -172,33 +325,7 @@
       ],
       "depended_by": []
     },
-    "neo-nexus": {
-      "depends_on": [],
-      "depended_by": [
-        "flowpay",
-        "neo-crm-core",
-        "neo-event-ingestor",
-        "neo-growth-system",
-        "neo-message-orchestrator",
-        "neo-provider-resend",
-        "neo-queue-worker",
-        "neobot-orchestrator",
-        "smart-core"
-      ]
-    },
-    "neo-growth-system": {
-      "depends_on": [
-        "neo-nexus"
-      ],
-      "depended_by": []
-    },
     "neo-queue-worker": {
-      "depends_on": [
-        "neo-nexus"
-      ],
-      "depended_by": []
-    },
-    "neo-crm-core": {
       "depends_on": [
         "neo-nexus"
       ],
@@ -210,7 +337,13 @@
       ],
       "depended_by": []
     },
-    "flowpay": {
+    "neo-crm-core": {
+      "depends_on": [
+        "neo-nexus"
+      ],
+      "depended_by": []
+    },
+    "neo-message-orchestrator": {
       "depends_on": [
         "neo-nexus"
       ],
@@ -222,9 +355,49 @@
       ],
       "depended_by": []
     },
-    "neo-message-orchestrator": {
+    "neo-growth-system": {
       "depends_on": [
         "neo-nexus"
+      ],
+      "depended_by": []
+    },
+    "flowpay-api": {
+      "depends_on": [],
+      "depended_by": [
+        "flowpay"
+      ]
+    },
+    "neo-chat-uncensored": {
+      "depends_on": [
+        "neo-nexus"
+      ],
+      "depended_by": []
+    },
+    "mio-system": {
+      "depends_on": [
+        "neo-nexus"
+      ],
+      "depended_by": []
+    },
+    "neo-id": {
+      "depends_on": [
+        "flowpay"
+      ],
+      "depended_by": []
+    },
+    "flowpay": {
+      "depends_on": [
+        "flowpay-api",
+        "neo-nexus"
+      ],
+      "depended_by": [
+        "neo-convert",
+        "neo-id"
+      ]
+    },
+    "neo-convert": {
+      "depends_on": [
+        "flowpay"
       ],
       "depended_by": []
     }
@@ -232,20 +405,12 @@
   "nexus_topology": {
     "events": [
       {
-        "event": "*",
-        "emitters": [],
-        "consumers": [
-          "neo-growth-system"
-        ],
-        "has_emitter": false,
-        "has_consumer": true
-      },
-      {
         "event": "BUILD_STATUS",
         "emitters": [
           "neobot-orchestrator"
         ],
         "consumers": [
+          "neo-growth-system",
           "neobot-orchestrator"
         ],
         "has_emitter": true,
@@ -253,12 +418,14 @@
       },
       {
         "event": "CHECKOUT_CREATED",
-        "emitters": [],
-        "consumers": [
-          "neo-event-ingestor",
-          "neo-crm-core"
+        "emitters": [
+          "neo-event-ingestor"
         ],
-        "has_emitter": false,
+        "consumers": [
+          "neo-crm-core",
+          "neo-growth-system"
+        ],
+        "has_emitter": true,
         "has_consumer": true
       },
       {
@@ -267,7 +434,6 @@
           "neo-message-orchestrator"
         ],
         "consumers": [
-          "neo-nexus",
           "neo-growth-system"
         ],
         "has_emitter": true,
@@ -279,6 +445,7 @@
           "neo-crm-core"
         ],
         "consumers": [
+          "neo-growth-system",
           "neo-message-orchestrator"
         ],
         "has_emitter": true,
@@ -290,6 +457,7 @@
           "neo-message-orchestrator"
         ],
         "consumers": [
+          "neo-growth-system",
           "neo-provider-resend"
         ],
         "has_emitter": true,
@@ -301,7 +469,6 @@
           "neo-provider-resend"
         ],
         "consumers": [
-          "neo-nexus",
           "neo-growth-system"
         ],
         "has_emitter": true,
@@ -313,7 +480,6 @@
           "neo-provider-resend"
         ],
         "consumers": [
-          "neo-nexus",
           "neo-growth-system"
         ],
         "has_emitter": true,
@@ -325,7 +491,6 @@
           "neo-provider-resend"
         ],
         "consumers": [
-          "neo-nexus",
           "neo-growth-system"
         ],
         "has_emitter": true,
@@ -337,7 +502,6 @@
           "neo-provider-resend"
         ],
         "consumers": [
-          "neo-nexus",
           "neo-growth-system"
         ],
         "has_emitter": true,
@@ -349,7 +513,6 @@
           "neo-provider-resend"
         ],
         "consumers": [
-          "neo-nexus",
           "neo-growth-system"
         ],
         "has_emitter": true,
@@ -361,8 +524,9 @@
           "smart-core"
         ],
         "consumers": [
-          "smart-core",
-          "flowpay"
+          "flowpay",
+          "neo-growth-system",
+          "smart-core"
         ],
         "has_emitter": true,
         "has_consumer": true
@@ -373,8 +537,9 @@
           "smart-core"
         ],
         "consumers": [
-          "smart-core",
-          "flowpay"
+          "flowpay",
+          "neo-growth-system",
+          "smart-core"
         ],
         "has_emitter": true,
         "has_consumer": true
@@ -385,7 +550,6 @@
           "flowpay"
         ],
         "consumers": [
-          "neo-nexus",
           "neo-growth-system"
         ],
         "has_emitter": true,
@@ -397,8 +561,9 @@
           "neobot-orchestrator"
         ],
         "consumers": [
-          "neobot-orchestrator",
-          "flowpay"
+          "flowpay",
+          "neo-growth-system",
+          "neobot-orchestrator"
         ],
         "has_emitter": true,
         "has_consumer": true
@@ -409,6 +574,7 @@
           "neobot-orchestrator"
         ],
         "consumers": [
+          "neo-growth-system",
           "neobot-orchestrator"
         ],
         "has_emitter": true,
@@ -416,11 +582,13 @@
       },
       {
         "event": "PAYMENT_CONFIRMED",
-        "emitters": [],
-        "consumers": [
+        "emitters": [
           "neo-event-ingestor"
         ],
-        "has_emitter": false,
+        "consumers": [
+          "neo-growth-system"
+        ],
+        "has_emitter": true,
         "has_consumer": true
       },
       {
@@ -429,7 +597,6 @@
           "neo-queue-worker"
         ],
         "consumers": [
-          "neo-nexus",
           "neo-growth-system"
         ],
         "has_emitter": true,
@@ -441,6 +608,7 @@
           "neobot-orchestrator"
         ],
         "consumers": [
+          "neo-growth-system",
           "neobot-orchestrator"
         ],
         "has_emitter": true,
@@ -448,31 +616,37 @@
       },
       {
         "event": "USER_CREATED",
-        "emitters": [],
-        "consumers": [
-          "neo-event-ingestor",
-          "neo-crm-core"
+        "emitters": [
+          "neo-event-ingestor"
         ],
-        "has_emitter": false,
+        "consumers": [
+          "neo-crm-core",
+          "neo-growth-system"
+        ],
+        "has_emitter": true,
         "has_consumer": true
       }
     ],
     "wildcard_consumers": [
-      "neo-nexus",
       "neo-growth-system"
     ],
-    "total_unique_events": 20,
+    "total_unique_events": 19,
     "orphan_events": [],
-    "phantom_events": [
-      "*",
-      "CHECKOUT_CREATED",
-      "PAYMENT_CONFIRMED",
-      "USER_CREATED"
-    ]
+    "phantom_events": []
   },
   "readiness_leaderboard": [
     {
       "id": "neobot-orchestrator",
+      "score": 100,
+      "grade": "A"
+    },
+    {
+      "id": "neo-agent-full",
+      "score": 100,
+      "grade": "A"
+    },
+    {
+      "id": "mio-system",
       "score": 100,
       "grade": "A"
     },
@@ -507,12 +681,12 @@
       "grade": "A"
     },
     {
-      "id": "neo-agent-full",
+      "id": "neo-mcp-server",
       "score": 90,
       "grade": "A"
     },
     {
-      "id": "mio-system",
+      "id": "neo-dashboard",
       "score": 90,
       "grade": "A"
     },
@@ -522,22 +696,32 @@
       "grade": "A"
     },
     {
+      "id": "neo-tunnel",
+      "score": 90,
+      "grade": "A"
+    },
+    {
+      "id": "neo-chat-uncensored",
+      "score": 90,
+      "grade": "A"
+    },
+    {
       "id": "neo-nexus",
       "score": 85,
       "grade": "B"
     },
     {
-      "id": "neo-protcl",
-      "score": 80,
-      "grade": "B"
-    },
-    {
-      "id": "neo-dashboard",
-      "score": 80,
-      "grade": "B"
-    },
-    {
       "id": "smart-ui",
+      "score": 80,
+      "grade": "B"
+    },
+    {
+      "id": "smart-ui-landing",
+      "score": 80,
+      "grade": "B"
+    },
+    {
+      "id": "smart-ui-mobile",
       "score": 80,
       "grade": "B"
     },
@@ -552,12 +736,12 @@
       "grade": "B"
     },
     {
-      "id": "neo-flowoff-pwa",
+      "id": "pro-ia",
       "score": 80,
       "grade": "B"
     },
     {
-      "id": "pro-ia",
+      "id": "ceo-escalavel-miniapp",
       "score": 80,
       "grade": "B"
     },
@@ -587,29 +771,254 @@
       "grade": "B"
     },
     {
-      "id": "neo-tunnel",
+      "id": "neoflw-token-page",
       "score": 80,
       "grade": "B"
     },
     {
-      "id": "smart-ui-landing",
+      "id": "neo-protcl",
       "score": 70,
       "grade": "B"
     },
     {
-      "id": "smart-ui-mobile",
+      "id": "paulinha-feed",
       "score": 70,
       "grade": "B"
     },
     {
-      "id": "ceo-escalavel-miniapp",
+      "id": "paulinha_ugc",
       "score": 70,
       "grade": "B"
     },
     {
-      "id": "neo-mcp-server",
+      "id": "flowpay-marketing",
+      "score": 65,
+      "grade": "C"
+    },
+    {
+      "id": "flowpay-api",
+      "score": 65,
+      "grade": "C"
+    },
+    {
+      "id": "flowpay-app",
+      "score": 65,
+      "grade": "C"
+    },
+    {
+      "id": "neo-context",
+      "score": 60,
+      "grade": "C"
+    },
+    {
+      "id": "neo-agent-react",
       "score": 50,
       "grade": "C"
+    },
+    {
+      "id": "neo-flow-chat-ui",
+      "score": 50,
+      "grade": "C"
+    },
+    {
+      "id": "neoflowoff-chat-ui",
+      "score": 50,
+      "grade": "C"
+    },
+    {
+      "id": "neo-protocol-landing",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neo-id",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neo-convert",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neo-protocol-contracts",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "flow-links-bio",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neoflw-token",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neo-landing-open",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neoflow-content-machine",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neo-flw-landing",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "docs",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "wod-contracts",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "wod-api",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "wod-landing",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "flowpay-docs-page",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "flowpay-docs",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "flowpay-infra",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neo-digitalfather",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neo-sdr-adapter",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neo-crm-dashboard",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neo-provider-messaging",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neo-provider-telegram",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neo-token-wodeth",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "chat-standards-template",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neo-flow-admin",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neo-flow-ingest",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neo-flow-system",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neo-flow-worker",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neo-flow-infra",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "chat-as-a-protocol-github",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neo-agent-runtime",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "chat-as-a-protocol-workspace",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "mypersonal_multiagents",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neo-protocol-web",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neo-landing-sdr",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neo-oficial-page",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "flowpay-support-bridge",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "geo-block-flowpay",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neo-ipfs-drive",
+      "score": 35,
+      "grade": "D"
+    },
+    {
+      "id": "neo-whatsapp-connect",
+      "score": 35,
+      "grade": "D"
     }
   ],
   "findings": [
@@ -617,147 +1026,154 @@
       "node_id": "neo-nexus",
       "category": "infra",
       "severity": "high",
-      "title": "Single Point of Failure \u2014 blast radius 9 nos",
-      "detail": "Nos dependentes: ['flowpay', 'neo-crm-core', 'neo-event-ingestor', 'neo-growth-system', 'neo-message-orchestrator', 'neo-provider-resend', 'neo-queue-worker', 'neobot-orchestrator', 'smart-core']. Falha impacta 9 nos. Considere circuit breaker / fallback."
+      "title": "Single Point of Failure — blast 12",
+      "detail": "Nos dependentes: ['flowpay', 'mio-system', 'neo-agent-full', 'neo-chat-uncensored', 'neo-crm-core', 'neo-event-ingestor', 'neo-growth-system', 'neo-message-orchestrator', 'neo-provider-resend', 'neo-queue-worker', 'neobot-orchestrator', 'smart-core']. Falha impacta 12 nos. Considere circuit breaker."
     },
     {
-      "node_id": "flowpay",
+      "node_id": "neoflw-token-page",
       "category": "contract",
       "severity": "medium",
       "title": "Contrato mainnet sem canonicalRegistry",
-      "detail": "Enderecos: {'FlowPay': '0xD49d3Fb2C2CBBA78a1E710660a628919eE78D82A'}. Adicione canonicalRegistry com path do deployment JSON para rastreabilidade."
+      "detail": "Enderecos: {'NEOFLW': '0x41F4ff3d45DED9C1332e4908F637B75fe83F5d6B'}. Adicione canonicalRegistry com path do deployment JSON para rastreabilidade."
+    },
+    {
+      "node_id": "flowpay-app",
+      "category": "infra",
+      "severity": "medium",
+      "title": "Runtime sem healthcheck configurado",
+      "detail": "Role 'Checkout / Dashboard Surface' requer /health para detectar restarts."
     },
     {
       "node_id": "__global__",
       "category": "infra",
       "severity": "medium",
-      "title": "Conflito de porta local :8043",
-      "detail": "Nos compartilhando porta 8043: ['neo-agent-full', 'neo-tunnel:neo-agent']. Multiplos servicos nao podem rodar simultaneamente nesta porta."
+      "title": "Conflito de porta local :3000",
+      "detail": "Nos compartilhando porta 3000: ['neo-agent-react', 'neo-nexus', 'neo-tunnel:nexus']. Multiplos servicos conflitando."
     },
     {
-      "node_id": "neo-growth-system",
-      "category": "config",
+      "node_id": "__global__",
+      "category": "infra",
+      "severity": "medium",
+      "title": "Conflito de porta local :3001",
+      "detail": "Nos compartilhando porta 3001: ['neo-dashboard', 'neo-chat-uncensored']. Multiplos servicos conflitando."
+    },
+    {
+      "node_id": "__global__",
+      "category": "infra",
+      "severity": "medium",
+      "title": "Conflito de porta local :8042",
+      "detail": "Nos compartilhando porta 8042: ['neo-agent-full', 'neo-tunnel:neo-agent']. Multiplos servicos conflitando."
+    },
+    {
+      "node_id": "__global__",
+      "category": "infra",
+      "severity": "medium",
+      "title": "Conflito de porta local :8080",
+      "detail": "Nos compartilhando porta 8080: ['mio-system', 'neo-tunnel']. Multiplos servicos conflitando."
+    },
+    {
+      "node_id": "__global__",
+      "category": "infra",
+      "severity": "medium",
+      "title": "Conflito de porta local :8787",
+      "detail": "Nos compartilhando porta 8787: ['flowpay', 'neo-tunnel:flowpay']. Multiplos servicos conflitando."
+    },
+    {
+      "node_id": "__global__",
+      "category": "infra",
+      "severity": "medium",
+      "title": "Conflito de porta local :19001",
+      "detail": "Nos compartilhando porta 19001: ['neobot-orchestrator', 'neo-tunnel:orchestrator']. Multiplos servicos conflitando."
+    },
+    {
+      "node_id": "flowpay",
+      "category": "infra",
       "severity": "low",
-      "title": "productionUrl diverge do targetCustomDomain",
-      "detail": "productionUrl='https://neo-growth-system-production.up.railway.app' vs targetCustomDomain='growth.neoprotocol.space'. Verifique apontamento DNS."
+      "title": "Railway sem .railway.internal para comunicacao interna",
+      "detail": "Nos no mesmo Railway Project devem usar .railway.internal para zero-egress."
     },
     {
-      "node_id": "neo-event-ingestor",
+      "node_id": "flowpay",
+      "category": "graph",
+      "severity": "low",
+      "title": "Dependencias implicitas sem dependsOn declarado",
+      "detail": "No depende de ['flowpay-api'] via webhook/URL mas nao declara dependsOn."
+    },
+    {
+      "node_id": "flowpay-marketing",
+      "category": "infra",
+      "severity": "low",
+      "title": "Railway node sem build/start commands documentados",
+      "detail": "productionUrl existe mas buildCommand/startCommand ausentes. Documente para reproducibilidade de deploys."
+    },
+    {
+      "node_id": "flowpay-api",
+      "category": "infra",
+      "severity": "low",
+      "title": "Railway node sem build/start commands documentados",
+      "detail": "productionUrl existe mas buildCommand/startCommand ausentes. Documente para reproducibilidade de deploys."
+    },
+    {
+      "node_id": "flowpay-app",
+      "category": "infra",
+      "severity": "low",
+      "title": "Railway node sem build/start commands documentados",
+      "detail": "productionUrl existe mas buildCommand/startCommand ausentes. Documente para reproducibilidade de deploys."
+    },
+    {
+      "node_id": "neo-chat-uncensored",
       "category": "topology",
       "severity": "low",
       "title": "webhookUrl.production usando URL temporaria",
-      "detail": "Valor: 'https://neo-event-ingestor-production.up.railway.app/events'. Recomendado usar custom domain estavel."
+      "detail": "Valor: 'https://laughter.up.railway.app/webhooks/flowpay'. Recomendado usar custom domain estavel."
     },
     {
-      "node_id": "neo-event-ingestor",
-      "category": "config",
+      "node_id": "paulinha-feed",
+      "category": "infra",
       "severity": "low",
-      "title": "productionUrl diverge do targetCustomDomain",
-      "detail": "productionUrl='https://neo-event-ingestor-production.up.railway.app' vs targetCustomDomain='ingestor.neoprotocol.space'. Verifique apontamento DNS."
+      "title": "Railway sem .railway.internal para comunicacao interna",
+      "detail": "Nos no mesmo Railway Project devem usar .railway.internal para zero-egress."
     },
     {
-      "node_id": "neo-crm-core",
-      "category": "config",
+      "node_id": "paulinha-feed",
+      "category": "infra",
       "severity": "low",
-      "title": "productionUrl diverge do targetCustomDomain",
-      "detail": "productionUrl='https://neo-crm-core-production.up.railway.app' vs targetCustomDomain='crm.neoprotocol.space'. Verifique apontamento DNS."
+      "title": "Railway node sem build/start commands documentados",
+      "detail": "productionUrl existe mas buildCommand/startCommand ausentes. Documente para reproducibilidade de deploys."
     },
     {
-      "node_id": "neo-message-orchestrator",
-      "category": "topology",
+      "node_id": "paulinha_ugc",
+      "category": "infra",
       "severity": "low",
-      "title": "webhookUrl.production usando URL temporaria",
-      "detail": "Valor: 'https://neo-message-orchestrator-production.up.railway.app/notify'. Recomendado usar custom domain estavel."
+      "title": "Railway sem .railway.internal para comunicacao interna",
+      "detail": "Nos no mesmo Railway Project devem usar .railway.internal para zero-egress."
     },
     {
-      "node_id": "neo-message-orchestrator",
-      "category": "config",
+      "node_id": "paulinha_ugc",
+      "category": "infra",
       "severity": "low",
-      "title": "productionUrl diverge do targetCustomDomain",
-      "detail": "productionUrl='https://neo-message-orchestrator-production.up.railway.app' vs targetCustomDomain='orchestrator-growth.neoprotocol.space'. Verifique apontamento DNS."
-    },
-    {
-      "node_id": "neo-provider-resend",
-      "category": "topology",
-      "severity": "low",
-      "title": "webhookUrl.production usando URL temporaria",
-      "detail": "Valor: 'https://neo-provider-resend-production.up.railway.app/webhook/resend'. Recomendado usar custom domain estavel."
-    },
-    {
-      "node_id": "neo-provider-resend",
-      "category": "config",
-      "severity": "low",
-      "title": "productionUrl diverge do targetCustomDomain",
-      "detail": "productionUrl='https://neo-provider-resend-production.up.railway.app' vs targetCustomDomain='provider-resend.neoprotocol.space'. Verifique apontamento DNS."
-    },
-    {
-      "node_id": "neo-queue-worker",
-      "category": "config",
-      "severity": "low",
-      "title": "productionUrl diverge do targetCustomDomain",
-      "detail": "productionUrl='https://neo-queue-worker-production.up.railway.app' vs targetCustomDomain='queue.neoprotocol.space'. Verifique apontamento DNS."
+      "title": "Railway node sem build/start commands documentados",
+      "detail": "productionUrl existe mas buildCommand/startCommand ausentes. Documente para reproducibilidade de deploys."
     },
     {
       "node_id": "__global__",
       "category": "contract",
       "severity": "info",
       "title": "Contrato duplicado: 0xd49d3fb2...",
-      "detail": "Endereco 0xd49d3fb2c2cbba78a1e710660a628919ee78d82a declarado em: ['smart-core:FlowPay', 'flowpay:FlowPay', 'flowpay:tokenCanonical:FlowPay']. canonicalRegistry presente \u2014 source-of-truth definida."
-    },
-    {
-      "node_id": "neo-nexus",
-      "category": "ops",
-      "severity": "info",
-      "title": "Wildcard consumer(s): ['neo-nexus', 'neo-growth-system']",
-      "detail": "Absorve todos os eventos emitidos: ['BUILD_STATUS', 'CRM:MESSAGE_FAILED', 'CRM:MESSAGE_REQUESTED', 'CRM:MESSAGE_SENT', 'EMAIL:BOUNCED', 'EMAIL:CLICKED', 'EMAIL:COMPLAINT', 'EMAIL:DELIVERED', 'EMAIL:OPENED', 'FACTORY:MINT_CONFIRMED', 'FACTORY:MINT_FAILED', 'FLOWPAY:PAYMENT_RECEIVED', 'NEOBOT:ACCESS_UNLOCKED', 'NEXUS_START', 'QUEUE:DLQ_ALERT', 'TASK_COMPLETED']. Garanta que reactors estejam mapeando cada evento."
+      "detail": "Endereco 0xd49d3fb2c2cbba78a1e710660a628919ee78d82a declarado em: ['smart-core:FlowPay', 'flowpay:FlowPay', 'flowpay:tokenCanonical:FlowPay']. canonicalRegistry presente — source-of-truth definida."
     },
     {
       "node_id": "neo-growth-system",
       "category": "ops",
       "severity": "info",
-      "title": "Evento consumido '*' sem emissor declarado",
-      "detail": "Pode ser evento externo (Woovi, WhatsApp API, webhook). Documente a origem com 'externalEventSources'."
-    },
-    {
-      "node_id": "neo-event-ingestor",
-      "category": "ops",
-      "severity": "info",
-      "title": "Evento consumido 'USER_CREATED' sem emissor declarado",
-      "detail": "Pode ser evento externo (Woovi, WhatsApp API, webhook). Documente a origem com 'externalEventSources'."
-    },
-    {
-      "node_id": "neo-crm-core",
-      "category": "ops",
-      "severity": "info",
-      "title": "Evento consumido 'USER_CREATED' sem emissor declarado",
-      "detail": "Pode ser evento externo (Woovi, WhatsApp API, webhook). Documente a origem com 'externalEventSources'."
-    },
-    {
-      "node_id": "neo-event-ingestor",
-      "category": "ops",
-      "severity": "info",
-      "title": "Evento consumido 'CHECKOUT_CREATED' sem emissor declarado",
-      "detail": "Pode ser evento externo (Woovi, WhatsApp API, webhook). Documente a origem com 'externalEventSources'."
-    },
-    {
-      "node_id": "neo-crm-core",
-      "category": "ops",
-      "severity": "info",
-      "title": "Evento consumido 'CHECKOUT_CREATED' sem emissor declarado",
-      "detail": "Pode ser evento externo (Woovi, WhatsApp API, webhook). Documente a origem com 'externalEventSources'."
-    },
-    {
-      "node_id": "neo-event-ingestor",
-      "category": "ops",
-      "severity": "info",
-      "title": "Evento consumido 'PAYMENT_CONFIRMED' sem emissor declarado",
-      "detail": "Pode ser evento externo (Woovi, WhatsApp API, webhook). Documente a origem com 'externalEventSources'."
+      "title": "Wildcard consumer(s): ['neo-growth-system']",
+      "detail": "Absorve todos os eventos emitidos: ['BUILD_STATUS', 'CHECKOUT_CREATED', 'CRM:MESSAGE_FAILED', 'CRM:MESSAGE_REQUESTED', 'CRM:MESSAGE_SENT', 'EMAIL:BOUNCED', 'EMAIL:CLICKED', 'EMAIL:COMPLAINT', 'EMAIL:DELIVERED', 'EMAIL:OPENED', 'FACTORY:MINT_CONFIRMED', 'FACTORY:MINT_FAILED', 'FLOWPAY:PAYMENT_RECEIVED', 'NEOBOT:ACCESS_UNLOCKED', 'NEXUS_START', 'PAYMENT_CONFIRMED', 'QUEUE:DLQ_ALERT', 'TASK_COMPLETED', 'USER_CREATED']. Garanta que reactors estejam mapeando cada evento."
     }
   ],
   "nodes": [
     {
       "id": "neobot-orchestrator",
-      "name": "Neobot \u2014 Node Warrior / Orchestrator",
+      "name": "Neobot Orchestrator",
       "org": "NEO Protocol",
       "role": "Orchestrator",
       "platform": "Local / Railway (Production)",
@@ -786,52 +1202,11 @@
       "finding_count": 0
     },
     {
-      "id": "neo-protocol-hub",
-      "name": "NEO Protocol Hub",
-      "org": "NEO Protocol",
-      "role": "Canonical Context Hub / Governance Node",
-      "platform": "Repository / Distributed Governance",
-      "has_production": false,
-      "has_contracts": false,
-      "nexus_events": [],
-      "blast_radius": 0,
-      "dependency_count": 0,
-      "readiness_score": -1,
-      "readiness_grade": "N/A",
-      "readiness_breakdown": {},
-      "finding_count": 0
-    },
-    {
       "id": "neo-mcp-server",
-      "name": "NEO MCP Server (Storacha)",
+      "name": "NEO MCP Server",
       "org": "NEO Protocol",
-      "role": "MCP Storage Runtime / Storacha Adapter",
-      "platform": "Local / MCP Runtime",
-      "has_production": false,
-      "has_contracts": false,
-      "nexus_events": [],
-      "blast_radius": 0,
-      "dependency_count": 0,
-      "readiness_score": 50,
-      "readiness_grade": "C",
-      "readiness_breakdown": {
-        "has_production_url": false,
-        "has_healthcheck": true,
-        "has_custom_domain": false,
-        "has_internal_url": false,
-        "webhook_urls_complete": true,
-        "nexus_events_declared": false,
-        "no_high_findings": true,
-        "no_critical_findings": true
-      },
-      "finding_count": 0
-    },
-    {
-      "id": "neo-agent-full",
-      "name": "NEO Agent Full (WhatsApp/TG)",
-      "org": "NEO Protocol",
-      "role": "Agent Node / Autonomous Service",
-      "platform": "Railway",
+      "role": "MCP Storage Runtime / Railway Service",
+      "platform": "Railway / Storacha",
       "has_production": true,
       "has_contracts": false,
       "nexus_events": [],
@@ -852,6 +1227,56 @@
       "finding_count": 0
     },
     {
+      "id": "neo-agent-full",
+      "name": "NEO Agent Full (WhatsApp/TG)",
+      "org": "NEO Protocol",
+      "role": "Agent Node / Autonomous Service",
+      "platform": "Railway",
+      "has_production": true,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 1,
+      "readiness_score": 100,
+      "readiness_grade": "A",
+      "readiness_breakdown": {
+        "has_production_url": true,
+        "has_healthcheck": true,
+        "has_custom_domain": true,
+        "has_internal_url": true,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": true,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neo-agent-react",
+      "name": "NEO Agent React",
+      "org": "NEO Protocol",
+      "role": "Agent Runtime / Visual Canvas",
+      "platform": "Railway (multi-service)",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 50,
+      "readiness_grade": "C",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": true,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
       "id": "neo-nexus",
       "name": "NEO Nexus Event Hub",
       "org": "NEO Protocol",
@@ -860,7 +1285,7 @@
       "has_production": true,
       "has_contracts": false,
       "nexus_events": [],
-      "blast_radius": 9,
+      "blast_radius": 12,
       "dependency_count": 0,
       "readiness_score": 85,
       "readiness_grade": "B",
@@ -886,8 +1311,8 @@
       "has_contracts": false,
       "nexus_events": [],
       "blast_radius": 0,
-      "dependency_count": 0,
-      "readiness_score": 90,
+      "dependency_count": 1,
+      "readiness_score": 100,
       "readiness_grade": "A",
       "readiness_breakdown": {
         "has_production_url": true,
@@ -895,7 +1320,7 @@
         "has_custom_domain": true,
         "has_internal_url": true,
         "webhook_urls_complete": true,
-        "nexus_events_declared": false,
+        "nexus_events_declared": true,
         "no_high_findings": true,
         "no_critical_findings": true
       },
@@ -903,21 +1328,21 @@
     },
     {
       "id": "neo-protcl",
-      "name": "NEO Protocol WebApp (Boot/Landing)",
+      "name": "NEO Protocol WebApp (Edge/Interface)",
       "org": "NEO Protocol",
-      "role": "Frontend / Landing / Bootloader",
-      "platform": "Vercel / IPFS",
+      "role": "Edge Node / Identity Custodian / Bootloader",
+      "platform": "Vercel / IPFS / Cloudflare",
       "has_production": true,
       "has_contracts": false,
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 80,
+      "readiness_score": 70,
       "readiness_grade": "B",
       "readiness_breakdown": {
         "has_production_url": true,
         "has_healthcheck": true,
-        "has_custom_domain": true,
+        "has_custom_domain": false,
         "has_internal_url": false,
         "webhook_urls_complete": true,
         "nexus_events_declared": false,
@@ -937,13 +1362,13 @@
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 80,
-      "readiness_grade": "B",
+      "readiness_score": 90,
+      "readiness_grade": "A",
       "readiness_breakdown": {
         "has_production_url": true,
         "has_healthcheck": true,
         "has_custom_domain": true,
-        "has_internal_url": false,
+        "has_internal_url": true,
         "webhook_urls_complete": true,
         "nexus_events_declared": false,
         "no_high_findings": true,
@@ -1038,12 +1463,12 @@
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 70,
+      "readiness_score": 80,
       "readiness_grade": "B",
       "readiness_breakdown": {
         "has_production_url": true,
         "has_healthcheck": true,
-        "has_custom_domain": false,
+        "has_custom_domain": true,
         "has_internal_url": false,
         "webhook_urls_complete": true,
         "nexus_events_declared": false,
@@ -1095,12 +1520,12 @@
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 70,
+      "readiness_score": 80,
       "readiness_grade": "B",
       "readiness_breakdown": {
         "has_production_url": true,
         "has_healthcheck": true,
-        "has_custom_domain": false,
+        "has_custom_domain": true,
         "has_internal_url": false,
         "webhook_urls_complete": true,
         "nexus_events_declared": false,
@@ -1136,10 +1561,10 @@
     },
     {
       "id": "flowpay",
-      "name": "FlowPay Platform (Marketing + App + API)",
-      "org": "FlowPay (NE\u039e Stack)",
-      "role": "Checkout / Financial Node (Stack)",
-      "platform": "Cloudflare Workers + D1 (API) / Cloudflare Pages (Web)",
+      "name": "FlowPay API Gateway",
+      "org": "FlowPay System",
+      "role": "Edge API / Financial Gateway",
+      "platform": "Railway + Cloudflare Workers + R1",
       "has_production": true,
       "has_contracts": true,
       "nexus_events": [
@@ -1148,8 +1573,8 @@
         "FACTORY:MINT_FAILED",
         "NEOBOT:ACCESS_UNLOCKED"
       ],
-      "blast_radius": 0,
-      "dependency_count": 1,
+      "blast_radius": 2,
+      "dependency_count": 2,
       "readiness_score": 90,
       "readiness_grade": "A",
       "readiness_breakdown": {
@@ -1162,38 +1587,13 @@
         "no_high_findings": true,
         "no_critical_findings": true
       },
-      "finding_count": 1
+      "finding_count": 2
     },
     {
       "id": "neo-flowoff-landing",
       "name": "FlowOFF Landing",
       "org": "NEO-FlowOFF",
       "role": "Landing Page",
-      "platform": "Vercel",
-      "has_production": true,
-      "has_contracts": false,
-      "nexus_events": [],
-      "blast_radius": 0,
-      "dependency_count": 0,
-      "readiness_score": 80,
-      "readiness_grade": "B",
-      "readiness_breakdown": {
-        "has_production_url": true,
-        "has_healthcheck": true,
-        "has_custom_domain": true,
-        "has_internal_url": false,
-        "webhook_urls_complete": true,
-        "nexus_events_declared": false,
-        "no_high_findings": true,
-        "no_critical_findings": true
-      },
-      "finding_count": 0
-    },
-    {
-      "id": "neo-flowoff-pwa",
-      "name": "FlowOFF PWA",
-      "org": "NEO-FlowOFF",
-      "role": "DApp / PWA",
       "platform": "Vercel",
       "has_production": true,
       "has_contracts": false,
@@ -1241,7 +1641,7 @@
     },
     {
       "id": "ceo-escalavel-miniapp",
-      "name": "CEO Escal\u00e1vel MiniApp",
+      "name": "CEO Escalável MiniApp",
       "org": "NEO-FlowOFF",
       "role": "Interface / MiniApp",
       "platform": "Vercel (nodevercel/agentflow)",
@@ -1250,12 +1650,12 @@
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
-      "readiness_score": 70,
+      "readiness_score": 80,
       "readiness_grade": "B",
       "readiness_breakdown": {
         "has_production_url": true,
         "has_healthcheck": true,
-        "has_custom_domain": false,
+        "has_custom_domain": true,
         "has_internal_url": false,
         "webhook_urls_complete": true,
         "nexus_events_declared": false,
@@ -1292,7 +1692,7 @@
     {
       "id": "wod-x-pro",
       "name": "WOD [X] PRO (App)",
-      "org": "WOD Game",
+      "org": "WodXPro",
       "role": "DApp / Game",
       "platform": "Vercel",
       "has_production": true,
@@ -1317,7 +1717,7 @@
     {
       "id": "wod-eth",
       "name": "WOD Core API / Contracts",
-      "org": "WOD Game",
+      "org": "WodXPro",
       "role": "Protocol Layer",
       "platform": "Railway / Base",
       "has_production": true,
@@ -1342,7 +1742,7 @@
     {
       "id": "wod-protocol",
       "name": "WOD Protocol (Docs/Landing)",
-      "org": "WOD Game",
+      "org": "WodXPro",
       "role": "Documentation / Web",
       "platform": "Vercel",
       "has_production": true,
@@ -1430,7 +1830,7 @@
         "no_high_findings": true,
         "no_critical_findings": true
       },
-      "finding_count": 1
+      "finding_count": 0
     },
     {
       "id": "neo-event-ingestor",
@@ -1459,7 +1859,7 @@
         "no_high_findings": true,
         "no_critical_findings": true
       },
-      "finding_count": 2
+      "finding_count": 0
     },
     {
       "id": "neo-crm-core",
@@ -1488,7 +1888,7 @@
         "no_high_findings": true,
         "no_critical_findings": true
       },
-      "finding_count": 1
+      "finding_count": 0
     },
     {
       "id": "neo-message-orchestrator",
@@ -1517,7 +1917,7 @@
         "no_high_findings": true,
         "no_critical_findings": true
       },
-      "finding_count": 2
+      "finding_count": 0
     },
     {
       "id": "neo-provider-resend",
@@ -1549,7 +1949,7 @@
         "no_high_findings": true,
         "no_critical_findings": true
       },
-      "finding_count": 2
+      "finding_count": 0
     },
     {
       "id": "neo-queue-worker",
@@ -1576,16 +1976,241 @@
         "no_high_findings": true,
         "no_critical_findings": true
       },
-      "finding_count": 1
+      "finding_count": 0
     },
     {
       "id": "neo-tunnel",
-      "name": "N\u039e\u039f Tunnel (open-tunneling)",
+      "name": "NΞØ Tunnel (open-tunneling)",
       "org": "NEO Protocol",
       "role": "Dev Infrastructure / Tunnel Server",
       "platform": "Railway",
       "has_production": true,
       "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 90,
+      "readiness_grade": "A",
+      "readiness_breakdown": {
+        "has_production_url": true,
+        "has_healthcheck": true,
+        "has_custom_domain": true,
+        "has_internal_url": true,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neo-protocol-landing",
+      "name": "neo-protocol-webapp",
+      "org": "NEO Protocol",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neo-id",
+      "name": "neo-id",
+      "org": "NEO Protocol",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 1,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neo-convert",
+      "name": "neo-convert",
+      "org": "NEO Protocol",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 1,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neo-protocol-contracts",
+      "name": "@neo-protocol/contracts",
+      "org": "NEO Protocol",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "flow-links-bio",
+      "name": "neoflw-hub",
+      "org": "NEO-FlowOFF",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neoflw-token",
+      "name": "neoflow",
+      "org": "NEO-FlowOFF",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neo-landing-open",
+      "name": "neo-landing-open",
+      "org": "NEO-FlowOFF",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neoflow-content-machine",
+      "name": "neoflowoff-nodemello",
+      "org": "NEO-FlowOFF",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neoflw-token-page",
+      "name": "NEØ FlowOFF Token Page",
+      "org": "NEO-PROTOCOL",
+      "role": "Token Landing / Mint DApp",
+      "platform": "Vercel (static + 1 serverless function)",
+      "has_production": true,
+      "has_contracts": true,
       "nexus_events": [],
       "blast_radius": 0,
       "dependency_count": 0,
@@ -1595,6 +2220,1006 @@
         "has_production_url": true,
         "has_healthcheck": true,
         "has_custom_domain": true,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 1
+    },
+    {
+      "id": "neo-flw-landing",
+      "name": "neo-flowoff-landing",
+      "org": "NEO-FlowOFF",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "docs",
+      "name": "Docs",
+      "org": "Neo Smart Factory",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "wod-contracts",
+      "name": "wod-contracts-root",
+      "org": "WodXPro",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "wod-api",
+      "name": "@wodxpro/api",
+      "org": "WodXPro",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "wod-landing",
+      "name": "wod-landing",
+      "org": "WodXPro",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "flowpay-marketing",
+      "name": "FlowPay Marketing",
+      "org": "FlowPay System",
+      "role": "Public Acquisition Surface",
+      "platform": "Railway",
+      "has_production": true,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 65,
+      "readiness_grade": "C",
+      "readiness_breakdown": {
+        "has_production_url": true,
+        "has_healthcheck": false,
+        "has_custom_domain": true,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 1
+    },
+    {
+      "id": "flowpay-docs-page",
+      "name": "Flowpay Docs Page",
+      "org": "FlowPay System",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "flowpay-docs",
+      "name": "Flowpay Docs",
+      "org": "FlowPay System",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "flowpay-api",
+      "name": "FlowPay API",
+      "org": "FlowPay System",
+      "role": "Edge Runtime / Payments API",
+      "platform": "Railway + Cloudflare Workers + R1",
+      "has_production": true,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 1,
+      "dependency_count": 0,
+      "readiness_score": 65,
+      "readiness_grade": "C",
+      "readiness_breakdown": {
+        "has_production_url": true,
+        "has_healthcheck": false,
+        "has_custom_domain": true,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 1
+    },
+    {
+      "id": "flowpay-infra",
+      "name": "Flowpay Infra",
+      "org": "FlowPay System",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "flowpay-app",
+      "name": "FlowPay App",
+      "org": "FlowPay System",
+      "role": "Checkout / Dashboard Surface",
+      "platform": "Railway",
+      "has_production": true,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 65,
+      "readiness_grade": "C",
+      "readiness_breakdown": {
+        "has_production_url": true,
+        "has_healthcheck": false,
+        "has_custom_domain": true,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 2
+    },
+    {
+      "id": "neo-flow-chat-ui",
+      "name": "NEØ Flow Chat UI",
+      "org": "Chat-as-a-Protocol",
+      "role": "Protocol Intent Terminal",
+      "platform": "Static HTTP / Local",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 50,
+      "readiness_grade": "C",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": true,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neoflowoff-chat-ui",
+      "name": "NEØ:One — NEO FlowOFF Chat UI",
+      "org": "NEO-FlowOFF",
+      "role": "FlowOFF Chat PWA / Lead Interface",
+      "platform": "Astro PWA / Local",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 50,
+      "readiness_grade": "C",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": true,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neo-chat-uncensored",
+      "name": "NØX.AI Chat",
+      "org": "Chat-as-a-Protocol",
+      "role": "Sovereign Chat Node",
+      "platform": "Railway",
+      "has_production": true,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 1,
+      "readiness_score": 90,
+      "readiness_grade": "A",
+      "readiness_breakdown": {
+        "has_production_url": true,
+        "has_healthcheck": true,
+        "has_custom_domain": false,
+        "has_internal_url": true,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": true,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 1
+    },
+    {
+      "id": "neo-digitalfather",
+      "name": "neo-digitalfather",
+      "org": "NEO-FlowOFF",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neo-sdr-adapter",
+      "name": "Neo Sdr Adapter",
+      "org": "NEO-FlowOFF",
+      "role": "FlowOFF SDR Adapter",
+      "platform": "GitHub / Remote Canonical",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neo-crm-dashboard",
+      "name": "neo-crm-dashboard",
+      "org": "NEO-Growth-System",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neo-provider-messaging",
+      "name": "neo-provider-messaging",
+      "org": "NEO-Growth-System",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neo-provider-telegram",
+      "name": "neo-provider-telegram",
+      "org": "NEO-Growth-System",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neo-token-wodeth",
+      "name": "@wodxpro/contract-data",
+      "org": "WodXPro",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "chat-standards-template",
+      "name": "Chat Standards Template",
+      "org": "Chat-as-a-Protocol",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neo-flow-admin",
+      "name": "@neo-flow/admin",
+      "org": "Chat-as-a-Protocol",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neo-flow-ingest",
+      "name": "@neo-flow/ingest",
+      "org": "Chat-as-a-Protocol",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neo-flow-system",
+      "name": "neo-flow-system",
+      "org": "Chat-as-a-Protocol",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neo-flow-worker",
+      "name": "@neo-flow/worker",
+      "org": "Chat-as-a-Protocol",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neo-flow-infra",
+      "name": "@neo-flow/infra",
+      "org": "Chat-as-a-Protocol",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "chat-as-a-protocol-github",
+      "name": ".github",
+      "org": "Chat-as-a-Protocol",
+      "role": "Org Profile",
+      "platform": "GitHub",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neo-context",
+      "name": "NEØ Context",
+      "org": "NEO-PROTOCOL",
+      "role": "Memory Node",
+      "platform": "Railway",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 60,
+      "readiness_grade": "C",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": true,
+        "has_custom_domain": false,
+        "has_internal_url": true,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neo-agent-runtime",
+      "name": "NEØ Agent Runtime",
+      "org": "NEO-PROTOCOL",
+      "role": "Doctrine Source",
+      "platform": "Local / Distributed",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "chat-as-a-protocol-workspace",
+      "name": "Chat-as-a-Protocol-Workspace",
+      "org": "Chat-as-a-Protocol",
+      "role": "Workspace Root",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "mypersonal_multiagents",
+      "name": "Mypersonal_Multiagents",
+      "org": "Mello Labs",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "paulinha-feed",
+      "name": "Paulinha Feed",
+      "org": "Neo Avatar Project",
+      "role": "Active Node",
+      "platform": "Railway",
+      "has_production": true,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 70,
+      "readiness_grade": "B",
+      "readiness_breakdown": {
+        "has_production_url": true,
+        "has_healthcheck": true,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 2
+    },
+    {
+      "id": "paulinha_ugc",
+      "name": "Paulinha UGC",
+      "org": "Neo Avatar Project",
+      "role": "Active Node",
+      "platform": "Railway",
+      "has_production": true,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 70,
+      "readiness_grade": "B",
+      "readiness_breakdown": {
+        "has_production_url": true,
+        "has_healthcheck": true,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 2
+    },
+    {
+      "id": "neo-protocol-web",
+      "name": "Neo Protocol Web",
+      "org": "NEO Protocol",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neo-landing-sdr",
+      "name": "neo-landing-sdr",
+      "org": "NEO-FlowOFF",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neo-oficial-page",
+      "name": "neo-oficial-page",
+      "org": "NEO-FlowOFF",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "flowpay-support-bridge",
+      "name": "flowpay-support-bridge",
+      "org": "FlowPay System",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "geo-block-flowpay",
+      "name": "Geo Block Flowpay",
+      "org": "FlowPay System",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neo-ipfs-drive",
+      "name": "Neo Ipfs Drive",
+      "org": "NEO-Growth-System",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
+        "has_internal_url": false,
+        "webhook_urls_complete": true,
+        "nexus_events_declared": false,
+        "no_high_findings": true,
+        "no_critical_findings": true
+      },
+      "finding_count": 0
+    },
+    {
+      "id": "neo-whatsapp-connect",
+      "name": "neo-whatsapp-connect",
+      "org": "NEO-Growth-System",
+      "role": "Discovered Node",
+      "platform": "Local / Discovered",
+      "has_production": false,
+      "has_contracts": false,
+      "nexus_events": [],
+      "blast_radius": 0,
+      "dependency_count": 0,
+      "readiness_score": 35,
+      "readiness_grade": "D",
+      "readiness_breakdown": {
+        "has_production_url": false,
+        "has_healthcheck": false,
+        "has_custom_domain": false,
         "has_internal_url": false,
         "webhook_urls_complete": true,
         "nexus_events_declared": false,

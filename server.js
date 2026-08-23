@@ -79,7 +79,7 @@ const MONITOR_FETCH_TIMEOUT_MS = Number(
 );
 const STACK_REPORT_SOURCE_URL =
   process.env.STACK_REPORT_SOURCE_URL ||
-  "https://raw.githubusercontent.com/NEO-PROTOCOL/neobot-orchestrator/main/config/stack_report.json";
+  "https://orchestrator.neoprotocol.space/api/stack-report.json";
 const STACK_REPORT_FALLBACK_PATH = path.join(__dirname, "stack-report.json");
 const DEFAULT_STACK_REPORT_CACHE_TTL_MS = 5 * 60 * 1000;
 const rawStackReportTtl = process.env.STACK_REPORT_CACHE_TTL_MS;
