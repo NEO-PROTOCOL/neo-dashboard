@@ -78,8 +78,10 @@ const MONITOR_FETCH_TIMEOUT_MS = Number(
   process.env.MONITOR_FETCH_TIMEOUT_MS || 5000,
 );
 const STACK_REPORT_SOURCE_URL =
-  process.env.STACK_REPORT_SOURCE_URL ||
-  "https://orchestrator.neoprotocol.space/api/stack-report.json";
+  process.env.STACK_REPORT_SOURCE_URL === undefined ||
+  process.env.STACK_REPORT_SOURCE_URL === null
+    ? "https://orchestrator.neoprotocol.space/api/stack-report.json"
+    : process.env.STACK_REPORT_SOURCE_URL;
 const STACK_REPORT_FALLBACK_PATH = path.join(__dirname, "stack-report.json");
 const DEFAULT_STACK_REPORT_CACHE_TTL_MS = 5 * 60 * 1000;
 const rawStackReportTtl = process.env.STACK_REPORT_CACHE_TTL_MS;
@@ -173,31 +175,37 @@ async function getCachedStackReport() {
     return { source: stackReportCache.source, body: stackReportCache.body };
   }
 
-  try {
-    const result = await fetchJsonWithTimeout(
-      STACK_REPORT_SOURCE_URL,
-      MONITOR_FETCH_TIMEOUT_MS,
-    );
-    if (result.ok && result.body) {
-      stackReportCache = {
-        source: "canonical",
-        body: result.body,
-        fetchedAt: now,
-      };
-      return { source: "canonical", body: result.body };
-    }
-    if (result.ok && !result.body) {
-      console.warn(
-        "[REPORT] Canonical stack report returned HTTP 200 with empty or invalid JSON body",
+  if (STACK_REPORT_SOURCE_URL) {
+    try {
+      const result = await fetchJsonWithTimeout(
+        STACK_REPORT_SOURCE_URL,
+        MONITOR_FETCH_TIMEOUT_MS,
       );
-    } else {
+      if (result.ok && result.body) {
+        stackReportCache = {
+          source: "canonical",
+          body: result.body,
+          fetchedAt: now,
+        };
+        return { source: "canonical", body: result.body };
+      }
+      if (result.ok && !result.body) {
+        console.warn(
+          "[REPORT] Canonical stack report returned HTTP 200 with empty or invalid JSON body",
+        );
+      } else {
+        console.warn(
+          `[REPORT] Canonical stack report returned HTTP ${result.status}`,
+        );
+      }
+    } catch (error) {
       console.warn(
-        `[REPORT] Canonical stack report returned HTTP ${result.status}`,
+        `[REPORT] Canonical stack report fetch failed: ${error.message}`,
       );
     }
-  } catch (error) {
-    console.warn(
-      `[REPORT] Canonical stack report fetch failed: ${error.message}`,
+  } else {
+    console.log(
+      "[REPORT] STACK_REPORT_SOURCE_URL is empty; skipping fetch and using local fallback",
     );
   }
 
