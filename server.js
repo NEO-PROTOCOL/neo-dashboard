@@ -355,6 +355,12 @@ console.log(
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 
+// This is an operator surface, not public search content.
+app.use((_req, res, next) => {
+  res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
+  next();
+});
+
 // Prevent stale HTML delivery behind edge/browser caches.
 app.use((req, res, next) => {
   if (req.path === "/" || req.path.endsWith(".html")) {
